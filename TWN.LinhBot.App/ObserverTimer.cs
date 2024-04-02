@@ -16,10 +16,10 @@ internal class ObserverTimer(Discord.WebSocket.SocketGuild socketGuild, StreamOb
   private Dictionary<string, DateTime> onlineCache = new Dictionary<string, DateTime>();
   internal void Start()
   {
-    LogMessage($"[{socketGuild.Name}] Creating Timer with {settings.TimerInterval}ms interval");
+    LogMessage($"Creating Timer with {settings.TimerInterval}ms interval");
     var timer = new Timer(settings.TimerInterval);
     timer.Elapsed += HandleElapsed;
-    LogMessage($"[{socketGuild.Name}] Staring Timer");
+    LogMessage($"Staring Timer");
     timer.Start();
   }
 
