@@ -16,10 +16,14 @@ public sealed class StreamObserverSettingsItem
   public required ulong GuildID { get; set; }
   public required double TimerInterval { get; set; }
   public required IEnumerable<CheckSettingsItem> CheckSettings { get; set; }
+
+  public override string ToString() => $"{GuildID} | {base.ToString()}";
 }
 
 public sealed class CheckSettingsItem
 {
   public required ulong RoleID { get;set; }
   public required ulong ChannelID { get;set; }
+
+  public override string ToString() => $"{RoleID}-{ChannelID} | {base.ToString()}";
 }
