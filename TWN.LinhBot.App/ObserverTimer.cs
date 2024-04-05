@@ -13,7 +13,7 @@ using Timer = System.Timers.Timer;
 namespace TWN.LinhBot.App;
 internal class ObserverTimer(Discord.WebSocket.SocketGuild socketGuild, StreamObserverSettingsItem settings)
 {
-  private Dictionary<string, DateTime> onlineCache = new Dictionary<string, DateTime>();
+  private readonly Dictionary<string, DateTime> onlineCache = [];
   internal void Start()
   {
     LogMessage($"Creating Timer with {settings.TimerInterval}ms interval");
@@ -54,7 +54,11 @@ internal class ObserverTimer(Discord.WebSocket.SocketGuild socketGuild, StreamOb
         LogMessage($"Checking User {streamer.Username}");
         var streamActivities = streamer.Activities.Where(a => a.Type == ActivityType.Streaming);
         if (streamActivities.Any())
-          onlineCache.TryAdd(streamer.Username, DateTime.Now);
+        {
+          if (onlineCache.ContainsKey(streamer.Username))
+            continue;
+          onlineCache.Upsert(streamer.Username, DateTime.Now);
+        }
         else
         {
           onlineCache.Remove(streamer.Username);
@@ -62,12 +66,11 @@ internal class ObserverTimer(Discord.WebSocket.SocketGuild socketGuild, StreamOb
         }
 
         var startStream = onlineCache[streamer.Username];
-        if ((DateTime.Now - startStream).Ticks > settings.TimerInterval * 10E4)
-          continue;
 
         foreach (StreamingGame activity in streamActivities.OfType<StreamingGame>())
         {
-          LogMessage($"Checking activity {activity.Name}");
+          //await channel.SendMessageAsync($"{streamer.DisplayName} is Streaming");
+          LogMessage($"\tChecking activity {activity.Name}");
         }
       }
     }
