@@ -7,8 +7,22 @@ using System.Threading.Tasks;
 namespace TWN.LinhBot.App;
 public sealed class Settings
 {
-  public required string DiscordAppToken { get; set; }
+  public required DiscordAPISettings DiscordAPI { get; set; }
+  public required TwitchAPISettings TwitchAPI { get; set; }
   public required IEnumerable<StreamObserverSettingsItem> StreamObserverSettings { get; set; }
+}
+
+public sealed class DiscordAPISettings
+{
+  public required string AppToken { get; set; }
+}
+
+public sealed class TwitchAPISettings
+{
+  public required string OAuthURL { get; set; }
+  public required string BaseURL { get; set; }
+  public required string ClientID { get; set; }
+  public required string ClientSecret { get; set; }
 }
 
 public sealed class StreamObserverSettingsItem

@@ -8,36 +8,33 @@ using Discord;
 using Discord.WebSocket;
 
 namespace TWN.LinhBot.App.Discord;
-internal class Client(string token, IEnumerable<StreamObserverSettingsItem> settings)
+internal class Client(DiscordAPISettings discordAPISettings, IEnumerable<StreamObserverSettingsItem> settings, Twitch.Client twitchClient, DiscordSocketClient discordSocketClient)
 {
-  private readonly DiscordSocketClient client = new(new()
-  {
-    GatewayIntents = GatewayIntents.GuildMembers | GatewayIntents.Guilds | GatewayIntents.GuildMessages
-  });
-
-  readonly string token = token;
-  readonly IEnumerable<StreamObserverSettingsItem> settings = settings;
+  readonly DiscordAPISettings _discordAPISettings = discordAPISettings;
+  readonly IEnumerable<StreamObserverSettingsItem> _settings = settings;
+  readonly Twitch.Client _twitchClient = twitchClient;
+  readonly DiscordSocketClient _discordSocketClient = discordSocketClient;
 
   public async void Start()
   {
-    await client.LoginAsync(TokenType.Bot, token);
-    await client.StartAsync();
+    await _discordSocketClient.LoginAsync(TokenType.Bot, _discordAPISettings.AppToken);
 
-    client.Log += HandleLog_Client;
-    client.Ready += HandleReady_Client;
+    _discordSocketClient.Log += HandleLog_Client;
+    _discordSocketClient.Ready += HandleReady_Client;
+
+    await _discordSocketClient.StartAsync();
   }
 
   async Task HandleReady_Client()
   {
-    await client.SetCustomStatusAsync($"{DateTime.Now:G}");
+    await _discordSocketClient.SetCustomStatusAsync($"{DateTime.Now:G}");
 
-    if (settings is null) return;
+    if (_settings is null) return;
 
-    var configuredGuilds = client.Guilds.Join(settings, o => o.Id, i => i.GuildID, (o, i) => (socketGuild: o, settings: i));
+    var configuredGuilds = _discordSocketClient.Guilds.Join(_settings, o => o.Id, i => i.GuildID, (o, i) => (socketGuild: o, settings: i));
 
     foreach (var configuredGuild in configuredGuilds)
     {
-      new ObserverTimer(configuredGuild.socketGuild, configuredGuild.settings).Start();
     }
   }
 
