@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
   private readonly IEnumerable<GuildConfig> _guildConfig = guildConfig;
   readonly DiscordSocketClient discordSocketClient = new(new()
   {
-    GatewayIntents = GatewayIntents.GuildMessages
+    GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.GuildIntegrations
   });
   bool ready = false;
 
@@ -49,6 +50,14 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
         .WithDefaultMemberPermissions(GuildPermission.ModerateMembers)
         .AddOption(name: "twitch-user", type: ApplicationCommandOptionType.String, description: "Twitch User Name", isRequired: true)
         .AddOption(name: "channel", type: ApplicationCommandOptionType.Channel, description: "Channel", isRequired: true)
+        .Build();
+
+      await discordSocketClient.CreateGlobalApplicationCommandAsync(guildCommand);
+
+      guildCommand = new SlashCommandBuilder()
+        .WithName("list-streams")
+        .WithDescription("Lists all stream in the Announcement Queue")
+        .WithDefaultMemberPermissions(GuildPermission.ModerateMembers)
         .Build();
 
       await discordSocketClient.CreateGlobalApplicationCommandAsync(guildCommand);
@@ -84,6 +93,11 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
           await AddStream(command);
         }
         break;
+      case "list-streams":
+        {
+          await ListStreams(command);
+        }
+        break;
       case "remove-stream":
         {
           await RemoveStream(command);
@@ -94,47 +108,93 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
     return;
   }
 
+
   private async Task AddStream(SocketSlashCommand command)
   {
     var twitchUserOption = command.Data.Options.FirstOrDefault(o => o.Name == "twitch-user");
     if (twitchUserOption is null)
     {
-      await command.RespondAsync("twitch-user not specified");
+      await command.RespondAsync("twitch-user not specified", ephemeral: true);
       return;
     }
 
     var channelOption = command.Data.Options.FirstOrDefault(o => o.Name == "channel");
     if (channelOption is null)
     {
-      await command.RespondAsync("channel not specified");
+      await command.RespondAsync("channel not specified", ephemeral: true);
       return;
     }
 
     var twitchUser = twitchUserOption.Value is string _twitchUser ? _twitchUser : string.Empty;
     if (string.IsNullOrWhiteSpace(twitchUser))
     {
-      await command.RespondAsync($"twitch-user ({twitchUser}) is empty");
+      await command.RespondAsync($"twitch-user ({twitchUser}) is empty", ephemeral: true);
       return;
     }
 
     var cancellationToken = new CancellationTokenSource().Token;
-
     var twitchUserInfo = await _twitchClient.GetUsers([twitchUser], cancellationToken);
-    if(twitchUserInfo?.Data.Length == 0)
+    if (twitchUserInfo?.Data.Length == 0)
     {
-      await command.RespondAsync($"twitch-user ({twitchUser}) not found");
+      await command.RespondAsync($"twitch-user ({twitchUser}) not found", ephemeral: true);
       return;
     }
 
     if (channelOption.Value is not ITextChannel channel)
     {
-      await command.RespondAsync($"channel ({channelOption.Value}) is not a text-channel");
+      await command.RespondAsync($"channel ({channelOption.Value}) is not a text-channel", ephemeral: true);
       return;
     }
 
     await _dataStore.AddDataAsync(twitchUser, channel.GuildId, channel.Id);
 
-    await command.RespondAsync($"**{twitchUser}**'s streams will be announced in {channel.Mention}");
+    await command.RespondAsync($"**{twitchUser}**'s streams will be announced in {channel.Mention}", ephemeral: true);
+  }
+  private async Task ListStreams(SocketSlashCommand command)
+  {
+
+    var data = await _dataStore.GetDataAsync();
+    var guildData = data.Where(d => d.GuildID == command.GuildId);
+    if (guildData.Any())
+    {
+      var cancellationToken = new CancellationTokenSource().Token;
+
+      var guildConfig = _guildConfig.FirstOrDefault(gc => gc.GuildID == command.GuildId);
+      var colorString = guildConfig?.Color.Replace("#", "");
+      var color = uint.TryParse(colorString, System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
+      var twitchUser = guildData.Select(gd => gd.TwitchUser).Distinct();
+      var twitchUserData = await _twitchClient.GetUsers(twitchUser, cancellationToken) ?? new([]);
+
+      var embed = guildData
+        .Join(twitchUserData.Data, o => o.TwitchUser, i => i.Login, (o, i) => (guildData: o, twitchUserData: i))
+        .GroupBy(gd => (gd.guildData.TwitchUser, gd.twitchUserData.Profile_Image_Url, gd.twitchUserData.Login, gd.twitchUserData.Offline_Image_Url))
+        .Select(gdg => new EmbedBuilder()
+          .WithAuthor(gdg.Key.TwitchUser)
+          .WithThumbnailUrl(gdg.Key.Profile_Image_Url)
+          .WithImageUrl(gdg.Key.Offline_Image_Url)
+          .WithFields(gdg.Select((gdgi, i) => new EmbedFieldBuilder().WithName($"{i+1}.").WithValue($"<#{gdgi.guildData.ChannelID}>").WithIsInline(false)))
+          .WithUrl($"https://twitch.tv/{gdg.Key.Login}")
+          .WithCurrentTimestamp()
+          .Build()).ToArray();
+      if (embed.Length > 0)
+        await command.RespondAsync(string.Empty, embed, ephemeral: true);
+      else
+        await command.RespondAsync("No streams in Announcement Queue", ephemeral: true);
+    }
+    else
+      await command.RespondAsync("No streams in Announcement Queue", ephemeral: true);
+  }
+
+  private async Task RemoveStream(SocketSlashCommand command)
+  {
+    var twitchUserOption = command.Data.Options.FirstOrDefault(o => o.Name == "twitch-user");
+    if (twitchUserOption is null)
+    {
+      await command.RespondAsync("twitch-user not specified", ephemeral: true);
+      return;
+    }
+
+    var channelOption = command.Data.Options.FirstOrDefault(o => o.Name == "channel");
   }
 
   public async Task SendTwitchMessage(ulong guildID, ulong channelID, TwitchEmnbedData twitchData)
@@ -167,18 +227,6 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
       .Build();
 
     await channel.SendMessageAsync(text: guildConfig.Text, embed: embed);
-  }
-
-  private async Task RemoveStream(SocketSlashCommand command)
-  {
-    var twitchUserOption = command.Data.Options.FirstOrDefault(o => o.Name == "twitch-user");
-    if (twitchUserOption is null)
-    {
-      await command.RespondAsync("twitch-user not specified");
-      return;
-    }
-
-    var channelOption = command.Data.Options.FirstOrDefault(o => o.Name == "channel");
   }
 
   static Task HandleLog_Client(LogMessage message)
