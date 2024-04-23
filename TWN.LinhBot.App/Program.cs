@@ -3,8 +3,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Discord.WebSocket;
 using Discord;
+using Discord.WebSocket;
+using Microsoft.Extensions.Logging;
 
 namespace TWN.LinhBot.App;
 
@@ -23,44 +24,45 @@ internal class Program
     settings = builder.Configuration.GetRequiredSection(nameof(Settings))
       .Get<Settings>() ?? new Settings()
       {
-        DiscordAPI = new() { AppToken = string.Empty },
-        TwitchAPI = new()
+        Watcher = new() { Delay = 1000, },
+        Discord = new()
+        {
+          Status = string.Empty,
+          AppToken = string.Empty,
+        },
+        Twitch = new()
         {
           OAuthURL = string.Empty,
           BaseURL = string.Empty,
           ClientID = string.Empty,
           ClientSecret = string.Empty,
         },
-        StreamObserverSettings = [],
+        GuildConfig = [],
+        DataStore = new() { FilePath = "dataStore.twn" },
       };
 
     builder.Services.AddHttpClient("TwitchAPI", client =>
     {
-      client.BaseAddress = new(settings.TwitchAPI.BaseURL);
+      client.BaseAddress = new(settings.Twitch.BaseURL);
     });
-
     builder.Services.AddHttpClient("TwitchOAuth", client =>
     {
-      client.BaseAddress = new(settings.TwitchAPI.OAuthURL);
+      client.BaseAddress = new(settings.Twitch.OAuthURL);
     });
 
-    builder.Services.AddSingleton(settings.TwitchAPI);
-    builder.Services.AddSingleton(settings.DiscordAPI);
-    builder.Services.AddSingleton(settings.StreamObserverSettings);
-    builder.Services.AddSingleton<DiscordSocketClient, DiscordSocketClient>(sp =>
-    {
-      return new DiscordSocketClient(new()
-      {
-        GatewayIntents = GatewayIntents.GuildMessages,
-      });
-    });
-    builder.Services.AddSingleton<Twitch.Client, Twitch.Client>();
-    builder.Services.AddSingleton<Discord.Client, Discord.Client>();
+    builder.Services
+      .AddSingleton(settings.Watcher)
+      .AddSingleton(settings.Discord)
+      .AddSingleton(settings.Twitch)
+      .AddSingleton(settings.GuildConfig)
+      .AddSingleton(settings.DataStore)
+      .AddHostedService<Watcher>()
+      .AddSingleton<Discord.Client, Discord.Client>()
+      .AddSingleton<Twitch.Client, Twitch.Client>()
+      .AddSingleton<DataStore.DataStore, DataStore.DataStore>()
+      ;
 
     var host = builder.Build();
-
-    var discordClient = host.Services.GetService<Discord.Client>();
-    discordClient?.Start();
 
     await host.RunAsync();
   }

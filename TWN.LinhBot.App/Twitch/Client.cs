@@ -11,10 +11,10 @@ using LanguageExt;
 using LanguageExt.Common;
 
 namespace TWN.LinhBot.App.Twitch;
-internal class Client(IHttpClientFactory httpClientFactory, TwitchAPISettings twitchAPISettings)
+internal class Client(IHttpClientFactory httpClientFactory, TwitchSettings twitchAPISettings)
 {
   readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-  readonly TwitchAPISettings _twitchAPISettings = twitchAPISettings;
+  readonly TwitchSettings _twitchAPISettings = twitchAPISettings;
 
   public async Task<string?> GetOAuthTocken()
   {
@@ -24,17 +24,30 @@ internal class Client(IHttpClientFactory httpClientFactory, TwitchAPISettings tw
     return (result?.access_token);
   }
 
-  public async Task<StreamsResponse?> GetStreams(IEnumerable<string> userLogins)
+  public async Task<StreamsResponse?> GetStreams(IEnumerable<string> userLogins, CancellationToken cancellationToken)
   {
     var oAuthToken = await GetOAuthTocken();
 
     var client = _httpClientFactory.CreateClient("TwitchAPI");
-    var queryParameter = userLogins.Any() ? $"?{string.Join("&",userLogins.Select(ul => $"user_login={ul}"))}" : string.Empty;
+    var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"user_login={ul}"))}" : string.Empty;
     var request = new HttpRequestMessage(HttpMethod.Get, $"streams{queryParameter}");
     request.Headers.Authorization = new("Bearer", oAuthToken);
     request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
-    var response = await client.SendAsync(request);
-    return await response.Content.ReadFromJsonAsync<StreamsResponse>();
+    var response = await client.SendAsync(request, cancellationToken);
+    return await response.Content.ReadFromJsonAsync<StreamsResponse>(cancellationToken);
+  }
+
+  public async Task<UsersResponse?> GetUsers(IEnumerable<string> userLogins, CancellationToken cancellationToken)
+  {
+    var oAuthToken = await GetOAuthTocken();
+
+    var client = _httpClientFactory.CreateClient("TwitchAPI");
+    var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"login={ul}"))}" : string.Empty;
+    var request = new HttpRequestMessage(HttpMethod.Get, $"users{queryParameter}");
+    request.Headers.Authorization = new("Bearer", oAuthToken);
+    request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
+    var response = await client.SendAsync(request, cancellationToken);
+    return await response.Content.ReadFromJsonAsync<UsersResponse>(cancellationToken);
   }
 }
 
@@ -55,23 +68,42 @@ public record OAuthResponse(
   string? message = null
 );
 
-public record StreamsResponse(StreamsResponseData[] data, StreamsResponsePagination pagination);
+#region Streams
+public record StreamsResponse(StreamsResponseData[] Data, StreamsResponsePagination Pagination);
 
-public record StreamsResponsePagination(string cursor);
+public record StreamsResponsePagination(string Cursor);
 
 public record StreamsResponseData(
-  string id,
-  string user_id,
-  string user_login,
-  string user_name,
-  string game_id,
-  string game_name,
-  string type,
-  string title,
-  int viewer_count,
-  DateTime started_at,
-  string language,
-  string thumbnail_url,
-  object[] tag_ids,
-  string[] tags,
-  bool is_mature);
+  string ID,
+  string User_Id,
+  string User_Login,
+  string User_Name,
+  string Game_ID,
+  string Game_Name,
+  string Type,
+  string Title,
+  int Viewer_Count,
+  DateTime Started_At,
+  string Language,
+  string Thumbnail_Url,
+  object[] Tag_IDs,
+  string[] Tags,
+  bool Is_Mature);
+#endregion
+
+#region Users
+public record UsersResponse(UsersResponseData[] Data);
+
+public record UsersResponseData(
+  string ID,
+  string Login,
+  string Display_Name,
+  string Type,
+  string Broadcaster_Type,
+  string Description,
+  string Profile_Image_Url,
+  string Offline_Image_Url,
+  int View_Count,
+  DateTime Created_At);
+
+#endregion

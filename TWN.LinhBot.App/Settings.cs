@@ -7,17 +7,24 @@ using System.Threading.Tasks;
 namespace TWN.LinhBot.App;
 public sealed class Settings
 {
-  public required DiscordAPISettings DiscordAPI { get; set; }
-  public required TwitchAPISettings TwitchAPI { get; set; }
-  public required IEnumerable<StreamObserverSettingsItem> StreamObserverSettings { get; set; }
+  public required WatcherSettings Watcher { get; set; }
+  public required DiscordSettings Discord { get; set; }
+  public required TwitchSettings Twitch { get; set; }
+  public required IEnumerable<GuildConfig> GuildConfig {  get; set; }
+  public required DataStoreSettings DataStore { get; set; }
+}
+public sealed class WatcherSettings
+{
+  public required int Delay { get; set; }
 }
 
-public sealed class DiscordAPISettings
+public sealed class DiscordSettings
 {
+  public required string Status { get; set; }
   public required string AppToken { get; set; }
 }
 
-public sealed class TwitchAPISettings
+public sealed class TwitchSettings
 {
   public required string OAuthURL { get; set; }
   public required string BaseURL { get; set; }
@@ -25,19 +32,16 @@ public sealed class TwitchAPISettings
   public required string ClientSecret { get; set; }
 }
 
-public sealed class StreamObserverSettingsItem
+public sealed class GuildConfig
 {
   public required ulong GuildID { get; set; }
-  public required double TimerInterval { get; set; }
-  public required IEnumerable<CheckSettingsItem> CheckSettings { get; set; }
-
-  public override string ToString() => $"{GuildID} | {base.ToString()}";
+  public required string Color { get; set; }
+  public required string Text { get; set; }
+  public required int ThumbnailWidth { get; set; }
+  public required int ThumbnailHeight { get; set; }
 }
 
-public sealed class CheckSettingsItem
+public sealed class DataStoreSettings
 {
-  public required ulong RoleID { get;set; }
-  public required ulong ChannelID { get;set; }
-
-  public override string ToString() => $"{RoleID}-{ChannelID} | {base.ToString()}";
+  public required string FilePath { get; set; }
 }
