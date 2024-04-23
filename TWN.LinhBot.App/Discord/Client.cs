@@ -187,6 +187,13 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
 
   private async Task RemoveStream(SocketSlashCommand command)
   {
+    var guildID = command.GuildId;
+    if(guildID is null)
+    {
+      await command.RespondAsync("guild not found", ephemeral: true);
+      return;
+    }
+
     var twitchUserOption = command.Data.Options.FirstOrDefault(o => o.Name == "twitch-user");
     if (twitchUserOption is null)
     {
@@ -194,7 +201,33 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
       return;
     }
 
+    var twitchUser = twitchUserOption.Value is string _twitchUser ? _twitchUser : string.Empty;
+    if (string.IsNullOrWhiteSpace(twitchUser))
+    {
+      await command.RespondAsync($"twitch-user ({twitchUser}) is empty", ephemeral: true);
+      return;
+    }
+
     var channelOption = command.Data.Options.FirstOrDefault(o => o.Name == "channel");
+    ITextChannel? channel = default;
+    if (channelOption is not null)
+    {
+      if (channelOption.Value is not ITextChannel _channel)
+      {
+        await command.RespondAsync($"channel ({channelOption.Value}) is not a text-channel", ephemeral: true);
+        return;
+      }
+      else
+        channel = _channel;
+    }
+
+    var data = await _dataStore.GetDataAsync();
+    var userData = data.Where(d => d.GuildID == guildID && d.TwitchUser == twitchUser);
+
+    var channels = channel is null ? userData.Select(ud => ud.ChannelID).ToArray() : [channel.Id];
+
+    await _dataStore.DeleteData(twitchUser, guildID, channels);
+    await command.RespondAsync($"anouncements for user {twitchUser}: {string.Join(",", channels.Select(c => $"<#{c}>"))} removed", ephemeral: true);
   }
 
   public async Task SendTwitchMessage(ulong guildID, ulong channelID, TwitchEmnbedData twitchData)

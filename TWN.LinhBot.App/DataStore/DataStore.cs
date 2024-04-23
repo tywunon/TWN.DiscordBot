@@ -19,7 +19,7 @@ internal class DataStore(DataStoreSettings dataStoreSettings)
     return JsonSerializer.Deserialize<List<Data>>(json) ?? [];
   }
 
-  public void StoreDataAsync(IEnumerable<Data> data)
+  public void StoreData(IEnumerable<Data> data)
   {
     var json = JsonSerializer.Serialize(data, new JsonSerializerOptions()
     {
@@ -37,10 +37,18 @@ internal class DataStore(DataStoreSettings dataStoreSettings)
     {
       var newData = new Data(twitchUser, guildID, channelID);
       existingData.Add(newData);
-      StoreDataAsync(existingData);
+      StoreData(existingData);
       return newData;
     }
     return mayExistingData;
+  }
+
+  internal async Task DeleteData(string twitchUser, ulong? guildID, ulong[] channels)
+  {
+    var data = await GetDataAsync();
+    var userData = data.Where(d => d.TwitchUser == twitchUser && d.GuildID == guildID && channels.Contains(d.ChannelID));
+    var keepData = data.Except(userData);
+    StoreData(keepData);
   }
 }
 
