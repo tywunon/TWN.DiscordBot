@@ -10,12 +10,13 @@ using Microsoft.Extensions.Logging;
 using TWN.LinhBot.App.Twitch;
 
 namespace TWN.LinhBot.App;
-internal class Watcher(WatcherSettings settings, IEnumerable<GuildConfig> guildConfigs, Discord.Client discordClient, Twitch.Client twitchClient, DataStore.DataStore dataStore, ILogger<Watcher> logger) : BackgroundService
+internal class Watcher(WatcherSettings settings, IEnumerable<GuildConfig> guildConfigs, Discord.DiscordClient discordClient, Twitch.TwitchClient twitchClient, DataStore.DataStore dataStore, ILogger<Watcher> logger) 
+  : BackgroundService
 {
   private readonly WatcherSettings _settings = settings;
   private readonly IEnumerable<GuildConfig> _guildConfigs = guildConfigs;
-  private readonly Discord.Client _discordClient = discordClient;
-  private readonly Client _twitchClient = twitchClient;
+  private readonly Discord.DiscordClient _discordClient = discordClient;
+  private readonly TwitchClient _twitchClient = twitchClient;
   private readonly DataStore.DataStore _dataStore = dataStore;
   private readonly ILogger<Watcher> _logger = logger;
   private readonly List<string> onlineCache = [];

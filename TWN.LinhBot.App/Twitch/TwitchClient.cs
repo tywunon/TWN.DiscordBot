@@ -13,11 +13,11 @@ using LanguageExt.Common;
 using Microsoft.Extensions.Logging;
 
 namespace TWN.LinhBot.App.Twitch;
-internal class Client(IHttpClientFactory httpClientFactory, TwitchSettings twitchAPISettings, ILogger<Client> logger)
+internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings twitchAPISettings, ILogger<TwitchClient> logger)
 {
   readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
   readonly TwitchSettings _twitchAPISettings = twitchAPISettings;
-  private readonly ILogger<Client> _logger = logger;
+  private readonly ILogger<TwitchClient> _logger = logger;
 
   public async Task<string?> GetOAuthTocken()
   {

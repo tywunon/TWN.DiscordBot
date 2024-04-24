@@ -13,13 +13,13 @@ using LanguageExt.Pipes;
 using Microsoft.Extensions.Logging;
 
 namespace TWN.LinhBot.App.Discord;
-internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClient, DataStore.DataStore dataStore, IEnumerable<GuildConfig> guildConfig, ILogger<Client> logger)
+internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClient twitchClient, DataStore.DataStore dataStore, IEnumerable<GuildConfig> guildConfig, ILogger<DiscordClient> logger)
 {
   readonly DiscordSettings _discordSettings = discordSettings;
-  private readonly Twitch.Client _twitchClient = twitchClient;
+  private readonly Twitch.TwitchClient _twitchClient = twitchClient;
   private readonly DataStore.DataStore _dataStore = dataStore;
   private readonly IEnumerable<GuildConfig> _guildConfig = guildConfig;
-  private readonly ILogger<Client> _logger = logger;
+  private readonly ILogger<DiscordClient> _logger = logger;
   readonly DiscordSocketClient discordSocketClient = new(new()
   {
     GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.GuildIntegrations,

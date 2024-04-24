@@ -39,7 +39,8 @@ internal class Program
           ClientSecret = string.Empty,
         },
         GuildConfig = [],
-        DataStore = new() { FilePath = "dataStore.twn" },
+        DataStore = new() { FilePath = string.Empty, },
+        TCPProbe = new() { Port = -1, },
       };
 
     builder.Services.AddLogging(b =>
@@ -70,10 +71,12 @@ internal class Program
       .AddSingleton(settings.Twitch)
       .AddSingleton(settings.GuildConfig)
       .AddSingleton(settings.DataStore)
+      .AddSingleton(settings.TCPProbe)
       .AddHostedService<Watcher>()
-      .AddSingleton<Discord.Client, Discord.Client>()
-      .AddSingleton<Twitch.Client, Twitch.Client>()
+      .AddSingleton<Discord.DiscordClient, Discord.DiscordClient>()
+      .AddSingleton<Twitch.TwitchClient, Twitch.TwitchClient>()
       .AddSingleton<DataStore.DataStore, DataStore.DataStore>()
+      .AddHostedService<TCPProbeProvider>()
       ;
 
     var host = builder.Build();

@@ -12,6 +12,7 @@ public sealed class Settings
   public required TwitchSettings Twitch { get; set; }
   public required IEnumerable<GuildConfig> GuildConfig {  get; set; }
   public required DataStoreSettings DataStore { get; set; }
+  public required TCPProbeSettings TCPProbe { get; set; }
 }
 public sealed class WatcherSettings
 {
@@ -44,4 +45,9 @@ public sealed class GuildConfig
 public sealed class DataStoreSettings
 {
   public required string FilePath { get; set; }
+}
+
+public sealed class TCPProbeSettings
+{
+  public required short Port { get; set; }
 }
