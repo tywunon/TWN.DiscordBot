@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
+using NReco.Logging.File;
 
 namespace TWN.LinhBot.App;
 
@@ -40,6 +41,19 @@ internal class Program
         GuildConfig = [],
         DataStore = new() { FilePath = "dataStore.twn" },
       };
+
+    builder.Services.AddLogging(b =>
+    {
+      b.AddConsole()
+      .AddFile(@"logs/app_{0:yyyy}-{0:MM}-{0:dd}.log", flo =>
+      {
+        flo.Append = true;
+        flo.FormatLogFileName = fName => string.Format(fName, DateTime.UtcNow);
+        flo.FileSizeLimitBytes = 20 * 1024 * 1024;
+        flo.MaxRollingFiles = 6;
+      })
+      ;
+    });
 
     builder.Services.AddHttpClient("TwitchAPI", client =>
     {

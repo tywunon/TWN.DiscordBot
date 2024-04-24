@@ -13,12 +13,13 @@ using LanguageExt.Pipes;
 using Microsoft.Extensions.Logging;
 
 namespace TWN.LinhBot.App.Discord;
-internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClient, DataStore.DataStore dataStore, IEnumerable<GuildConfig> guildConfig)
+internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClient, DataStore.DataStore dataStore, IEnumerable<GuildConfig> guildConfig, ILogger<Client> logger)
 {
   readonly DiscordSettings _discordSettings = discordSettings;
   private readonly Twitch.Client _twitchClient = twitchClient;
   private readonly DataStore.DataStore _dataStore = dataStore;
   private readonly IEnumerable<GuildConfig> _guildConfig = guildConfig;
+  private readonly ILogger<Client> _logger = logger;
   readonly DiscordSocketClient discordSocketClient = new(new()
   {
     GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.GuildIntegrations
@@ -262,9 +263,23 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
     await channel.SendMessageAsync(text: guildConfig.Text, embed: embed);
   }
 
-  static Task HandleLog_Client(LogMessage message)
+  Task HandleLog_Client(LogMessage message)
   {
-    Console.WriteLine(message.ToString());
+    switch (message.Severity)
+    {
+      case LogSeverity.Critical:
+        _logger.Log(LogLevel.Critical, message.Exception, "{0}", message.Message); break;
+      case LogSeverity.Error:
+        _logger.Log(LogLevel.Error, message.Exception, "{0}", message.Message); break;
+      case LogSeverity.Warning:
+        _logger.Log(LogLevel.Warning, message.Exception, "{0}", message.Message); break;
+      case LogSeverity.Info:
+        _logger.Log(LogLevel.Information, message.Exception, "{0}", message.Message); break;
+      case LogSeverity.Debug:
+        _logger.Log(LogLevel.Debug, message.Exception, "{0}", message.Message); break;
+      case LogSeverity.Verbose:
+        _logger.Log(LogLevel.Trace, message.Exception, "{0}", message.Message); break;
+    }
     return Task.CompletedTask;
   }
 }

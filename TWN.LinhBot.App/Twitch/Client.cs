@@ -10,44 +10,72 @@ using System.Web;
 using LanguageExt;
 using LanguageExt.Common;
 
+using Microsoft.Extensions.Logging;
+
 namespace TWN.LinhBot.App.Twitch;
-internal class Client(IHttpClientFactory httpClientFactory, TwitchSettings twitchAPISettings)
+internal class Client(IHttpClientFactory httpClientFactory, TwitchSettings twitchAPISettings, ILogger<Client> logger)
 {
   readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
   readonly TwitchSettings _twitchAPISettings = twitchAPISettings;
+  private readonly ILogger<Client> _logger = logger;
 
   public async Task<string?> GetOAuthTocken()
   {
-    var client = _httpClientFactory.CreateClient("TwitchOAuth");
-    var response = await client.PostAsync(string.Empty, new OAuthContent(_twitchAPISettings.ClientID, _twitchAPISettings.ClientSecret));
-    var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
-    return (result?.access_token);
+    try
+    {
+
+      var client = _httpClientFactory.CreateClient("TwitchOAuth");
+      var response = await client.PostAsync(string.Empty, new OAuthContent(_twitchAPISettings.ClientID, _twitchAPISettings.ClientSecret));
+      var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
+      return (result?.access_token);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "{0}", ex.Message);
+      return string.Empty;
+    }
   }
 
   public async Task<StreamsResponse?> GetStreams(IEnumerable<string> userLogins, CancellationToken cancellationToken)
   {
-    var oAuthToken = await GetOAuthTocken();
+    try
+    {
+      var oAuthToken = await GetOAuthTocken();
 
-    var client = _httpClientFactory.CreateClient("TwitchAPI");
-    var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"user_login={ul}"))}" : string.Empty;
-    var request = new HttpRequestMessage(HttpMethod.Get, $"streams{queryParameter}");
-    request.Headers.Authorization = new("Bearer", oAuthToken);
-    request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
-    var response = await client.SendAsync(request, cancellationToken);
-    return await response.Content.ReadFromJsonAsync<StreamsResponse>(cancellationToken);
+      var client = _httpClientFactory.CreateClient("TwitchAPI");
+      var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"user_login={ul}"))}" : string.Empty;
+      var request = new HttpRequestMessage(HttpMethod.Get, $"streams{queryParameter}");
+      request.Headers.Authorization = new("Bearer", oAuthToken);
+      request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
+      var response = await client.SendAsync(request, cancellationToken);
+      return await response.Content.ReadFromJsonAsync<StreamsResponse>(cancellationToken);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "{0}", ex.Message);
+      return null;
+    }
   }
 
   public async Task<UsersResponse?> GetUsers(IEnumerable<string> userLogins, CancellationToken cancellationToken)
   {
-    var oAuthToken = await GetOAuthTocken();
+    try
+    {
+      var oAuthToken = await GetOAuthTocken();
 
-    var client = _httpClientFactory.CreateClient("TwitchAPI");
-    var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"login={ul}"))}" : string.Empty;
-    var request = new HttpRequestMessage(HttpMethod.Get, $"users{queryParameter}");
-    request.Headers.Authorization = new("Bearer", oAuthToken);
-    request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
-    var response = await client.SendAsync(request, cancellationToken);
-    return await response.Content.ReadFromJsonAsync<UsersResponse>(cancellationToken);
+      var client = _httpClientFactory.CreateClient("TwitchAPI");
+      var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"login={ul}"))}" : string.Empty;
+      var request = new HttpRequestMessage(HttpMethod.Get, $"users{queryParameter}");
+      request.Headers.Authorization = new("Bearer", oAuthToken);
+      request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
+      var response = await client.SendAsync(request, cancellationToken);
+      return await response.Content.ReadFromJsonAsync<UsersResponse>(cancellationToken);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "{0}", ex.Message);
+      return null;
+    }
   }
 }
 
