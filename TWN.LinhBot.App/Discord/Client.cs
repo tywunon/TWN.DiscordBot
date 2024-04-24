@@ -22,7 +22,8 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
   private readonly ILogger<Client> _logger = logger;
   readonly DiscordSocketClient discordSocketClient = new(new()
   {
-    GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.GuildIntegrations
+    GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.GuildIntegrations,
+    LogGatewayIntentWarnings = true,
   });
   bool ready = false;
 
@@ -32,8 +33,8 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
 
     discordSocketClient.Log += HandleLog_Client;
     discordSocketClient.Ready += HandleReady_Client;
-
     await discordSocketClient.StartAsync();
+
 
     while (!ready) { await Task.Delay(100); }
   }
@@ -173,7 +174,7 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
           .WithAuthor(gdg.Key.TwitchUser)
           .WithThumbnailUrl(gdg.Key.Profile_Image_Url)
           .WithImageUrl(gdg.Key.Offline_Image_Url)
-          .WithFields(gdg.Select((gdgi, i) => new EmbedFieldBuilder().WithName($"{i+1}.").WithValue($"<#{gdgi.guildData.ChannelID}>").WithIsInline(false)))
+          .WithFields(gdg.Select((gdgi, i) => new EmbedFieldBuilder().WithName($"{i + 1}.").WithValue($"<#{gdgi.guildData.ChannelID}>").WithIsInline(false)))
           .WithUrl($"https://twitch.tv/{gdg.Key.Login}")
           .WithCurrentTimestamp()
           .Build()).ToArray();
@@ -189,7 +190,7 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
   private async Task RemoveStream(SocketSlashCommand command)
   {
     var guildID = command.GuildId;
-    if(guildID is null)
+    if (guildID is null)
     {
       await command.RespondAsync("guild not found", ephemeral: true);
       return;
@@ -265,21 +266,17 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
 
   Task HandleLog_Client(LogMessage message)
   {
-    switch (message.Severity)
+    var logLevel = message.Severity switch
     {
-      case LogSeverity.Critical:
-        _logger.Log(LogLevel.Critical, message.Exception, "{Message}", message.Message); break;
-      case LogSeverity.Error:
-        _logger.Log(LogLevel.Error, message.Exception, "{Message}", message.Message); break;
-      case LogSeverity.Warning:
-        _logger.Log(LogLevel.Warning, message.Exception, "{Message}", message.Message); break;
-      case LogSeverity.Info:
-        _logger.Log(LogLevel.Information, message.Exception, "{Message}", message.Message); break;
-      case LogSeverity.Debug:
-        _logger.Log(LogLevel.Debug, message.Exception, "{Message}", message.Message); break;
-      case LogSeverity.Verbose:
-        _logger.Log(LogLevel.Trace, message.Exception, "{Message}", message.Message); break;
-    }
+      LogSeverity.Critical => LogLevel.Critical,
+      LogSeverity.Error => LogLevel.Error,
+      LogSeverity.Warning => LogLevel.Warning,
+      LogSeverity.Info => LogLevel.Information,
+      LogSeverity.Verbose => LogLevel.Trace,
+      LogSeverity.Debug => LogLevel.Debug,
+      _ => LogLevel.Information
+    };
+    _logger.Log(logLevel, message.Exception, "[{Source}] {Message}", message.Source, message.Message);
     return Task.CompletedTask;
   }
 }
