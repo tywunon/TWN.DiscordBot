@@ -27,11 +27,11 @@ internal class Client(IHttpClientFactory httpClientFactory, TwitchSettings twitc
       var client = _httpClientFactory.CreateClient("TwitchOAuth");
       var response = await client.PostAsync(string.Empty, new OAuthContent(_twitchAPISettings.ClientID, _twitchAPISettings.ClientSecret));
       var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
-      return (result?.access_token);
+      return (result?.Access_Token);
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex, "{0}", ex.Message);
+      _logger.LogError(ex, "{Message}", ex.Message);
       return string.Empty;
     }
   }
@@ -52,7 +52,7 @@ internal class Client(IHttpClientFactory httpClientFactory, TwitchSettings twitc
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex, "{0}", ex.Message);
+      _logger.LogError(ex, "{Message}", ex.Message);
       return null;
     }
   }
@@ -73,7 +73,7 @@ internal class Client(IHttpClientFactory httpClientFactory, TwitchSettings twitc
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex, "{0}", ex.Message);
+      _logger.LogError(ex, "{Message}", ex.Message);
       return null;
     }
   }
@@ -88,12 +88,12 @@ class OAuthContent(string clientID, string clientSecret) : FormUrlEncodedContent
 { }
 
 public record OAuthResponse(
-  string? access_token = null,
-  int? expires_in = null,
-  string? token_type = null,
+  string? Access_Token = null,
+  int? Expires_In = null,
+  string? Token_Type = null,
 
-  int? status = null,
-  string? message = null
+  int? Status = null,
+  string? Message = null
 );
 
 #region Streams

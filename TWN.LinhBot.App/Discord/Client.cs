@@ -268,17 +268,17 @@ internal class Client(DiscordSettings discordSettings, Twitch.Client twitchClien
     switch (message.Severity)
     {
       case LogSeverity.Critical:
-        _logger.Log(LogLevel.Critical, message.Exception, "{0}", message.Message); break;
+        _logger.Log(LogLevel.Critical, message.Exception, "{Message}", message.Message); break;
       case LogSeverity.Error:
-        _logger.Log(LogLevel.Error, message.Exception, "{0}", message.Message); break;
+        _logger.Log(LogLevel.Error, message.Exception, "{Message}", message.Message); break;
       case LogSeverity.Warning:
-        _logger.Log(LogLevel.Warning, message.Exception, "{0}", message.Message); break;
+        _logger.Log(LogLevel.Warning, message.Exception, "{Message}", message.Message); break;
       case LogSeverity.Info:
-        _logger.Log(LogLevel.Information, message.Exception, "{0}", message.Message); break;
+        _logger.Log(LogLevel.Information, message.Exception, "{Message}", message.Message); break;
       case LogSeverity.Debug:
-        _logger.Log(LogLevel.Debug, message.Exception, "{0}", message.Message); break;
+        _logger.Log(LogLevel.Debug, message.Exception, "{Message}", message.Message); break;
       case LogSeverity.Verbose:
-        _logger.Log(LogLevel.Trace, message.Exception, "{0}", message.Message); break;
+        _logger.Log(LogLevel.Trace, message.Exception, "{Message}", message.Message); break;
     }
     return Task.CompletedTask;
   }

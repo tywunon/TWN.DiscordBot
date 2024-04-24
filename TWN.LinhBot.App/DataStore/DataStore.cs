@@ -21,10 +21,7 @@ internal class DataStore(DataStoreSettings dataStoreSettings)
 
   public void StoreData(IEnumerable<Data> data)
   {
-    var json = JsonSerializer.Serialize(data, new JsonSerializerOptions()
-    {
-
-    });
+    var json = JsonSerializer.Serialize(data);
     File.WriteAllText(_dataStoreSettings.FilePath, json, Encoding.UTF8);
   }
 
