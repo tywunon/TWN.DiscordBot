@@ -10,11 +10,10 @@ using Microsoft.Extensions.Logging;
 using TWN.LinhBot.App.Twitch;
 
 namespace TWN.LinhBot.App;
-internal class Watcher(WatcherSettings settings, IEnumerable<GuildConfig> guildConfigs, Discord.DiscordClient discordClient, Twitch.TwitchClient twitchClient, DataStore.DataStore dataStore, ILogger<Watcher> logger) 
+internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordClient, Twitch.TwitchClient twitchClient, DataStore.DataStore dataStore, ILogger<Watcher> logger) 
   : BackgroundService
 {
   private readonly WatcherSettings _settings = settings;
-  private readonly IEnumerable<GuildConfig> _guildConfigs = guildConfigs;
   private readonly Discord.DiscordClient _discordClient = discordClient;
   private readonly TwitchClient _twitchClient = twitchClient;
   private readonly DataStore.DataStore _dataStore = dataStore;
@@ -45,7 +44,6 @@ internal class Watcher(WatcherSettings settings, IEnumerable<GuildConfig> guildC
             var dataGroups = lookUpData
               .Join(twitchStreamData.Data, o => o.TwitchUser, i => i.User_Login, (o, i) => (lookUpData: o, twitchStreamData: i))
               .Join(twitchUserData.Data, o => o.twitchStreamData.User_Login, i => i.Login, (o, i) => (lookUpData: o.lookUpData, twitchStreamData: o.twitchStreamData, twitchUserData: i))
-              .Join(_guildConfigs, o => o.lookUpData.GuildID, i => i.GuildID, (o, i) => (o.lookUpData, o.twitchStreamData, o.twitchUserData, guildConfig: i))
               .GroupBy(d => d.lookUpData.TwitchUser);
 
             foreach (var dataGroup in dataGroups)
