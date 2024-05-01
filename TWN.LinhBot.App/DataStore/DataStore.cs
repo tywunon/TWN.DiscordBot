@@ -9,7 +9,6 @@ namespace TWN.LinhBot.App.DataStore;
 internal class DataStore(DataStoreSettings dataStoreSettings)
 {
   private readonly DataStoreSettings _dataStoreSettings = dataStoreSettings;
-  private readonly object _lock = new();
 
   public async Task<List<Data>> GetDataAsync()
   {
