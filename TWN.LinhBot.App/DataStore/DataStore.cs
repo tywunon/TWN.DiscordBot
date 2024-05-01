@@ -9,6 +9,7 @@ namespace TWN.LinhBot.App.DataStore;
 internal class DataStore(DataStoreSettings dataStoreSettings)
 {
   private readonly DataStoreSettings _dataStoreSettings = dataStoreSettings;
+  private readonly object _lock = new();
 
   public async Task<List<Data>> GetDataAsync()
   {
@@ -19,10 +20,10 @@ internal class DataStore(DataStoreSettings dataStoreSettings)
     return JsonSerializer.Deserialize<List<Data>>(json) ?? [];
   }
 
-  public void StoreData(IEnumerable<Data> data)
+  public async Task StoreData(IEnumerable<Data> data)
   {
     var json = JsonSerializer.Serialize(data);
-    File.WriteAllText(_dataStoreSettings.FilePath, json, Encoding.UTF8);
+    await File.WriteAllTextAsync(_dataStoreSettings.FilePath, json, Encoding.UTF8);
   }
 
   public async Task<Data> AddDataAsync(string twitchUser, ulong guildID, ulong channelID)
@@ -34,7 +35,7 @@ internal class DataStore(DataStoreSettings dataStoreSettings)
     {
       var newData = new Data(twitchUser, guildID, channelID);
       existingData.Add(newData);
-      StoreData(existingData);
+      await StoreData(existingData);
       return newData;
     }
     return mayExistingData;
@@ -45,7 +46,7 @@ internal class DataStore(DataStoreSettings dataStoreSettings)
     var data = await GetDataAsync();
     var userData = data.Where(d => d.TwitchUser == twitchUser && d.GuildID == guildID && channels.Contains(d.ChannelID));
     var keepData = data.Except(userData);
-    StoreData(keepData);
+    await StoreData(keepData);
   }
 }
 
