@@ -10,7 +10,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace TWN.LinhBot.App;
-internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger) : BackgroundService
+internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger) 
+  : BackgroundService
 {
   private readonly TCPProbeSettings _tcpProbeSettings = tcpProbeSettings;
   private readonly ILogger<TCPProbeProvider> _logger = logger;
@@ -24,7 +25,9 @@ internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPPr
       _logger.LogInformation("Probe listening on {LocalEndPoint}", listener.LocalEndPoint);
       listener.Listen(100);
 
-      while (!stoppingToken.IsCancellationRequested)
+      PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(20));
+
+      while (await timer.WaitForNextTickAsync(stoppingToken))
       {
         try
         {

@@ -23,56 +23,65 @@ internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordCl
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
     await _discordClient.StartAsync();
-    while (!stoppingToken.IsCancellationRequested)
+
+    PeriodicTimer timer = new(TimeSpan.FromMilliseconds(_settings.Delay));
+
+    try
     {
-      try
+      while (await timer.WaitForNextTickAsync(stoppingToken))
       {
-        var lookUpData = await _dataStore.GetDataAsync();
-        if (lookUpData.Count != 0)
+        try
         {
-          var twitchUsers = lookUpData.Select(lud => lud.TwitchUser).Distinct();
-          var twitchStreamData = await _twitchClient.GetStreams(twitchUsers, stoppingToken) ?? new([], new(string.Empty));
-
-          var onlineUser = twitchStreamData.Data.Select(td => td.User_Login);
-          var offlineUser = onlineCache.Except(onlineUser);
-          onlineCache.RemoveAll(s => offlineUser.Contains(s));
-
-          if (onlineUser.Any())
+          var lookUpData = await _dataStore.GetDataAsync();
+          if (lookUpData.Count != 0)
           {
-            var twitchUserData = await _twitchClient.GetUsers(onlineUser, stoppingToken) ?? new([]);
+            var twitchUsers = lookUpData.Select(lud => lud.TwitchUser).Distinct();
+            var twitchStreamData = await _twitchClient.GetStreams(twitchUsers, stoppingToken) ?? new([], new(string.Empty));
 
-            var dataGroups = lookUpData
-              .Join(twitchStreamData.Data, o => o.TwitchUser, i => i.User_Login, (o, i) => (lookUpData: o, twitchStreamData: i))
-              .Join(twitchUserData.Data, o => o.twitchStreamData.User_Login, i => i.Login, (o, i) => (lookUpData: o.lookUpData, twitchStreamData: o.twitchStreamData, twitchUserData: i))
-              .GroupBy(d => d.lookUpData.TwitchUser);
+            var onlineUser = twitchStreamData.Data.Select(td => td.User_Login);
+            var offlineUser = onlineCache.Except(onlineUser);
+            onlineCache.RemoveAll(s => offlineUser.Contains(s));
 
-            foreach (var dataGroup in dataGroups)
+            if (onlineUser.Any())
             {
-              if (onlineCache.Contains(dataGroup.Key))
-                continue;
-              onlineCache.Add(dataGroup.Key);
-              foreach (var data in dataGroup)
+              var twitchUserData = await _twitchClient.GetUsers(onlineUser, stoppingToken) ?? new([]);
+
+              var dataGroups = lookUpData
+                .Join(twitchStreamData.Data, o => o.TwitchUser, i => i.User_Login, (o, i) => (lookUpData: o, twitchStreamData: i))
+                .Join(twitchUserData.Data, o => o.twitchStreamData.User_Login, i => i.Login, (o, i) => (lookUpData: o.lookUpData, twitchStreamData: o.twitchStreamData, twitchUserData: i))
+                .GroupBy(d => d.lookUpData.TwitchUser);
+
+              foreach (var dataGroup in dataGroups)
               {
-                await _discordClient.SendTwitchMessage(data.lookUpData.GuildID, data.lookUpData.ChannelID, new Discord.TwitchEmnbedData()
+                if (onlineCache.Contains(dataGroup.Key))
+                  continue;
+                onlineCache.Add(dataGroup.Key);
+                foreach (var data in dataGroup)
                 {
-                  Title = data.twitchStreamData.Title,
-                  UserLogin = data.twitchStreamData.User_Login,
-                  UserName = data.twitchStreamData.User_Name,
-                  GameName = data.twitchStreamData.Game_Name,
-                  UserImage = data.twitchUserData.Profile_Image_Url,
-                  ThumbnailURL = data.twitchStreamData.Thumbnail_Url,
-                  StartedAt = data.twitchStreamData.Started_At,
-                });
+                  await _discordClient.SendTwitchMessage(data.lookUpData.GuildID, data.lookUpData.ChannelID, new Discord.TwitchEmnbedData()
+                  {
+                    Title = data.twitchStreamData.Title,
+                    UserLogin = data.twitchStreamData.User_Login,
+                    UserName = data.twitchStreamData.User_Name,
+                    GameName = data.twitchStreamData.Game_Name,
+                    UserImage = data.twitchUserData.Profile_Image_Url,
+                    ThumbnailURL = data.twitchStreamData.Thumbnail_Url,
+                    StartedAt = data.twitchStreamData.Started_At,
+                  });
+                }
               }
             }
           }
         }
+        catch (Exception ex)
+        {
+          _logger.LogError(ex, "An Exception was thrown while watching");
+        }
       }
-      catch(Exception ex)
-      {
-        _logger.LogError(ex, "An Exception was thrown while watching");
-      }
-      await Task.Delay(_settings.Delay, stoppingToken);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "An Exception was thrown trying to watch");
     }
   }
 }
