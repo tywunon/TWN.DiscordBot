@@ -64,16 +64,16 @@ internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordCl
               foreach (var dataGroup in dataGroups)
               {
                 _logger.Log(LogLevel.Debug, new EventId(), dataGroup, null, (s, ex) => "dataGroup:" + string.Join(", ", s.Select(_s => (_s.lookUpData.GuildID, _s.lookUpData.ChannelID, _s.twitchStreamData.Game_Name))));
-                _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache:" + dataGroup.Key + ":" + string.Join(", ", s));
+                _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache-pre:" + dataGroup.Key + ":" + string.Join(", ", s));
                 if (onlineCache.Contains(dataGroup.Key.twitchUser))
                   continue;
 
                 onlineCache.Add(dataGroup.Key.twitchUser);
-                _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache:" + string.Join(", ", s));
+                _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache-post:" + string.Join(", ", s));
 
                 foreach (var data in dataGroup)
                 {
-                  _logger.Log(LogLevel.Debug, new EventId(), data, null, (s, ex) => "data:" + (s.lookUpData.GuildID, s.lookUpData.ChannelID, s.twitchStreamData.Game_Name));
+                  _logger.Log(LogLevel.Debug, new EventId(), data, null, (s, ex) => "data:" + dataGroup.Key + ":" + (s.lookUpData.GuildID, s.lookUpData.ChannelID, s.twitchStreamData.Game_Name));
                   await _discordClient.SendTwitchMessage(data.lookUpData.GuildID, data.lookUpData.ChannelID, new Discord.TwitchEmnbedData()
                   {
                     Title = data.twitchStreamData.Title,
