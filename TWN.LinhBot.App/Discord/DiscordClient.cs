@@ -35,7 +35,6 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     discordSocketClient.Ready += HandleReady_Client;
     await discordSocketClient.StartAsync();
 
-
     while (!ready) { await Task.Delay(100); }
   }
 
@@ -44,6 +43,13 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     await discordSocketClient.SetCustomStatusAsync(_discordSettings.Status);
     await discordSocketClient.SetStatusAsync(UserStatus.Idle);
 
+    await CreateSlashCommands();
+
+    ready = true;
+  }
+
+  private async Task CreateSlashCommands()
+  {
     try
     {
       var guildCommand = new SlashCommandBuilder()
@@ -80,8 +86,6 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     {
       await HandleLog_Client(new LogMessage(LogSeverity.Error, "slashCreation", ex.Message, ex));
     }
-
-    ready = true;
   }
 
   private async Task HandleSlashCommandExecuted_Client(SocketSlashCommand command)
