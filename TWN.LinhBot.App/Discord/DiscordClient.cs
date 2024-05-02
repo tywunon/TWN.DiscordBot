@@ -283,6 +283,10 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
         .WithThumbnailUrl(twitchData.UserImage)
         .WithImageUrl(thumbnailURL)
         .WithUrl($"https://twitch.tv/{twitchData.UserLogin}")
+        .WithFooter(new EmbedFooterBuilder()
+          .WithIconUrl(twitchData.UserImage)
+          .WithText(guildConfig.FooterText)
+        )
         .WithTimestamp(twitchData.StartedAt)
         .Build();
 

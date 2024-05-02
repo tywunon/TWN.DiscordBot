@@ -38,6 +38,7 @@ public sealed class GuildConfig
   public required ulong GuildID { get; set; }
   public required string Color { get; set; }
   public required string Text { get; set; }
+  public required string FooterText { get; set; }
   public required int ThumbnailWidth { get; set; }
   public required int ThumbnailHeight { get; set; }
 }
