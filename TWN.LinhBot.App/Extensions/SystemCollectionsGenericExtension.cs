@@ -7,4 +7,7 @@ public static class SystemCollectionsGenericExtension
     if (!self.TryAdd(key, value))
       self[key] = value;
   }
+
+  public static bool RemoveAll<K, V>(this IDictionary<K, V> self, Func<KeyValuePair<K, V>, bool> predicate) 
+    => self.Filter(predicate).ToList().All(self.Remove);
 }
