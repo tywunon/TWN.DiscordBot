@@ -54,8 +54,7 @@ internal class Program
         flo.FormatLogFileName = fName => string.Format(fName, DateTime.UtcNow);
         flo.FileSizeLimitBytes = 20 * 1024 * 1024;
         flo.MaxRollingFiles = 6;
-      })
-      ;
+      });
     });
 
     builder.Services.AddHttpClient("TwitchAPI", client =>
