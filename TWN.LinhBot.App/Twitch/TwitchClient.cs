@@ -38,7 +38,7 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
       var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"user_login={ul}"))}" : string.Empty;
       var request = new HttpRequestMessage(HttpMethod.Get, $"streams{queryParameter}");
       request.Headers.Authorization = new("Bearer", oAuthToken);
-      request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
+      request.Headers.Add("client-id", _twitchAPISettings.ClientID);
       var response = await client.SendAsync(request, cancellationToken);
       return await response.Content.ReadFromJsonAsync<StreamsResponse>(cancellationToken) ?? new([], new(string.Empty));
     }
@@ -59,7 +59,7 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
       var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"login={ul}"))}" : string.Empty;
       var request = new HttpRequestMessage(HttpMethod.Get, $"users{queryParameter}");
       request.Headers.Authorization = new("Bearer", oAuthToken);
-      request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
+      request.Headers.Add("client-id", _twitchAPISettings.ClientID);
       var response = await client.SendAsync(request, cancellationToken);
       return await response.Content.ReadFromJsonAsync<UsersResponse>(cancellationToken) ?? new([]);
     }
