@@ -1,8 +1,9 @@
-﻿using System.Net.Http.Json;
-
+﻿
 using LanguageExt;
 
 using Microsoft.Extensions.Logging;
+
+using System.Net.Http.Json;
 
 namespace TWN.LinhBot.App.Twitch;
 internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings twitchAPISettings, ILogger<TwitchClient> logger)
@@ -11,7 +12,7 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
   private readonly TwitchSettings _twitchAPISettings = twitchAPISettings;
   private readonly ILogger<TwitchClient> _logger = logger;
 
-  public async Task<string?> GetOAuthTocken()
+  public async Task<string> GetOAuthToken()
   {
     try
     {
@@ -19,7 +20,7 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
       var client = _httpClientFactory.CreateClient("TwitchOAuth");
       var response = await client.PostAsync(string.Empty, new OAuthContent(_twitchAPISettings.ClientID, _twitchAPISettings.ClientSecret));
       var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
-      return result?.Access_Token;
+      return result?.Access_Token ?? string.Empty;
     }
     catch (Exception ex)
     {
@@ -28,11 +29,11 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
     }
   }
 
-  public async Task<StreamsResponse?> GetStreams(IEnumerable<string> userLogins, CancellationToken cancellationToken)
+  public async Task<StreamsResponse> GetStreams(IEnumerable<string> userLogins, CancellationToken cancellationToken)
   {
     try
     {
-      var oAuthToken = await GetOAuthTocken();
+      var oAuthToken = await GetOAuthToken();
 
       var client = _httpClientFactory.CreateClient("TwitchAPI");
       var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"user_login={ul}"))}" : string.Empty;
@@ -40,20 +41,20 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
       request.Headers.Authorization = new("Bearer", oAuthToken);
       request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
       var response = await client.SendAsync(request, cancellationToken);
-      return await response.Content.ReadFromJsonAsync<StreamsResponse>(cancellationToken);
+      return await response.Content.ReadFromJsonAsync<StreamsResponse>(cancellationToken) ?? new([], new(string.Empty));
     }
     catch (Exception ex)
     {
       _logger.LogError(ex, "{Message}", ex.Message);
-      return null;
+      return new([], new(string.Empty));
     }
   }
 
-  public async Task<UsersResponse?> GetUsers(IEnumerable<string> userLogins, CancellationToken cancellationToken)
+  public async Task<UsersResponse> GetUsers(IEnumerable<string> userLogins, CancellationToken cancellationToken)
   {
     try
     {
-      var oAuthToken = await GetOAuthTocken();
+      var oAuthToken = await GetOAuthToken();
 
       var client = _httpClientFactory.CreateClient("TwitchAPI");
       var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"login={ul}"))}" : string.Empty;
@@ -61,12 +62,12 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
       request.Headers.Authorization = new("Bearer", oAuthToken);
       request.Headers.Add("client-id", "2zswyembrowcn69z52y9ogc5q9ks4i");
       var response = await client.SendAsync(request, cancellationToken);
-      return await response.Content.ReadFromJsonAsync<UsersResponse>(cancellationToken);
+      return await response.Content.ReadFromJsonAsync<UsersResponse>(cancellationToken) ?? new([]);
     }
     catch (Exception ex)
     {
       _logger.LogError(ex, "{Message}", ex.Message);
-      return null;
+      return new([]);
     }
   }
 }

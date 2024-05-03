@@ -252,7 +252,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     }
   }
 
-  public async Task SendTwitchMessage(ulong guildID, ulong channelID, TwitchEmnbedData twitchData)
+  public async Task SendTwitchMessage(ulong guildID, ulong channelID, TwitchEmbedData twitchData)
   {
     try
     {
@@ -312,7 +312,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
   }
 }
 
-public sealed class TwitchEmnbedData
+public sealed class TwitchEmbedData
 {
   public required string Title { get; init; }
   public required string UserLogin { get; init; }
