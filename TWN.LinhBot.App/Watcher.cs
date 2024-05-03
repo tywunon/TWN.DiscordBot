@@ -41,7 +41,7 @@ internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordCl
             var offlineUser = onlineCache.Keys.Select(oc => oc).Except(onlineUser).ToList();
             _logger.Log(LogLevel.Debug, new EventId(), offlineUser, null, (s, ex) => "offlineUser:" + string.Join(", ", s));
 
-            onlineCache.RemoveAll(oc => offlineUser.Contains(oc.Key) || oc.Value < DateTime.Now.AddMinutes(-5));
+            onlineCache.RemoveAll(oc => offlineUser.Contains(oc.Key) || oc.Value < DateTime.Now.AddMilliseconds(-_settings.Horizon));
             _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache:" + string.Join(", ", s));
 
             if (onlineUser.Any())

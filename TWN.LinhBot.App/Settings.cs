@@ -11,6 +11,7 @@ public sealed class Settings
 public sealed class WatcherSettings
 {
   public required int Delay { get; set; }
+  public required double Horizon { get; set; }
 }
 
 public sealed class DiscordSettings
