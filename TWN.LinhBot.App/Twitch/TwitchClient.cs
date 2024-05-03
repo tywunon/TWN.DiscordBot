@@ -16,7 +16,6 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
   {
     try
     {
-
       var client = _httpClientFactory.CreateClient("TwitchOAuth");
       var response = await client.PostAsync(string.Empty, new OAuthContent(_twitchAPISettings.ClientID, _twitchAPISettings.ClientSecret));
       var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
@@ -72,7 +71,8 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
   }
 }
 
-internal class OAuthContent(string clientID, string clientSecret) : FormUrlEncodedContent
+internal class OAuthContent(string clientID, string clientSecret) 
+  : FormUrlEncodedContent
   ([
         KeyValuePair.Create("client_id", clientID),
         KeyValuePair.Create("client_secret", clientSecret),
