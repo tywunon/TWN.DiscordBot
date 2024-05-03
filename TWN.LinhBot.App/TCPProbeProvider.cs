@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace TWN.LinhBot.App;
-internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger) 
+internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger)
   : BackgroundService
 {
   private readonly TCPProbeSettings _tcpProbeSettings = tcpProbeSettings;

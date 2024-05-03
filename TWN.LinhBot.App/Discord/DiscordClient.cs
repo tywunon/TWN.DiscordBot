@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Discord;
+﻿using Discord;
 using Discord.WebSocket;
 
 using LanguageExt.Pipes;
@@ -15,17 +8,17 @@ using Microsoft.Extensions.Logging;
 namespace TWN.LinhBot.App.Discord;
 internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClient twitchClient, DataStore.DataStore dataStore, IEnumerable<GuildConfig> guildConfig, ILogger<DiscordClient> logger)
 {
-  readonly DiscordSettings _discordSettings = discordSettings;
+  private readonly DiscordSettings _discordSettings = discordSettings;
   private readonly Twitch.TwitchClient _twitchClient = twitchClient;
   private readonly DataStore.DataStore _dataStore = dataStore;
   private readonly IEnumerable<GuildConfig> _guildConfig = guildConfig;
   private readonly ILogger<DiscordClient> _logger = logger;
-  readonly DiscordSocketClient discordSocketClient = new(new()
+  private readonly DiscordSocketClient discordSocketClient = new(new()
   {
     GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.GuildIntegrations | GatewayIntents.Guilds,
     LogGatewayIntentWarnings = true,
   });
-  bool ready = false;
+  private bool ready = false;
 
   public async Task StartAsync()
   {
@@ -38,7 +31,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     while (!ready) { await Task.Delay(100); }
   }
 
-  async Task HandleReady_Client()
+  private async Task HandleReady_Client()
   {
     await discordSocketClient.SetCustomStatusAsync(_discordSettings.Status);
     await discordSocketClient.SetStatusAsync(UserStatus.Idle);
@@ -270,7 +263,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
 
       var guild = discordSocketClient.GetGuild(guildID);
       if (guild is null) return;
-      var channel = guild.GetTextChannel(channelID); 
+      var channel = guild.GetTextChannel(channelID);
       if (channel is null) return;
 
       var color = uint.TryParse(guildConfig.Color.Replace("#", ""), System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
@@ -302,7 +295,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     }
   }
 
-  Task HandleLog_Client(LogMessage message)
+  private Task HandleLog_Client(LogMessage message)
   {
     var logLevel = message.Severity switch
     {

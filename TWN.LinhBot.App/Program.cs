@@ -1,11 +1,8 @@
-﻿using System;
-
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Discord;
-using Discord.WebSocket;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using NReco.Logging.File;
 
 namespace TWN.LinhBot.App;
@@ -15,7 +12,8 @@ internal class Program
   private static async Task Main(string[] args) => await MainAsync(args);
 
   private static Settings? settings;
-  static async Task MainAsync(string[] args)
+
+  private static async Task MainAsync(string[] args)
   {
     var builder = Host.CreateApplicationBuilder(args);
 

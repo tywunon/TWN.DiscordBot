@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TWN.LinhBot.App;
+﻿namespace TWN.LinhBot.App;
 public sealed class Settings
 {
   public required WatcherSettings Watcher { get; set; }
   public required DiscordSettings Discord { get; set; }
   public required TwitchSettings Twitch { get; set; }
-  public required IEnumerable<GuildConfig> GuildConfig {  get; set; }
+  public required IEnumerable<GuildConfig> GuildConfig { get; set; }
   public required DataStoreSettings DataStore { get; set; }
   public required TCPProbeSettings TCPProbe { get; set; }
 }

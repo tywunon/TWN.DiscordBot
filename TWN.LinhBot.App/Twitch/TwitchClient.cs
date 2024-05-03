@@ -1,22 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
+﻿using System.Net.Http.Json;
 
 using LanguageExt;
-using LanguageExt.Common;
 
 using Microsoft.Extensions.Logging;
 
 namespace TWN.LinhBot.App.Twitch;
 internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings twitchAPISettings, ILogger<TwitchClient> logger)
 {
-  readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-  readonly TwitchSettings _twitchAPISettings = twitchAPISettings;
+  private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+  private readonly TwitchSettings _twitchAPISettings = twitchAPISettings;
   private readonly ILogger<TwitchClient> _logger = logger;
 
   public async Task<string?> GetOAuthTocken()
@@ -27,7 +19,7 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
       var client = _httpClientFactory.CreateClient("TwitchOAuth");
       var response = await client.PostAsync(string.Empty, new OAuthContent(_twitchAPISettings.ClientID, _twitchAPISettings.ClientSecret));
       var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
-      return (result?.Access_Token);
+      return result?.Access_Token;
     }
     catch (Exception ex)
     {
@@ -79,7 +71,7 @@ internal class TwitchClient(IHttpClientFactory httpClientFactory, TwitchSettings
   }
 }
 
-class OAuthContent(string clientID, string clientSecret) : FormUrlEncodedContent
+internal class OAuthContent(string clientID, string clientSecret) : FormUrlEncodedContent
   ([
         KeyValuePair.Create("client_id", clientID),
         KeyValuePair.Create("client_secret", clientSecret),
