@@ -12,7 +12,7 @@ internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordCl
   private readonly TwitchClient _twitchClient = twitchClient;
   private readonly DataStore.DataStore _dataStore = dataStore;
   private readonly ILogger<Watcher> _logger = logger;
-  private readonly List<string> onlineCache = [];
+  private readonly Dictionary<string, DateTime> onlineCache = [];
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
@@ -38,10 +38,10 @@ internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordCl
 
             var onlineUser = twitchStreamData.Data.Select(td => td.User_Login);
             _logger.Log(LogLevel.Debug, new EventId(), onlineUser, null, (s, ex) => "onlineUser:" + string.Join(", ", s));
-            var offlineUser = onlineCache.Except(onlineUser);
+            var offlineUser = onlineCache.Keys.Select(oc => oc).Except(onlineUser).ToList();
             _logger.Log(LogLevel.Debug, new EventId(), offlineUser, null, (s, ex) => "offlineUser:" + string.Join(", ", s));
 
-            onlineCache.RemoveAll(s => offlineUser.Contains(s));
+            onlineCache.RemoveAll(oc => offlineUser.Contains(oc.Key) || oc.Value < DateTime.Now.AddMinutes(-5));
             _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache:" + string.Join(", ", s));
 
             if (onlineUser.Any())
@@ -59,10 +59,13 @@ internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordCl
               {
                 _logger.Log(LogLevel.Debug, new EventId(), dataGroup, null, (s, ex) => "dataGroup:" + string.Join(", ", s.Select(_s => (_s.lookUpData.GuildID, _s.lookUpData.ChannelID, _s.twitchStreamData.Game_Name))));
                 _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache-pre:" + dataGroup.Key + ":" + string.Join(", ", s));
-                if (onlineCache.Contains(dataGroup.Key.twitchUser))
+                if (onlineCache.ContainsKey(dataGroup.Key.twitchUser))
+                {
+                  onlineCache[dataGroup.Key.twitchUser] = DateTime.Now;
                   continue;
+                }
 
-                onlineCache.Add(dataGroup.Key.twitchUser);
+                onlineCache.Add(dataGroup.Key.twitchUser, DateTime.Now);
                 _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache-post:" + string.Join(", ", s));
 
                 foreach (var data in dataGroup)
