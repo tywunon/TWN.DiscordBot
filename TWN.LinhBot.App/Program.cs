@@ -23,9 +23,9 @@ internal class Program
     settings = builder.Configuration.GetRequiredSection(nameof(Settings))
       .Get<Settings>() ?? new Settings()
       {
-        Watcher = new() 
-        { 
-          Delay = 1000, 
+        Watcher = new()
+        {
+          Delay = 1000,
           Horizon = 5 * 60 * 1000 // 5min
         },
         Discord = new()
