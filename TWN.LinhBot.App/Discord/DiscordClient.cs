@@ -178,8 +178,8 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
           .GroupBy(gd => (gd.guildData.TwitchUser, gd.twitchUserData.Profile_Image_Url, gd.twitchUserData.Login, gd.twitchUserData.Offline_Image_Url))
           .Select(gdg => new EmbedBuilder()
             .WithAuthor(gdg.Key.TwitchUser)
-            .WithThumbnailUrl(gdg.Key.Profile_Image_Url)
-            .WithImageUrl(gdg.Key.Offline_Image_Url)
+            .WithThumbnailUrl($"{gdg.Key.Profile_Image_Url}?v={DateTime.Now.Ticks}")
+            .WithImageUrl($"{gdg.Key.Offline_Image_Url}?v={DateTime.Now.Ticks}")
             .WithFields(gdg.Select((gdgi, i) => new EmbedFieldBuilder().WithName($"{i + 1}.").WithValue($"<#{gdgi.guildData.ChannelID}>").WithIsInline(false)))
             .WithUrl($"https://twitch.tv/{gdg.Key.Login}")
             .WithCurrentTimestamp()
@@ -268,7 +268,9 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
 
       var color = uint.TryParse(guildConfig.Color.Replace("#", ""), System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
 
-      var thumbnailURL = twitchData.ThumbnailURL
+      
+
+      var thumbnailURL = $"{twitchData.ThumbnailURL}?v={DateTime.Now.Ticks}"
         .Replace("{width}", $"{guildConfig.ThumbnailWidth}")
         .Replace("{height}", $"{guildConfig.ThumbnailHeight}");
 
@@ -277,7 +279,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
         .WithAuthor(twitchData.UserName)
         .WithTitle($"{twitchData.UserName} ist online mit {twitchData.GameName}")
         .WithDescription(twitchData.Title)
-        .WithThumbnailUrl(twitchData.UserImage)
+        .WithThumbnailUrl($"{twitchData.UserImage}?v={DateTime.Now.Ticks}")
         .WithImageUrl(thumbnailURL)
         .WithUrl($"https://twitch.tv/{twitchData.UserLogin}")
         .WithFooter(new EmbedFooterBuilder()
