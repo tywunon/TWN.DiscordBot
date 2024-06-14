@@ -47,7 +47,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     {
       var guildCommand = new SlashCommandBuilder()
         .WithName("add-stream")
-        .WithDescription("Adds annother Stream to the Announcement Queue")
+        .WithDescription("Adds another Stream to the Announcement Queue")
         .WithDefaultMemberPermissions(GuildPermission.ModerateMembers)
         .AddOption(name: "twitch-user", type: ApplicationCommandOptionType.String, description: "Twitch User Name", isRequired: true)
         .AddOption(name: "channel", type: ApplicationCommandOptionType.Channel, description: "Channel", isRequired: true)
@@ -243,7 +243,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
       var channels = channel is null ? userData.Select(ud => ud.ChannelID).ToArray() : [channel.Id];
 
       await _dataStore.DeleteData(twitchUser, guildID, channels);
-      await command.RespondAsync($"anouncements for user {twitchUser}: {string.Join(",", channels.Select(c => $"<#{c}>"))} removed", ephemeral: true);
+      await command.RespondAsync($"announcements for user {twitchUser}: {string.Join(",", channels.Select(c => $"<#{c}>"))} removed", ephemeral: true);
     }
     catch (Exception ex)
     {
