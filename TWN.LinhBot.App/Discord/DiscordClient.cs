@@ -135,21 +135,27 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
 
       var cancellationToken = new CancellationTokenSource().Token;
       var twitchUserInfo = await _twitchClient.GetUsers([twitchUser], cancellationToken);
-      if (twitchUserInfo?.Data.Length == 0)
-      {
-        await command.RespondAsync($"twitch-user ({twitchUser}) not found", ephemeral: true);
-        return;
-      }
+      await twitchUserInfo.Match(
+        async tui =>
+        {
+          if (tui.Data.Length == 0)
+          {
+            await command.RespondAsync($"twitch-user ({twitchUser}) not found", ephemeral: true);
+            return;
+          }
 
-      if (channelOption.Value is not ITextChannel channel)
-      {
-        await command.RespondAsync($"channel ({channelOption.Value}) is not a text-channel", ephemeral: true);
-        return;
-      }
+          if (channelOption.Value is not ITextChannel channel)
+          {
+            await command.RespondAsync($"channel ({channelOption.Value}) is not a text-channel", ephemeral: true);
+            return;
+          }
 
-      await _dataStore.AddDataAsync(twitchUser, channel.GuildId, channel.Id);
+          await _dataStore.AddDataAsync(twitchUser, channel.GuildId, channel.Id);
 
-      await command.RespondAsync($"**{twitchUser}**'s streams will be announced in {channel.Mention}", ephemeral: true);
+          await command.RespondAsync($"**{twitchUser}**'s streams will be announced in {channel.Mention}", ephemeral: true);
+        },
+        error => Task.FromResult(error)
+      );
     }
     catch (Exception ex)
     {
@@ -171,23 +177,32 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
         var colorString = guildConfig?.Color.Replace("#", "");
         var color = uint.TryParse(colorString, System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
         var twitchUser = guildData.Select(gd => gd.TwitchUser).Distinct();
-        var twitchUserData = await _twitchClient.GetUsers(twitchUser, cancellationToken) ?? new([]);
+        var twitchUserData = await _twitchClient.GetUsers(twitchUser, cancellationToken);
 
-        var embed = guildData
-          .Join(twitchUserData.Data, o => o.TwitchUser, i => i.Login, (o, i) => (guildData: o, twitchUserData: i))
-          .GroupBy(gd => (gd.guildData.TwitchUser, gd.twitchUserData.Profile_Image_Url, gd.twitchUserData.Login, gd.twitchUserData.Offline_Image_Url))
-          .Select(gdg => new EmbedBuilder()
-            .WithAuthor(gdg.Key.TwitchUser)
-            .WithThumbnailUrl($"{gdg.Key.Profile_Image_Url}?v={DateTime.Now.Ticks}")
-            .WithImageUrl($"{gdg.Key.Offline_Image_Url}?v={DateTime.Now.Ticks}")
-            .WithFields(gdg.Select((gdgi, i) => new EmbedFieldBuilder().WithName($"{i + 1}.").WithValue($"<#{gdgi.guildData.ChannelID}>").WithIsInline(false)))
-            .WithUrl($"https://twitch.tv/{gdg.Key.Login}")
-            .WithCurrentTimestamp()
-            .Build()).ToArray();
-        if (embed.Length > 0)
-          await command.RespondAsync(string.Empty, embed, ephemeral: true);
-        else
-          await command.RespondAsync("No streams in Announcement Queue", ephemeral: true);
+        await twitchUserData.Match
+          (
+            async tud =>
+            {
+              var embed = guildData
+                .Join(tud.Data, o => o.TwitchUser, i => i.Login, (o, i) => (guildData: o, twitchUserData: i))
+                .GroupBy(gd => (gd.guildData.TwitchUser, gd.twitchUserData.Profile_Image_Url, gd.twitchUserData.Login, gd.twitchUserData.Offline_Image_Url))
+                .Select(gdg => new EmbedBuilder()
+              .WithAuthor(gdg.Key.TwitchUser)
+              .WithThumbnailUrl($"{gdg.Key.Profile_Image_Url}?v={DateTime.Now.Ticks}")
+              .WithImageUrl($"{gdg.Key.Offline_Image_Url}?v={DateTime.Now.Ticks}")
+              .WithFields(gdg.Select((gdgi, i) => new EmbedFieldBuilder().WithName($"{i + 1}.").WithValue($"<#{gdgi.guildData.ChannelID}>").WithIsInline(false)))
+              .WithUrl($"https://twitch.tv/{gdg.Key.Login}")
+              .WithCurrentTimestamp()
+              .Build()).ToArray();
+                if (embed.Length > 0)
+                  await command.RespondAsync(string.Empty, embed, ephemeral: true);
+                else
+                  await command.RespondAsync("No streams in Announcement Queue", ephemeral: true);
+            },
+            error => Task.FromResult(error)
+          );
+
+
       }
       else
         await command.RespondAsync("No streams in Announcement Queue", ephemeral: true);
@@ -268,7 +283,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
 
       var color = uint.TryParse(guildConfig.Color.Replace("#", ""), System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
 
-      
+
 
       var thumbnailURL = $"{twitchData.ThumbnailURL}?v={DateTime.Now.Ticks}"
         .Replace("{width}", $"{guildConfig.ThumbnailWidth}")

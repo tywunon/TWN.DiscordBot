@@ -33,57 +33,73 @@ internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordCl
           {
             var twitchUsers = lookUpData.Select(lud => lud.TwitchUser).Distinct();
             _logger.Log(LogLevel.Debug, new EventId(), twitchUsers, null, (s, ex) => "twitchUsers:" + string.Join(", ", s));
-            var twitchStreamData = await _twitchClient.GetStreams(twitchUsers, stoppingToken) ?? new([], new(string.Empty));
-            _logger.Log(LogLevel.Debug, new EventId(), twitchStreamData, null, (s, ex) => "twitchStreamData:" + string.Join(", ", s.Data.Select(_s => $"{_s.User_Login}")));
+            var twitchStreamData = await _twitchClient.GetStreams(twitchUsers, stoppingToken);
 
-            var onlineUser = twitchStreamData.Data.Select(td => td.User_Login);
-            _logger.Log(LogLevel.Debug, new EventId(), onlineUser, null, (s, ex) => "onlineUser:" + string.Join(", ", s));
-            var offlineUser = onlineCache.Keys.Select(oc => oc).Except(onlineUser).ToList();
-            _logger.Log(LogLevel.Debug, new EventId(), offlineUser, null, (s, ex) => "offlineUser:" + string.Join(", ", s));
-
-            onlineCache.RemoveAll(oc => offlineUser.Contains(oc.Key) || oc.Value < DateTime.Now.AddMilliseconds(-_settings.Horizon));
-            _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache:" + string.Join(", ", s));
-
-            if (onlineUser.Any())
-            {
-              var twitchUserData = await _twitchClient.GetUsers(onlineUser, stoppingToken) ?? new([]);
-              _logger.Log(LogLevel.Debug, new EventId(), twitchUserData, null, (s, ex) => "twitchUserData:" + string.Join(", ", s.Data.Select(_s => $"{_s.Login}")));
-
-              var dataGroups = lookUpData
-                .Join(twitchStreamData.Data, o => o.TwitchUser, i => i.User_Login, (o, i) => (lookUpData: o, twitchStreamData: i))
-                .Join(twitchUserData.Data, o => o.twitchStreamData.User_Login, i => i.Login, (o, i) => (lookUpData: o.lookUpData, twitchStreamData: o.twitchStreamData, twitchUserData: i))
-                .GroupBy(d => (twitchUser: d.lookUpData.TwitchUser, d.twitchStreamData.Game_Name));
-              _logger.Log(LogLevel.Debug, new EventId(), dataGroups, null, (s, ex) => "dataGroups:" + string.Join(", ", s.Select(_s => $"{(_s.Key, string.Join(", ", _s.Select(_s1 => (_s1.lookUpData.GuildID, _s1.lookUpData.ChannelID, _s1.twitchStreamData.Game_Name))))}")));
-
-              foreach (var dataGroup in dataGroups)
+            await twitchStreamData.Match
+            (
+              async streamData =>
               {
-                _logger.Log(LogLevel.Debug, new EventId(), dataGroup, null, (s, ex) => "dataGroup:" + string.Join(", ", s.Select(_s => (_s.lookUpData.GuildID, _s.lookUpData.ChannelID, _s.twitchStreamData.Game_Name))));
-                _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache-pre:" + dataGroup.Key + ":" + string.Join(", ", s));
-                if (onlineCache.ContainsKey(dataGroup.Key.twitchUser))
-                {
-                  onlineCache[dataGroup.Key.twitchUser] = DateTime.Now;
-                  continue;
-                }
+                _logger.Log(LogLevel.Debug, new EventId(), streamData, null, (s, ex) => "twitchStreamData:" + string.Join(", ", s.Data.Select(_s => $"{_s.User_Login}")));
 
-                onlineCache.Add(dataGroup.Key.twitchUser, DateTime.Now);
-                _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache-post:" + string.Join(", ", s));
+                var onlineUser = streamData.Data.Select(td => td.User_Login);
+                _logger.Log(LogLevel.Debug, new EventId(), onlineUser, null, (s, ex) => "onlineUser:" + string.Join(", ", s));
+                var offlineUser = onlineCache.Keys.Select(oc => oc).Except(onlineUser).ToList();
+                _logger.Log(LogLevel.Debug, new EventId(), offlineUser, null, (s, ex) => "offlineUser:" + string.Join(", ", s));
 
-                foreach (var data in dataGroup)
+                onlineCache.RemoveAll(oc => offlineUser.Contains(oc.Key) || oc.Value < DateTime.Now.AddMilliseconds(-_settings.Horizon));
+                _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache:" + string.Join(", ", s));
+
+                if (onlineUser.Any())
                 {
-                  _logger.Log(LogLevel.Debug, new EventId(), data, null, (s, ex) => "data:" + dataGroup.Key + ":" + (s.lookUpData.GuildID, s.lookUpData.ChannelID, s.twitchStreamData.Game_Name));
-                  await _discordClient.SendTwitchMessage(data.lookUpData.GuildID, data.lookUpData.ChannelID, new Discord.TwitchEmbedData()
-                  {
-                    Title = data.twitchStreamData.Title,
-                    UserLogin = data.twitchStreamData.User_Login,
-                    UserName = data.twitchStreamData.User_Name,
-                    GameName = data.twitchStreamData.Game_Name,
-                    UserImage = data.twitchUserData.Profile_Image_Url,
-                    ThumbnailURL = data.twitchStreamData.Thumbnail_Url,
-                    StartedAt = data.twitchStreamData.Started_At,
-                  });
+                  var twitchUserData = await _twitchClient.GetUsers(onlineUser, stoppingToken);
+
+                  await twitchUserData.Match
+                  (
+                    async userResponse =>
+                    {
+                      _logger.Log(LogLevel.Debug, new EventId(), userResponse, null, (s, ex) => "twitchUserData:" + string.Join(", ", s.Data.Select(_s => $"{_s.Login}")));
+
+                      var dataGroups = lookUpData
+                        .Join(streamData.Data, o => o.TwitchUser, i => i.User_Login, (o, i) => (lookUpData: o, twitchStreamData: i))
+                        .Join(userResponse.Data, o => o.twitchStreamData.User_Login, i => i.Login, (o, i) => (lookUpData: o.lookUpData, twitchStreamData: o.twitchStreamData, twitchUserData: i))
+                        .GroupBy(d => (twitchUser: d.lookUpData.TwitchUser, d.twitchStreamData.Game_Name));
+                      _logger.Log(LogLevel.Debug, new EventId(), dataGroups, null, (s, ex) => "dataGroups:" + string.Join(", ", s.Select(_s => $"{(_s.Key, string.Join(", ", _s.Select(_s1 => (_s1.lookUpData.GuildID, _s1.lookUpData.ChannelID, _s1.twitchStreamData.Game_Name))))}")));
+
+                      foreach (var dataGroup in dataGroups)
+                      {
+                        _logger.Log(LogLevel.Debug, new EventId(), dataGroup, null, (s, ex) => "dataGroup:" + string.Join(", ", s.Select(_s => (_s.lookUpData.GuildID, _s.lookUpData.ChannelID, _s.twitchStreamData.Game_Name))));
+                        _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache-pre:" + dataGroup.Key + ":" + string.Join(", ", s));
+                        if (onlineCache.ContainsKey(dataGroup.Key.twitchUser))
+                        {
+                          onlineCache[dataGroup.Key.twitchUser] = DateTime.Now;
+                          continue;
+                        }
+
+                        onlineCache.Add(dataGroup.Key.twitchUser, DateTime.Now);
+                        _logger.Log(LogLevel.Debug, new EventId(), onlineCache, null, (s, ex) => "onlineCache-post:" + string.Join(", ", s));
+
+                        foreach (var data in dataGroup)
+                        {
+                          _logger.Log(LogLevel.Debug, new EventId(), data, null, (s, ex) => "data:" + dataGroup.Key + ":" + (s.lookUpData.GuildID, s.lookUpData.ChannelID, s.twitchStreamData.Game_Name));
+                          await _discordClient.SendTwitchMessage(data.lookUpData.GuildID, data.lookUpData.ChannelID, new Discord.TwitchEmbedData()
+                          {
+                            Title = data.twitchStreamData.Title,
+                            UserLogin = data.twitchStreamData.User_Login,
+                            UserName = data.twitchStreamData.User_Name,
+                            GameName = data.twitchStreamData.Game_Name,
+                            UserImage = data.twitchUserData.Profile_Image_Url,
+                            ThumbnailURL = data.twitchStreamData.Thumbnail_Url,
+                            StartedAt = data.twitchStreamData.Started_At,
+                          });
+                        }
+                      }
+                    },
+                    error => Task.FromResult(error)
+                  );
                 }
-              }
-            }
+              },
+              error => Task.FromResult(error)
+            );
           }
         }
         catch (Exception ex)
