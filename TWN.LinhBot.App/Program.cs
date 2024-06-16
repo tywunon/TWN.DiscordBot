@@ -18,7 +18,7 @@ internal class Program
     var builder = Host.CreateApplicationBuilder(args);
 
     builder.Configuration
-      .AddJsonFile("appsettings.json", false, true);
+      .AddJsonFile($"appsettings.json", false, true);
 
     settings = builder.Configuration.GetRequiredSection(nameof(Settings))
       .Get<Settings>() ?? new Settings()
