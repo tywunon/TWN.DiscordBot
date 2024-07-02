@@ -5,6 +5,10 @@ namespace TWN.LinhBot.App.DataStore;
 internal class DataStore(DataStoreSettings dataStoreSettings)
 {
   private readonly DataStoreSettings _dataStoreSettings = dataStoreSettings;
+  readonly JsonSerializerOptions jsonSerializerOptions = new()
+  {
+    WriteIndented = true,
+  };
 
   public async Task<List<Data>> GetDataAsync()
   {
@@ -12,12 +16,12 @@ internal class DataStore(DataStoreSettings dataStoreSettings)
       return [];
 
     var json = await File.ReadAllTextAsync(_dataStoreSettings.FilePath, Encoding.UTF8);
-    return JsonSerializer.Deserialize<List<Data>>(json) ?? [];
+    return JsonSerializer.Deserialize<List<Data>>(json, jsonSerializerOptions) ?? [];
   }
 
   public async Task StoreData(IEnumerable<Data> data)
   {
-    var json = JsonSerializer.Serialize(data);
+    var json = JsonSerializer.Serialize(data, jsonSerializerOptions);
     await File.WriteAllTextAsync(_dataStoreSettings.FilePath, json, Encoding.UTF8);
   }
 
