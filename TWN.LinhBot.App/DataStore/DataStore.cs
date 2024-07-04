@@ -44,7 +44,7 @@ internal class DataStore(DataStoreSettings dataStoreSettings)
   {
     var data = await GetDataAsync();
     var deleteData = data.Announcements.Where(d => d.TwitchUser == twitchUser && d.GuildID == guildID && channels.Contains(d.ChannelID));
-    foreach(var deleteDate in deleteData)
+    foreach(var deleteDate in deleteData.Freeze())
       data.Announcements.Remove(deleteDate);
     await StoreData(data);
   }
