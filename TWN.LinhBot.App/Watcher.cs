@@ -28,10 +28,10 @@ internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordCl
         try
         {
           var lookUpData = await _dataStore.GetDataAsync();
-          _logger.Log(LogLevel.Debug, new EventId(), lookUpData, null, (s, ex) => "lookUpData:" + string.Join(", ", s.Select(_s => $"{(_s.TwitchUser, _s.GuildID, _s.ChannelID)}")));
-          if (lookUpData.Count != 0)
+          _logger.Log(LogLevel.Debug, new EventId(), lookUpData, null, (s, ex) => "lookUpData:" + string.Join(", ", s.Announcements.Select(_s => $"{(_s.TwitchUser, _s.GuildID, _s.ChannelID)}")));
+          if (lookUpData.Announcements.Count != 0)
           {
-            var twitchUsers = lookUpData.Select(lud => lud.TwitchUser).Distinct();
+            var twitchUsers = lookUpData.Announcements.Select(lud => lud.TwitchUser).Distinct();
             _logger.Log(LogLevel.Debug, new EventId(), twitchUsers, null, (s, ex) => "twitchUsers:" + string.Join(", ", s));
             var twitchStreamData = await _twitchClient.GetStreams(twitchUsers, stoppingToken);
 
@@ -59,7 +59,7 @@ internal class Watcher(WatcherSettings settings, Discord.DiscordClient discordCl
                     {
                       _logger.Log(LogLevel.Debug, new EventId(), userResponse, null, (s, ex) => "twitchUserData:" + string.Join(", ", s.Data.Select(_s => $"{_s.Login}")));
 
-                      var dataGroups = lookUpData
+                      var dataGroups = lookUpData.Announcements
                         .Join(streamData.Data, o => o.TwitchUser, i => i.User_Login, (o, i) => (lookUpData: o, twitchStreamData: i))
                         .Join(userResponse.Data, o => o.twitchStreamData.User_Login, i => i.Login, (o, i) => (lookUpData: o.lookUpData, twitchStreamData: o.twitchStreamData, twitchUserData: i))
                         .GroupBy(d => (twitchUser: d.lookUpData.TwitchUser, d.twitchStreamData.Game_Name));

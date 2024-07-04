@@ -152,7 +152,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
             return;
           }
 
-          await _dataStore.AddDataAsync(twitchUser, channel.GuildId, channel.Id);
+          await _dataStore.AddAnnouncementAsync(twitchUser, channel.GuildId, channel.Id);
 
           await command.RespondAsync($"**{twitchUser}**'s streams will be announced in {channel.Mention}", ephemeral: true);
         },
@@ -170,7 +170,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     try
     {
       var data = await _dataStore.GetDataAsync();
-      var guildData = data.Where(d => d.GuildID == command.GuildId);
+      var guildData = data.Announcements.Where(d => d.GuildID == command.GuildId);
       if (guildData.Any())
       {
         var cancellationToken = new CancellationTokenSource().Token;
@@ -255,11 +255,11 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
       }
 
       var data = await _dataStore.GetDataAsync();
-      var userData = data.Where(d => d.GuildID == guildID && d.TwitchUser == twitchUser);
+      var userData = data.Announcements.Where(d => d.GuildID == guildID && d.TwitchUser == twitchUser);
 
       var channels = channel is null ? userData.Select(ud => ud.ChannelID).ToArray() : [channel.Id];
 
-      await _dataStore.DeleteData(twitchUser, guildID, channels);
+      await _dataStore.DeleteAnnouncement(twitchUser, guildID, channels);
       await command.RespondAsync($"announcements for user {twitchUser}: {string.Join(",", channels.Select(c => $"<#{c}>"))} removed", ephemeral: true);
     }
     catch (Exception ex)
