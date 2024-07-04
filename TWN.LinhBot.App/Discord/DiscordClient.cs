@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿using System.Web;
+
+using Discord;
 using Discord.WebSocket;
 
 using LanguageExt.Pipes;
@@ -176,7 +178,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
         var guildConfig = _guildConfig.FirstOrDefault(gc => gc.GuildID == command.GuildId);
         var colorString = guildConfig?.Color.Replace("#", "");
         var color = uint.TryParse(colorString, System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
-        var twitchUser = guildData.Select(gd => gd.TwitchUser).Distinct();
+        var twitchUser = guildData.Select(gd => gd.TwitchUser).Distinct().Freeze();
         var twitchUserData = await _twitchClient.GetUsers(twitchUser, cancellationToken);
 
         await twitchUserData.Match
@@ -188,8 +190,8 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
                 .GroupBy(gd => (gd.guildData.TwitchUser, gd.twitchUserData.Profile_Image_Url, gd.twitchUserData.Login, gd.twitchUserData.Offline_Image_Url))
                 .Select(gdg => new EmbedBuilder()
               .WithAuthor(gdg.Key.TwitchUser)
-              .WithThumbnailUrl($"{gdg.Key.Profile_Image_Url}?v={DateTime.Now.Ticks}")
-              .WithImageUrl($"{gdg.Key.Offline_Image_Url}?v={DateTime.Now.Ticks}")
+              .WithThumbnailUrl(AttachCacheBuster(gdg.Key.Profile_Image_Url))
+              .WithImageUrl(AttachCacheBuster(gdg.Key.Offline_Image_Url))
               .WithFields(gdg.Select((gdgi, i) => new EmbedFieldBuilder().WithName($"{i + 1}.").WithValue($"<#{gdgi.guildData.ChannelID}>").WithIsInline(false)))
               .WithUrl($"https://twitch.tv/{gdg.Key.Login}")
               .WithCurrentTimestamp()
@@ -285,7 +287,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
 
 
 
-      var thumbnailURL = $"{twitchData.ThumbnailURL}?v={DateTime.Now.Ticks}"
+      var thumbnailURL = twitchData.ThumbnailURL
         .Replace("{width}", $"{guildConfig.ThumbnailWidth}")
         .Replace("{height}", $"{guildConfig.ThumbnailHeight}");
 
@@ -294,8 +296,8 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
         .WithAuthor(twitchData.UserName)
         .WithTitle($"{twitchData.UserName} ist online mit {twitchData.GameName}")
         .WithDescription(twitchData.Title)
-        .WithThumbnailUrl($"{twitchData.UserImage}?v={DateTime.Now.Ticks}")
-        .WithImageUrl(thumbnailURL)
+        .WithThumbnailUrl(AttachCacheBuster(twitchData.UserImage))
+        .WithImageUrl(AttachCacheBuster(thumbnailURL))
         .WithUrl($"https://twitch.tv/{twitchData.UserLogin}")
         .WithFooter(new EmbedFooterBuilder()
           .WithIconUrl(twitchData.UserImage)
@@ -326,6 +328,26 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     };
     _logger.Log(logLevel, message.Exception, "[{Source}] {Message}", message.Source, message.Message);
     return Task.CompletedTask;
+  }
+
+  private string AttachCacheBuster(string uri)
+  {
+    if (string.IsNullOrWhiteSpace(uri))
+      return string.Empty;
+
+    try
+    {
+      UriBuilder uriBuilder = new UriBuilder(uri);
+      var queryParams = HttpUtility.ParseQueryString(uriBuilder.Query);
+      queryParams.Add("v", DateTime.Now.Ticks.ToString());
+      uriBuilder.Query = queryParams.ToString();
+      return uriBuilder.ToString();
+    }
+    catch (Exception ex)
+    {
+      HandleLog_Client(new LogMessage(LogSeverity.Error, "SendTwitchMessage", ex.Message, ex)).RunSynchronously();
+    }
+    return string.Empty;
   }
 }
 
