@@ -20,7 +20,7 @@ internal class Program
 
     var settings = builder.Configuration.GetRequiredSection(nameof(Settings))
       .Get<Settings>() ?? new Settings(Watcher: new(Delay: 1000,
-                                                    Horizon: 5 * 60 * 1000),
+                                                    Horizon: 5 * 60 * 1000), //5min
                                        Discord: new(Status: string.Empty,
                                                     AppToken: string.Empty),
                                        Twitch: new(OAuthURL: string.Empty,
