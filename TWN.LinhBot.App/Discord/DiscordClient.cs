@@ -8,13 +8,13 @@ using LanguageExt.Pipes;
 using Microsoft.Extensions.Logging;
 
 namespace TWN.LinhBot.App.Discord;
-internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClient twitchClient, DataStore.DataStore dataStore, IEnumerable<GuildConfig> guildConfig, ILogger<DiscordClient> logger)
+internal class DiscordClient(DiscordSettings discordSettings,
+                             Twitch.ITwitchClient twitchClient,
+                             DataStore.IDataStore dataStore,
+                             IEnumerable<GuildConfig> guildConfigs,
+                             ILogger<DiscordClient> logger)
+: IDiscordClient
 {
-  private readonly DiscordSettings _discordSettings = discordSettings;
-  private readonly Twitch.TwitchClient _twitchClient = twitchClient;
-  private readonly DataStore.DataStore _dataStore = dataStore;
-  private readonly IEnumerable<GuildConfig> _guildConfig = guildConfig;
-  private readonly ILogger<DiscordClient> _logger = logger;
   private readonly DiscordSocketClient discordSocketClient = new(new()
   {
     GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.GuildIntegrations | GatewayIntents.Guilds,
@@ -24,7 +24,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
 
   public async Task StartAsync()
   {
-    await discordSocketClient.LoginAsync(TokenType.Bot, _discordSettings.AppToken);
+    await discordSocketClient.LoginAsync(TokenType.Bot, discordSettings.AppToken);
 
     discordSocketClient.Log += HandleLog_Client;
     discordSocketClient.Ready += HandleReady_Client;
@@ -35,7 +35,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
 
   private async Task HandleReady_Client()
   {
-    await discordSocketClient.SetCustomStatusAsync(_discordSettings.Status);
+    await discordSocketClient.SetCustomStatusAsync(discordSettings.Status);
     await discordSocketClient.SetStatusAsync(UserStatus.Idle);
 
     await CreateSlashCommands();
@@ -136,7 +136,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
       }
 
       var cancellationToken = new CancellationTokenSource().Token;
-      var twitchUserInfo = await _twitchClient.GetUsers([twitchUser], cancellationToken);
+      var twitchUserInfo = await twitchClient.GetUsers([twitchUser], cancellationToken);
       await twitchUserInfo.Match(
         async tui =>
         {
@@ -152,7 +152,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
             return;
           }
 
-          await _dataStore.AddAnnouncementAsync(twitchUser, channel.GuildId, channel.Id);
+          await dataStore.AddAnnouncementAsync(twitchUser, channel.GuildId, channel.Id);
 
           await command.RespondAsync($"**{twitchUser}**'s streams will be announced in {channel.Mention}", ephemeral: true);
         },
@@ -169,17 +169,17 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
   {
     try
     {
-      var data = await _dataStore.GetDataAsync();
+      var data = await dataStore.GetDataAsync();
       var guildData = data.Announcements.Where(d => d.GuildID == command.GuildId);
       if (guildData.Any())
       {
         var cancellationToken = new CancellationTokenSource().Token;
 
-        var guildConfig = _guildConfig.FirstOrDefault(gc => gc.GuildID == command.GuildId);
+        var guildConfig = guildConfigs.FirstOrDefault(gc => gc.GuildID == command.GuildId);
         var colorString = guildConfig?.Color.Replace("#", "");
         var color = uint.TryParse(colorString, System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
         var twitchUser = guildData.Select(gd => gd.TwitchUser).Distinct().Freeze();
-        var twitchUserData = await _twitchClient.GetUsers(twitchUser, cancellationToken);
+        var twitchUserData = await twitchClient.GetUsers(twitchUser, cancellationToken);
 
         await twitchUserData.Match
           (
@@ -196,10 +196,10 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
               .WithUrl($"https://twitch.tv/{gdg.Key.Login}")
               .WithCurrentTimestamp()
               .Build()).ToArray();
-                if (embed.Length > 0)
-                  await command.RespondAsync(string.Empty, embed, ephemeral: true);
-                else
-                  await command.RespondAsync("No streams in Announcement Queue", ephemeral: true);
+              if (embed.Length > 0)
+                await command.RespondAsync(string.Empty, embed, ephemeral: true);
+              else
+                await command.RespondAsync("No streams in Announcement Queue", ephemeral: true);
             },
             error => Task.FromResult(error)
           );
@@ -254,12 +254,12 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
           channel = _channel;
       }
 
-      var data = await _dataStore.GetDataAsync();
+      var data = await dataStore.GetDataAsync();
       var userData = data.Announcements.Where(d => d.GuildID == guildID && d.TwitchUser == twitchUser);
 
       var channels = channel is null ? userData.Select(ud => ud.ChannelID).ToArray() : [channel.Id];
 
-      await _dataStore.DeleteAnnouncement(twitchUser, guildID, channels);
+      await dataStore.DeleteAnnouncement(twitchUser, guildID, channels);
       await command.RespondAsync($"announcements for user {twitchUser}: {string.Join(",", channels.Select(c => $"<#{c}>"))} removed", ephemeral: true);
     }
     catch (Exception ex)
@@ -275,7 +275,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
     {
       if (twitchData is null) return;
 
-      var guildConfig = _guildConfig.FirstOrDefault(gc => gc.GuildID == guildID);
+      var guildConfig = guildConfigs.FirstOrDefault(gc => gc.GuildID == guildID);
       if (guildConfig is null) return;
 
       var guild = discordSocketClient.GetGuild(guildID);
@@ -326,7 +326,7 @@ internal class DiscordClient(DiscordSettings discordSettings, Twitch.TwitchClien
       LogSeverity.Debug => LogLevel.Debug,
       _ => LogLevel.Information
     };
-    _logger.Log(logLevel, message.Exception, "[{Source}] {Message}", message.Source, message.Message);
+    logger.Log(logLevel, message.Exception, "[{Source}] {Message}", message.Source, message.Message);
     return Task.CompletedTask;
   }
 

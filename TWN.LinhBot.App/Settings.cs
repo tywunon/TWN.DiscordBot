@@ -1,49 +1,29 @@
 ﻿namespace TWN.LinhBot.App;
-public sealed class Settings
-{
-  public required WatcherSettings Watcher { get; set; }
-  public required DiscordSettings Discord { get; set; }
-  public required TwitchSettings Twitch { get; set; }
-  public required IEnumerable<GuildConfig> GuildConfig { get; set; }
-  public required DataStoreSettings DataStore { get; set; }
-  public required TCPProbeSettings TCPProbe { get; set; }
-}
-public sealed class WatcherSettings
-{
-  public required int Delay { get; set; }
-  public required double Horizon { get; set; }
-}
+public sealed record Settings(WatcherSettings Watcher,
+                              DiscordSettings Discord,
+                              TwitchSettings Twitch,
+                              IEnumerable<GuildConfig> GuildConfig,
+                              DataStoreSettings DataStore,
+                              TCPProbeSettings TCPProbe);
 
-public sealed class DiscordSettings
-{
-  public required string Status { get; set; }
-  public required string AppToken { get; set; }
-}
+public sealed record WatcherSettings(int Delay,
+                                     double Horizon);
 
-public sealed class TwitchSettings
-{
-  public required string OAuthURL { get; set; }
-  public required string BaseURL { get; set; }
-  public required string ClientID { get; set; }
-  public required string ClientSecret { get; set; }
-}
+public sealed record DiscordSettings(string Status,
+                                     string AppToken);
 
-public sealed class GuildConfig
-{
-  public required ulong GuildID { get; set; }
-  public required string Color { get; set; }
-  public required string Text { get; set; }
-  public required string FooterText { get; set; }
-  public required int ThumbnailWidth { get; set; }
-  public required int ThumbnailHeight { get; set; }
-}
+public sealed record TwitchSettings(string OAuthURL,
+                                    string BaseURL,
+                                    string ClientID,
+                                    string ClientSecret);
 
-public sealed class DataStoreSettings
-{
-  public required string FilePath { get; set; }
-}
+public sealed record GuildConfig(ulong GuildID,
+                                 string Color,
+                                 string Text,
+                                 string FooterText,
+                                 int ThumbnailWidth,
+                                 int ThumbnailHeight);
 
-public sealed class TCPProbeSettings
-{
-  public required short Port { get; set; }
-}
+public sealed record DataStoreSettings(string FilePath);
+
+public sealed record TCPProbeSettings(short Port);
