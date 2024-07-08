@@ -7,7 +7,6 @@ using OneOf;
 using OneOf.Types;
 
 using System.Net.Http.Json;
-using System.Reflection.Metadata.Ecma335;
 
 namespace TWN.LinhBot.App.Twitch;
 internal class TwitchClient(IHttpClientFactory httpClientFactory,

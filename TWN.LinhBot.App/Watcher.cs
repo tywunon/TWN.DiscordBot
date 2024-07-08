@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using TWN.LinhBot.App.Twitch;
-
 namespace TWN.LinhBot.App;
 internal class Watcher(WatcherSettings settings, Discord.IDiscordClient discordClient, Twitch.ITwitchClient twitchClient, DataStore.IDataStore dataStore, ILogger<Watcher> logger) : BackgroundService
 {
