@@ -25,7 +25,10 @@ internal class Program
                                                     Horizon: 5 * 60 * 1000),
                                        Discord: new(Status: string.Empty,
                                                     AppToken: string.Empty),
-                                       Twitch: new(OAuthURL: string.Empty, BaseURL: string.Empty, ClientID: string.Empty, ClientSecret: string.Empty),
+                                       Twitch: new(OAuthURL: string.Empty,
+                                                   BaseURL: string.Empty,
+                                                   ClientID: string.Empty,
+                                                   ClientSecret: string.Empty),
                                        GuildConfig: [],
                                        DataStore: new(FilePath: string.Empty),
                                        TCPProbe: new(Port: -1));
