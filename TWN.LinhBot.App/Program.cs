@@ -11,8 +11,6 @@ internal class Program
 {
   private static async Task Main(string[] args) => await MainAsync(args);
 
-  private static Settings? settings;
-
   private static async Task MainAsync(string[] args)
   {
     var builder = Host.CreateApplicationBuilder(args);
@@ -20,7 +18,7 @@ internal class Program
     builder.Configuration
       .AddJsonFile($"appsettings.json", false, true);
 
-    settings = builder.Configuration.GetRequiredSection(nameof(Settings))
+    var settings = builder.Configuration.GetRequiredSection(nameof(Settings))
       .Get<Settings>() ?? new Settings(Watcher: new(Delay: 1000,
                                                     Horizon: 5 * 60 * 1000),
                                        Discord: new(Status: string.Empty,
