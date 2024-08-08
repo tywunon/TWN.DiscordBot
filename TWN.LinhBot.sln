@@ -5,17 +5,19 @@ VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.DiscordBot.App", "TWN.DiscordBot.App\TWN.DiscordBot.App.csproj", "{65EE1A78-B1EB-48AD-A7E3-41C40FB2C436}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Twitch", "TWN.DiscordBot.Twitch\TWN.DiscordBot.Twitch.csproj", "{4A1EA235-DB20-45D3-B2FA-26A0E8E3BFD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.DiscordBot.Twitch", "TWN.DiscordBot.Twitch\TWN.DiscordBot.Twitch.csproj", "{4A1EA235-DB20-45D3-B2FA-26A0E8E3BFD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Interfaces", "TWN.DiscordBot.Interfaces\TWN.DiscordBot.Interfaces.csproj", "{81008FC1-1319-4A8E-81A4-E1C309059977}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.DiscordBot.Interfaces", "TWN.DiscordBot.Interfaces\TWN.DiscordBot.Interfaces.csproj", "{81008FC1-1319-4A8E-81A4-E1C309059977}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Discord", "TWN.DiscordBot.Discord\TWN.DiscordBot.Discord.csproj", "{8E9360D3-E0CD-4438-B9F2-4E7DBD1A2856}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.DiscordBot.Discord", "TWN.DiscordBot.Discord\TWN.DiscordBot.Discord.csproj", "{8E9360D3-E0CD-4438-B9F2-4E7DBD1A2856}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.DataStore", "TWN.DiscordBot.DataStore\TWN.DiscordBot.DataStore.csproj", "{F17972EE-5934-419C-93F9-FADE241D7ED6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.DiscordBot.DataStore", "TWN.DiscordBot.DataStore\TWN.DiscordBot.DataStore.csproj", "{F17972EE-5934-419C-93F9-FADE241D7ED6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Settings", "TWN.DiscordBot.Settings\TWN.DiscordBot.Settings.csproj", "{B53998CF-2522-4A6B-8263-1451B8D18C06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.DiscordBot.Settings", "TWN.DiscordBot.Settings\TWN.DiscordBot.Settings.csproj", "{B53998CF-2522-4A6B-8263-1451B8D18C06}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Systems", "Systems", "{F65DFD73-63C7-4B04-AB0C-83485B246652}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Utils", "TWN.DiscordBot.Utils\TWN.DiscordBot.Utils.csproj", "{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{B53998CF-2522-4A6B-8263-1451B8D18C06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B53998CF-2522-4A6B-8263-1451B8D18C06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B53998CF-2522-4A6B-8263-1451B8D18C06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

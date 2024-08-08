@@ -23,7 +23,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
   {
     try
     {
-      var client = httpClientFactory.CreateClient("TwitchOAuth");
+      var client = httpClientFactory.CreateTwitchOAuthClient();
       var response = await client.PostAsync(string.Empty, new OAuthContent(twitchAPISettings.ClientID, twitchAPISettings.ClientSecret));
       var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
       if (result is null)
@@ -49,7 +49,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
       return await oAuthTokenResult.Match(
         async oAuthToken =>
         {
-          var client = httpClientFactory.CreateClient("TwitchAPI");
+          var client = httpClientFactory.CreateTwitchAPIClient();
           var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"user_login={ul}"))}" : string.Empty;
           var request = new HttpRequestMessage(HttpMethod.Get, $"streams{queryParameter}");
           request.Headers.Authorization = new("Bearer", oAuthToken);
@@ -82,7 +82,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
       return await oAuthTokenResult.Match(
         async oAuthToken =>
         {
-          var client = httpClientFactory.CreateClient("TwitchAPI");
+          var client = httpClientFactory.CreateTwitchAPIClient();
           var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"login={ul}"))}" : string.Empty;
           var request = new HttpRequestMessage(HttpMethod.Get, $"users{queryParameter}");
           request.Headers.Authorization = new("Bearer", oAuthToken);
