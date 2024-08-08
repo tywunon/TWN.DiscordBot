@@ -5,7 +5,10 @@ using Microsoft.Extensions.Logging;
 
 using NReco.Logging.File;
 
-namespace TWN.LinhBot.App;
+using TWN.DiscordBot.Interfaces;
+using TWN.LinhBot.App;
+
+namespace TWN.DiscordBot.App;
 
 internal class Program
 {
@@ -19,17 +22,19 @@ internal class Program
       .AddJsonFile($"appsettings.json", false, true);
 
     var settings = builder.Configuration.GetRequiredSection(nameof(Settings))
-      .Get<Settings>() ?? new Settings(Watcher: new(Delay: 1000,
-                                                    Horizon: 5 * 60 * 1000), //5min
-                                       Discord: new(Status: string.Empty,
-                                                    AppToken: string.Empty),
-                                       Twitch: new(OAuthURL: string.Empty,
-                                                   BaseURL: string.Empty,
-                                                   ClientID: string.Empty,
-                                                   ClientSecret: string.Empty),
-                                       GuildConfig: [],
-                                       DataStore: new(FilePath: string.Empty),
-                                       TCPProbe: new(Port: -1));
+      .Get<Settings.Settings>() 
+      ?? new Settings.Settings(
+        Watcher: new(Delay: 1000,
+        Horizon: 5 * 60 * 1000), //5min
+        Discord: new(Status: string.Empty,
+                    AppToken: string.Empty),
+        Twitch: new(OAuthURL: string.Empty,
+                    BaseURL: string.Empty,
+                    ClientID: string.Empty,
+                    ClientSecret: string.Empty),
+        GuildConfig: [],
+        DataStore: new(FilePath: string.Empty),
+        TCPProbe: new(Port: -1));
 
     builder.Services.AddLogging(b =>
     {
@@ -59,11 +64,12 @@ internal class Program
       .AddSingleton(settings.GuildConfig)
       .AddSingleton(settings.DataStore)
       .AddSingleton(settings.TCPProbe)
+      .AddSingleton<IDiscordClient, Discord.DiscordClient>()
+      .AddSingleton<ITwitchClient, Twitch.TwitchClient>()
+      .AddSingleton<IDataStore, DataStore.JSONDataStore>()
       .AddHostedService<Watcher>()
-      .AddSingleton<Discord.IDiscordClient, Discord.DiscordClient>()
-      .AddSingleton<Twitch.ITwitchClient, Twitch.TwitchClient>()
-      .AddSingleton<DataStore.IDataStore, DataStore.DataStore>()
       .AddHostedService<TCPProbeProvider>()
+      .AddHostedService<LogCleaner>()
       ;
 
     var host = builder.Build();

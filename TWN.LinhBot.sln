@@ -3,7 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.LinhBot.App", "TWN.LinhBot.App\TWN.LinhBot.App.csproj", "{65EE1A78-B1EB-48AD-A7E3-41C40FB2C436}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.DiscordBot.App", "TWN.DiscordBot.App\TWN.DiscordBot.App.csproj", "{65EE1A78-B1EB-48AD-A7E3-41C40FB2C436}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Twitch", "TWN.DiscordBot.Twitch\TWN.DiscordBot.Twitch.csproj", "{4A1EA235-DB20-45D3-B2FA-26A0E8E3BFD7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Interfaces", "TWN.DiscordBot.Interfaces\TWN.DiscordBot.Interfaces.csproj", "{81008FC1-1319-4A8E-81A4-E1C309059977}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Discord", "TWN.DiscordBot.Discord\TWN.DiscordBot.Discord.csproj", "{8E9360D3-E0CD-4438-B9F2-4E7DBD1A2856}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.DataStore", "TWN.DiscordBot.DataStore\TWN.DiscordBot.DataStore.csproj", "{F17972EE-5934-419C-93F9-FADE241D7ED6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Settings", "TWN.DiscordBot.Settings\TWN.DiscordBot.Settings.csproj", "{B53998CF-2522-4A6B-8263-1451B8D18C06}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Systems", "Systems", "{F65DFD73-63C7-4B04-AB0C-83485B246652}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +27,34 @@ Global
 		{65EE1A78-B1EB-48AD-A7E3-41C40FB2C436}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65EE1A78-B1EB-48AD-A7E3-41C40FB2C436}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65EE1A78-B1EB-48AD-A7E3-41C40FB2C436}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A1EA235-DB20-45D3-B2FA-26A0E8E3BFD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A1EA235-DB20-45D3-B2FA-26A0E8E3BFD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A1EA235-DB20-45D3-B2FA-26A0E8E3BFD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A1EA235-DB20-45D3-B2FA-26A0E8E3BFD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81008FC1-1319-4A8E-81A4-E1C309059977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81008FC1-1319-4A8E-81A4-E1C309059977}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81008FC1-1319-4A8E-81A4-E1C309059977}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81008FC1-1319-4A8E-81A4-E1C309059977}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E9360D3-E0CD-4438-B9F2-4E7DBD1A2856}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E9360D3-E0CD-4438-B9F2-4E7DBD1A2856}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E9360D3-E0CD-4438-B9F2-4E7DBD1A2856}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E9360D3-E0CD-4438-B9F2-4E7DBD1A2856}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F17972EE-5934-419C-93F9-FADE241D7ED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F17972EE-5934-419C-93F9-FADE241D7ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F17972EE-5934-419C-93F9-FADE241D7ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F17972EE-5934-419C-93F9-FADE241D7ED6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B53998CF-2522-4A6B-8263-1451B8D18C06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B53998CF-2522-4A6B-8263-1451B8D18C06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B53998CF-2522-4A6B-8263-1451B8D18C06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B53998CF-2522-4A6B-8263-1451B8D18C06}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4A1EA235-DB20-45D3-B2FA-26A0E8E3BFD7} = {F65DFD73-63C7-4B04-AB0C-83485B246652}
+		{8E9360D3-E0CD-4438-B9F2-4E7DBD1A2856} = {F65DFD73-63C7-4B04-AB0C-83485B246652}
+		{F17972EE-5934-419C-93F9-FADE241D7ED6} = {F65DFD73-63C7-4B04-AB0C-83485B246652}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {628460EB-860D-4088-8022-6E9D6D8EAA38}

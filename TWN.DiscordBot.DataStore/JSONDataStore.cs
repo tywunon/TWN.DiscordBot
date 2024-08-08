@@ -1,8 +1,12 @@
 ﻿using System.Text;
 using System.Text.Json;
 
-namespace TWN.LinhBot.App.DataStore;
-internal class DataStore(DataStoreSettings dataStoreSettings)
+using TWN.DiscordBot.Interfaces;
+using TWN.DiscordBot.Interfaces.Types;
+using TWN.DiscordBot.Settings;
+
+namespace TWN.DiscordBot.DataStore;
+public class JSONDataStore(DataStoreSettings dataStoreSettings)
 : IDataStore
 {
   private readonly JsonSerializerOptions jsonSerializerOptions = new()
@@ -49,7 +53,3 @@ internal class DataStore(DataStoreSettings dataStoreSettings)
     await StoreData(data);
   }
 }
-
-public sealed record Data(ICollection<Announcement> Announcements) { }
-
-public sealed record Announcement(string TwitchUser, ulong GuildID, ulong ChannelID) { }

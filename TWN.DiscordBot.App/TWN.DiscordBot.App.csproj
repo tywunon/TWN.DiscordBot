@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="3.14.1" />
     <PackageReference Include="LanguageExt.Core" Version="4.4.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
@@ -19,8 +18,14 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
     <PackageReference Include="NReco.Logging.File" Version="1.2.1" />
-    <PackageReference Include="OneOf" Version="3.0.271" />
-    <PackageReference Include="OneOf.SourceGenerator" Version="3.0.271" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TWN.DiscordBot.DataStore\TWN.DiscordBot.DataStore.csproj" />
+    <ProjectReference Include="..\TWN.DiscordBot.Discord\TWN.DiscordBot.Discord.csproj" />
+    <ProjectReference Include="..\TWN.DiscordBot.Interfaces\TWN.DiscordBot.Interfaces.csproj" />
+    <ProjectReference Include="..\TWN.DiscordBot.Settings\TWN.DiscordBot.Settings.csproj" />
+    <ProjectReference Include="..\TWN.DiscordBot.Twitch\TWN.DiscordBot.Twitch.csproj" />
   </ItemGroup>
 
   <ItemGroup>

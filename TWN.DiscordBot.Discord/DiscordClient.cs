@@ -7,13 +7,17 @@ using LanguageExt.Pipes;
 
 using Microsoft.Extensions.Logging;
 
-namespace TWN.LinhBot.App.Discord;
-internal class DiscordClient(DiscordSettings discordSettings,
-                             Twitch.ITwitchClient twitchClient,
-                             DataStore.IDataStore dataStore,
+using TWN.DiscordBot.Interfaces;
+using TWN.DiscordBot.Interfaces.Types;
+using TWN.DiscordBot.Settings;
+
+namespace TWN.DiscordBot.Discord;
+public class DiscordClient(DiscordSettings discordSettings,
+                             ITwitchClient twitchClient,
+                             IDataStore dataStore,
                              IEnumerable<GuildConfig> guildConfigs,
                              ILogger<DiscordClient> logger)
-: IDiscordClient
+: Interfaces.IDiscordClient
 {
   private readonly DiscordSocketClient discordSocketClient = new(new()
   {
@@ -269,7 +273,7 @@ internal class DiscordClient(DiscordSettings discordSettings,
     }
   }
 
-  public async Task SendTwitchMessage(ulong guildID, ulong channelID, TwitchEmbedData twitchData)
+  public async Task SendTwitchMessage(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData)
   {
     try
     {
@@ -349,15 +353,4 @@ internal class DiscordClient(DiscordSettings discordSettings,
     }
     return string.Empty;
   }
-}
-
-public sealed class TwitchEmbedData
-{
-  public required string Title { get; init; }
-  public required string UserLogin { get; init; }
-  public required string UserName { get; init; }
-  public required string GameName { get; init; }
-  public required string UserImage { get; init; }
-  public required string ThumbnailURL { get; init; }
-  public required DateTime StartedAt { get; init; }
 }

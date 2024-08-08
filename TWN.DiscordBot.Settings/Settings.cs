@@ -1,4 +1,4 @@
-﻿namespace TWN.LinhBot.App;
+﻿namespace TWN.DiscordBot.Settings;
 public sealed record Settings(WatcherSettings Watcher,
                               DiscordSettings Discord,
                               TwitchSettings Twitch,
@@ -27,3 +27,4 @@ public sealed record GuildConfig(ulong GuildID,
 public sealed record DataStoreSettings(string FilePath);
 
 public sealed record TCPProbeSettings(short Port);
+

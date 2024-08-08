@@ -4,7 +4,9 @@ using System.Net.Sockets;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace TWN.LinhBot.App;
+using TWN.DiscordBot.Settings;
+
+namespace TWN.DiscordBot.App;
 internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger) : BackgroundService
 {
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)

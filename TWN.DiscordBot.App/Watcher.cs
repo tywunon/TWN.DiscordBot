@@ -1,8 +1,12 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace TWN.LinhBot.App;
-internal class Watcher(WatcherSettings settings, Discord.IDiscordClient discordClient, Twitch.ITwitchClient twitchClient, DataStore.IDataStore dataStore, ILogger<Watcher> logger) : BackgroundService
+using TWN.DiscordBot.Interfaces;
+using TWN.DiscordBot.Interfaces.Types;
+using TWN.DiscordBot.Settings;
+
+namespace TWN.DiscordBot.App;
+internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, ITwitchClient twitchClient, IDataStore dataStore, ILogger<Watcher> logger) : BackgroundService
 {
   private readonly Dictionary<string, DateTime> onlineCache = [];
 
@@ -73,7 +77,7 @@ internal class Watcher(WatcherSettings settings, Discord.IDiscordClient discordC
                         foreach (var data in dataGroup)
                         {
                           logger.Log(LogLevel.Debug, new EventId(), data, null, (s, ex) => "data:" + dataGroup.Key + ":" + (s.lookUpData.GuildID, s.lookUpData.ChannelID, s.twitchStreamData.Game_Name));
-                          await discordClient.SendTwitchMessage(data.lookUpData.GuildID, data.lookUpData.ChannelID, new Discord.TwitchEmbedData()
+                          await discordClient.SendTwitchMessage(data.lookUpData.GuildID, data.lookUpData.ChannelID, new DiscordTwitchEmbedData()
                           {
                             Title = data.twitchStreamData.Title,
                             UserLogin = data.twitchStreamData.User_Login,
