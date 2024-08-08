@@ -19,7 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Systems", "Systems", "{F65D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Utils", "TWN.DiscordBot.Utils\TWN.DiscordBot.Utils.csproj", "{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.API", "TWN.DiscordBot.API\TWN.DiscordBot.API.csproj", "{46388336-4024-4DBE-99D9-D09DBCA6F15A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.WebHost", "TWN.DiscordBot.WebHost\TWN.DiscordBot.WebHost.csproj", "{46388336-4024-4DBE-99D9-D09DBCA6F15A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

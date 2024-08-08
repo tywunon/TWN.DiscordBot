@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using TWN.DiscordBot.Interfaces.Types;
 
-namespace TWN.DiscordBot.API.Services;
+namespace TWN.DiscordBot.WebHost.Services;
 internal interface IDataStoreService
 {
   Task DeleteAnnouncementAsync(string twitchUser, ulong guildID, ulong? channelID);

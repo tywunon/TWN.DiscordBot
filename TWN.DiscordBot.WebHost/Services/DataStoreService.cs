@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
 
-namespace TWN.DiscordBot.API.Services;
+namespace TWN.DiscordBot.WebHost.Services;
 internal class DataStoreService(IDataStore dataStore) : IDataStoreService
 {
   public async Task<IEnumerable<Announcement>> GetAnnouncementsAsync()

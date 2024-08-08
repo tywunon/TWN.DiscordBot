@@ -1,4 +1,4 @@
-﻿using TWN.DiscordBot.API.Services;
+﻿using TWN.DiscordBot.WebHost.Services;
 
 namespace Microsoft.Extensions.DependencyInjection;
 public static class MicrosoftExtensionsDependencyInjectionExtension

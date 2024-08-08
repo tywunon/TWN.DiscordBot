@@ -1,10 +1,14 @@
 ﻿namespace TWN.DiscordBot.Settings;
-public sealed record Settings(WatcherSettings Watcher,
+public sealed record Settings(WebHostSettings WebHost,
+                              WatcherSettings Watcher,
                               DiscordSettings Discord,
                               TwitchSettings Twitch,
                               IEnumerable<GuildConfig> GuildConfig,
                               DataStoreSettings DataStore,
                               TCPProbeSettings TCPProbe);
+
+public sealed record WebHostSettings(string Test, 
+                                     IEnumerable<string> Urls);
 
 public sealed record WatcherSettings(int Delay,
                                      double Horizon);

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
-using TWN.DiscordBot.API.Services;
+using TWN.DiscordBot.WebHost.Services;
 
 namespace Microsoft.AspNetCore.Builder;
 

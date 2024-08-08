@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,10 +26,12 @@ internal class Program
     var settings = builder.Configuration.GetRequiredSection(nameof(Settings))
       .Get<Settings.Settings>() 
       ?? new Settings.Settings(
+        WebHost: new(Test: "Test", 
+                     Urls: []),
         Watcher: new(Delay: 1000,
-        Horizon: 5 * 60 * 1000), //5min
+                     Horizon: 5 * 60 * 1000), //5min
         Discord: new(Status: string.Empty,
-                    AppToken: string.Empty),
+                     AppToken: string.Empty),
         Twitch: new(OAuthURL: string.Empty,
                     BaseURL: string.Empty,
                     ClientID: string.Empty,
@@ -36,6 +39,10 @@ internal class Program
         GuildConfig: [],
         DataStore: new(FilePath: string.Empty),
         TCPProbe: new(Port: -1));
+
+    builder.WebHost
+      .UseUrls(settings.WebHost.Urls.Distinct().ToArray())
+      ;
 
     builder.Services.AddLogging(b =>
     {
@@ -59,6 +66,7 @@ internal class Program
     });
 
     builder.Services
+      .AddSingleton(settings.WebHost)
       .AddSingleton(settings.Watcher)
       .AddSingleton(settings.Discord)
       .AddSingleton(settings.Twitch)
