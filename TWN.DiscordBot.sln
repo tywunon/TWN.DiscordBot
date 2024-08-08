@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Systems", "Systems", "{F65D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.Utils", "TWN.DiscordBot.Utils\TWN.DiscordBot.Utils.csproj", "{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.API", "TWN.DiscordBot.API\TWN.DiscordBot.API.csproj", "{46388336-4024-4DBE-99D9-D09DBCA6F15A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3ED0AAC-15BB-410D-AE97-2CEC51E68804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46388336-4024-4DBE-99D9-D09DBCA6F15A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46388336-4024-4DBE-99D9-D09DBCA6F15A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46388336-4024-4DBE-99D9-D09DBCA6F15A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46388336-4024-4DBE-99D9-D09DBCA6F15A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -61,6 +67,7 @@ Global
 		{4A1EA235-DB20-45D3-B2FA-26A0E8E3BFD7} = {F65DFD73-63C7-4B04-AB0C-83485B246652}
 		{8E9360D3-E0CD-4438-B9F2-4E7DBD1A2856} = {F65DFD73-63C7-4B04-AB0C-83485B246652}
 		{F17972EE-5934-419C-93F9-FADE241D7ED6} = {F65DFD73-63C7-4B04-AB0C-83485B246652}
+		{46388336-4024-4DBE-99D9-D09DBCA6F15A} = {F65DFD73-63C7-4B04-AB0C-83485B246652}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {628460EB-860D-4088-8022-6E9D6D8EAA38}

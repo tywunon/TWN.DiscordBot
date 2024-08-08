@@ -263,7 +263,7 @@ public class DiscordClient(DiscordSettings discordSettings,
 
       var channels = channel is null ? userData.Select(ud => ud.ChannelID).ToArray() : [channel.Id];
 
-      await dataStore.DeleteAnnouncement(twitchUser, guildID, channels);
+      await dataStore.DeleteAnnouncementAsync(twitchUser, guildID ?? 0, channels);
       await command.RespondAsync($"announcements for user {twitchUser}: {string.Join(",", channels.Select(c => $"<#{c}>"))} removed", ephemeral: true);
     }
     catch (Exception ex)

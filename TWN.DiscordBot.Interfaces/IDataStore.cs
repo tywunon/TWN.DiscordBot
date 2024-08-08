@@ -3,8 +3,9 @@
 namespace TWN.DiscordBot.Interfaces;
 public interface IDataStore
 {
-  Task DeleteAnnouncement(string twitchUser, ulong? guildID, ulong[] channels);
+  Task DeleteAnnouncementAsync(string twitchUser, ulong guildID, ulong[] channels);
   Task<Announcement> AddAnnouncementAsync(string twitchUser, ulong guildID, ulong channelID);
+  Task<IEnumerable<Announcement>> GetAnnouncementsAsync();
   Task<Data> GetDataAsync();
-  Task StoreData(Data data);
+  Task StoreDataAsync(Data data);
 }

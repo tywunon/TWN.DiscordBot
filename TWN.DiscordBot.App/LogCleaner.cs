@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace TWN.LinhBot.App;
+namespace TWN.DiscordBot.App;
 internal class LogCleaner(ILogger<LogCleaner> logger) : BackgroundService
 {
   protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -19,9 +13,12 @@ internal class LogCleaner(ILogger<LogCleaner> logger) : BackgroundService
       {
         try
         {
-          foreach (var logfile in Directory.EnumerateFiles(@".\logs\", "*.log"))
-            if (File.GetCreationTimeUtc(logfile) < DateTime.UtcNow.AddDays(-7))
-              File.Delete(logfile);
+          foreach (var logFile in Directory.EnumerateFiles(@".\logs\", "*.log"))
+            if (File.GetCreationTimeUtc(logFile) < DateTime.UtcNow.AddDays(-7))
+            { 
+              File.Delete(logFile);
+              logger.LogInformation("Log file deleted ({logFile})", logFile);
+            }
         }
         catch (Exception ex)
         {

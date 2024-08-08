@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -6,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using NReco.Logging.File;
 
 using TWN.DiscordBot.Interfaces;
-using TWN.LinhBot.App;
 
 namespace TWN.DiscordBot.App;
 
@@ -16,7 +16,8 @@ internal class Program
 
   private static async Task MainAsync(string[] args)
   {
-    var builder = Host.CreateApplicationBuilder(args);
+    //var builder = Host.CreateApplicationBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
     builder.Configuration
       .AddJsonFile($"appsettings.json", false, true);
@@ -67,12 +68,17 @@ internal class Program
       .AddSingleton<IDiscordClient, Discord.DiscordClient>()
       .AddSingleton<ITwitchClient, Twitch.TwitchClient>()
       .AddSingleton<IDataStore, DataStore.JSONDataStore>()
+      .AddBotAPIServices()
       .AddHostedService<Watcher>()
       .AddHostedService<TCPProbeProvider>()
       .AddHostedService<LogCleaner>()
       ;
 
     var host = builder.Build();
+
+    host.MapBotAPI();
+    host.UseStatusCodePages();
+    host.UseHttpsRedirection();
 
     await host.RunAsync();
   }

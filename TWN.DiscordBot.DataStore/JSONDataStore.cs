@@ -23,10 +23,16 @@ public class JSONDataStore(DataStoreSettings dataStoreSettings)
     return JsonSerializer.Deserialize<Data>(json, jsonSerializerOptions) ?? new([]);
   }
 
-  public async Task StoreData(Data data)
+  public async Task StoreDataAsync(Data data)
   {
     var json = JsonSerializer.Serialize(data, jsonSerializerOptions);
     await File.WriteAllTextAsync(dataStoreSettings.FilePath, json, Encoding.UTF8);
+  }
+
+  public async Task<IEnumerable<Announcement>> GetAnnouncementsAsync()
+  {
+    var data = await GetDataAsync();
+    return data.Announcements;
   }
 
   public async Task<Announcement> AddAnnouncementAsync(string twitchUser, ulong guildID, ulong channelID)
@@ -38,18 +44,20 @@ public class JSONDataStore(DataStoreSettings dataStoreSettings)
     {
       var newData = new Announcement(twitchUser, guildID, channelID);
       existingData.Announcements.Add(newData);
-      await StoreData(existingData);
+      await StoreDataAsync(existingData);
       return newData;
     }
     return mayExistingData;
   }
 
-  public async Task DeleteAnnouncement(string twitchUser, ulong? guildID, ulong[] channels)
+  public async Task DeleteAnnouncementAsync(string twitchUser, ulong guildID, ulong[] channels)
   {
     var data = await GetDataAsync();
-    var deleteData = data.Announcements.Where(d => d.TwitchUser == twitchUser && d.GuildID == guildID && channels.Contains(d.ChannelID));
+    var deleteData = data.Announcements.Where(d => d.TwitchUser == twitchUser && d.GuildID == guildID);
+    if (channels.Length != 0)
+      deleteData = deleteData.Where(d => channels.Contains(d.ChannelID));
     foreach (var deleteDate in deleteData.Freeze())
       data.Announcements.Remove(deleteDate);
-    await StoreData(data);
+    await StoreDataAsync(data);
   }
 }
