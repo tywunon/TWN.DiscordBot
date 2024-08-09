@@ -15,3 +15,11 @@ public sealed class DiscordTwitchEmbedData
     public required string ThumbnailURL { get; init; }
     public required DateTime StartedAt { get; init; }
 }
+
+public enum DiscordConnectionState : byte
+{
+  Disconnected,
+  Connecting,
+  Connected,
+  Disconnecting
+}

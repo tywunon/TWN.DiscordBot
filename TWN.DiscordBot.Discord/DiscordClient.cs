@@ -7,6 +7,9 @@ using LanguageExt.Pipes;
 
 using Microsoft.Extensions.Logging;
 
+using OneOf;
+using OneOf.Types;
+
 using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
 using TWN.DiscordBot.Settings;
@@ -352,5 +355,18 @@ public class DiscordClient(DiscordSettings discordSettings,
       HandleLog_Client(new LogMessage(LogSeverity.Error, "SendTwitchMessage", ex.Message, ex)).RunSynchronously();
     }
     return string.Empty;
+  }
+  public Task<DiscordConnectionState> HealthCheck()
+  {
+    DiscordConnectionState result =
+      discordSocketClient.ConnectionState switch
+      {
+        ConnectionState.Disconnected => DiscordConnectionState.Disconnected,
+        ConnectionState.Connecting => DiscordConnectionState.Connecting,
+        ConnectionState.Connected => DiscordConnectionState.Connected,
+        ConnectionState.Disconnecting => DiscordConnectionState.Disconnecting,
+        _ => default,
+      };
+    return Task.FromResult(result);
   }
 }

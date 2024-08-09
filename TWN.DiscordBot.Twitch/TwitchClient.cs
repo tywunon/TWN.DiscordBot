@@ -15,8 +15,8 @@ using TWN.DiscordBot.Settings;
 
 namespace TWN.DiscordBot.Twitch;
 public class TwitchClient(IHttpClientFactory httpClientFactory,
-                            TwitchSettings twitchAPISettings,
-                            ILogger<TwitchClient> logger)
+                          TwitchSettings twitchAPISettings,
+                          ILogger<TwitchClient> logger)
 : ITwitchClient
 {
   public async Task<OneOf<string, Error<Exception>>> GetOAuthToken()
@@ -24,7 +24,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     try
     {
       var client = httpClientFactory.CreateTwitchOAuthClient();
-      var response = await client.PostAsync(string.Empty, new OAuthContent(twitchAPISettings.ClientID, twitchAPISettings.ClientSecret));
+      var response = await PostOAuthAsync();
       var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
       if (result is null)
       {
@@ -106,18 +106,26 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
       return new Error<Exception>(ex);
     }
   }
+
+  private async Task<HttpResponseMessage> PostOAuthAsync() => await httpClientFactory.CreateTwitchOAuthClient().PostAsync(string.Empty, new OAuthContent(twitchAPISettings.ClientID, twitchAPISettings.ClientSecret));
+
+  public async Task<bool> HealthCheck()
+  {
+    var response = await PostOAuthAsync();
+    return response.IsSuccessStatusCode;
+  }
 }
 
 internal class OAuthContent(string clientID, string clientSecret)
-  : FormUrlEncodedContent
+: FormUrlEncodedContent
   ([
-        KeyValuePair.Create("client_id", clientID),
-        KeyValuePair.Create("client_secret", clientSecret),
-        KeyValuePair.Create("grant_type", "client_credentials"),
+    KeyValuePair.Create("client_id", clientID),
+    KeyValuePair.Create("client_secret", clientSecret),
+    KeyValuePair.Create("grant_type", "client_credentials"),
   ])
 { }
 
-public record OAuthResponse(
+internal record OAuthResponse(
   string? Access_Token = null,
   int? Expires_In = null,
   string? Token_Type = null,

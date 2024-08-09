@@ -84,7 +84,9 @@ internal class Program
 
     var host = builder.Build();
 
-    host.MapBotAPI();
+    host.MapHealthChecks();
+    host.UseBotAPI();
+    host.MapDataAPI();
     host.UseStatusCodePages();
     host.UseHttpsRedirection();
 
