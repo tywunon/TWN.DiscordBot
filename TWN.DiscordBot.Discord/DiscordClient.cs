@@ -7,37 +7,80 @@ using LanguageExt.Pipes;
 
 using Microsoft.Extensions.Logging;
 
-using OneOf;
-using OneOf.Types;
-
 using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
 using TWN.DiscordBot.Settings;
 
 namespace TWN.DiscordBot.Discord;
-public class DiscordClient(DiscordSettings discordSettings,
-                             ITwitchClient twitchClient,
-                             IDataStore dataStore,
-                             IEnumerable<GuildConfig> guildConfigs,
-                             ILogger<DiscordClient> logger)
-: Interfaces.IDiscordClient
+public class DiscordClient : Interfaces.IDiscordClient
 {
   private readonly DiscordSocketClient discordSocketClient = new(new()
   {
     GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.GuildIntegrations | GatewayIntents.Guilds,
     LogGatewayIntentWarnings = true,
+    MaxWaitBetweenGuildAvailablesBeforeReady = 60000,
   });
+
+  private readonly DiscordSettings discordSettings;
+  private readonly ITwitchClient twitchClient;
+  private readonly IDataStore dataStore;
+  private readonly IEnumerable<GuildConfig> guildConfigs;
+  private readonly ILogger<DiscordClient> logger;
+
   private bool ready = false;
 
-  public async Task StartAsync()
+  public DiscordClient(DiscordSettings discordSettings,
+                       ITwitchClient twitchClient,
+                       IDataStore dataStore,
+                       IEnumerable<GuildConfig> guildConfigs,
+                       ILogger<DiscordClient> logger)
   {
-    await discordSocketClient.LoginAsync(TokenType.Bot, discordSettings.AppToken);
+    this.discordSettings = discordSettings;
+    this.twitchClient = twitchClient;
+    this.dataStore = dataStore;
+    this.guildConfigs = guildConfigs;
+    this.logger = logger;
 
+    InitSocketClient();
+  }
+
+  private void InitSocketClient()
+  {
     discordSocketClient.Log += HandleLog_Client;
     discordSocketClient.Ready += HandleReady_Client;
+
+    Task.Run(StartAsync).Wait();
+  }
+
+  private async Task StartAsync()
+  {
+    if (ready) return;
+
+    await discordSocketClient.LoginAsync(TokenType.Bot, discordSettings.AppToken);
     await discordSocketClient.StartAsync();
 
     while (!ready) { await Task.Delay(100); }
+  }
+
+  private Task HandleLog_Client(LogMessage message)
+  {
+    WriteLog(message);
+    return Task.CompletedTask;
+  }
+
+  private void WriteLog(LogMessage message)
+  {
+    var logLevel = message.Severity switch
+    {
+      LogSeverity.Critical => LogLevel.Critical,
+      LogSeverity.Error => LogLevel.Error,
+      LogSeverity.Warning => LogLevel.Warning,
+      LogSeverity.Info => LogLevel.Information,
+      LogSeverity.Verbose => LogLevel.Trace,
+      LogSeverity.Debug => LogLevel.Debug,
+      _ => LogLevel.Information
+    };
+    logger.Log(logLevel, message.Exception, "[{Source}] {Message}", message.Source, message.Message);
   }
 
   private async Task HandleReady_Client()
@@ -86,7 +129,7 @@ public class DiscordClient(DiscordSettings discordSettings,
     }
     catch (Exception ex)
     {
-      await HandleLog_Client(new LogMessage(LogSeverity.Error, "slashCreation", ex.Message, ex));
+      WriteLog(new LogMessage(LogSeverity.Error, "slashCreation", ex.Message, ex));
     }
   }
 
@@ -168,7 +211,7 @@ public class DiscordClient(DiscordSettings discordSettings,
     }
     catch (Exception ex)
     {
-      await HandleLog_Client(new LogMessage(LogSeverity.Error, "AddStream", ex.Message, ex));
+      WriteLog(new LogMessage(LogSeverity.Error, "AddStream", ex.Message, ex));
       await command.RespondAsync(ex.Message, ephemeral: true);
     }
   }
@@ -218,7 +261,7 @@ public class DiscordClient(DiscordSettings discordSettings,
     }
     catch (Exception ex)
     {
-      await HandleLog_Client(new LogMessage(LogSeverity.Error, "ListStreams", ex.Message, ex));
+      WriteLog(new LogMessage(LogSeverity.Error, "ListStreams", ex.Message, ex));
       await command.RespondAsync(ex.Message, ephemeral: true);
     }
   }
@@ -271,7 +314,7 @@ public class DiscordClient(DiscordSettings discordSettings,
     }
     catch (Exception ex)
     {
-      await HandleLog_Client(new LogMessage(LogSeverity.Error, "RemoveStream", ex.Message, ex));
+      WriteLog(new LogMessage(LogSeverity.Error, "RemoveStream", ex.Message, ex));
       await command.RespondAsync(ex.Message, ephemeral: true);
     }
   }
@@ -317,24 +360,8 @@ public class DiscordClient(DiscordSettings discordSettings,
     }
     catch (Exception ex)
     {
-      await HandleLog_Client(new LogMessage(LogSeverity.Error, "SendTwitchMessage", ex.Message, ex));
+      WriteLog(new LogMessage(LogSeverity.Error, "SendTwitchMessage", ex.Message, ex));
     }
-  }
-
-  private Task HandleLog_Client(LogMessage message)
-  {
-    var logLevel = message.Severity switch
-    {
-      LogSeverity.Critical => LogLevel.Critical,
-      LogSeverity.Error => LogLevel.Error,
-      LogSeverity.Warning => LogLevel.Warning,
-      LogSeverity.Info => LogLevel.Information,
-      LogSeverity.Verbose => LogLevel.Trace,
-      LogSeverity.Debug => LogLevel.Debug,
-      _ => LogLevel.Information
-    };
-    logger.Log(logLevel, message.Exception, "[{Source}] {Message}", message.Source, message.Message);
-    return Task.CompletedTask;
   }
 
   private string AttachCacheBuster(string uri)
@@ -352,10 +379,17 @@ public class DiscordClient(DiscordSettings discordSettings,
     }
     catch (Exception ex)
     {
-      HandleLog_Client(new LogMessage(LogSeverity.Error, "SendTwitchMessage", ex.Message, ex)).RunSynchronously();
+      WriteLog(new LogMessage(LogSeverity.Error, "SendTwitchMessage", ex.Message, ex));
     }
     return string.Empty;
   }
+
+  public async Task<string> GetChannelName(ulong channelID)
+  {
+    var channel = await discordSocketClient.GetChannelAsync(channelID);
+    return channel.Name;
+  }
+
   public Task<DiscordConnectionState> HealthCheck()
   {
     DiscordConnectionState result =

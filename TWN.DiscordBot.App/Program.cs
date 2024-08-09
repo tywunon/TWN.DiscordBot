@@ -29,7 +29,7 @@ internal class Program
         WebHost: new(Test: "Test", 
                      Urls: []),
         Watcher: new(Delay: 1000,
-                     Horizon: 5 * 60 * 1000), //5min
+                     Horizon: 5 * 60 * 1000), // 5min
         Discord: new(Status: string.Empty,
                      AppToken: string.Empty),
         Twitch: new(OAuthURL: string.Empty,
@@ -51,7 +51,7 @@ internal class Program
       {
         flo.Append = true;
         flo.FormatLogFileName = fName => string.Format(fName, DateTime.UtcNow);
-        flo.FileSizeLimitBytes = 20 * 1024 * 1024;
+        flo.FileSizeLimitBytes = 20 * 1024 * 1024; // 20MiB
         flo.MaxRollingFiles = 6;
       });
     });
@@ -84,7 +84,7 @@ internal class Program
 
     var host = builder.Build();
 
-    host.MapHealthChecks();
+    host.UseHealthChecks();
     host.UseBotAPI();
     host.MapDataAPI();
     host.UseStatusCodePages();

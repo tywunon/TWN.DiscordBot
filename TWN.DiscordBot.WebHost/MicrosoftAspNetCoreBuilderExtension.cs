@@ -20,7 +20,7 @@ public static class MicrosoftAspNetCoreBuilderExtension
       ;
   }
 
-  public static void MapHealthChecks(this WebApplication webApplication)
+  public static void UseHealthChecks(this WebApplication webApplication)
   {
     webApplication.UseHealthChecks("/api/health", new HealthCheckOptions()
     {

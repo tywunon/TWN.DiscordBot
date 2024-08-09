@@ -12,8 +12,6 @@ internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, I
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
-    await discordClient.StartAsync();
-
     PeriodicTimer timer = new(TimeSpan.FromMilliseconds(settings.Delay));
     logger.LogDebug("{obj} created ({Delay})", nameof(timer), settings.Delay);
 
