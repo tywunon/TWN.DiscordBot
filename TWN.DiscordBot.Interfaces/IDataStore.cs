@@ -1,7 +1,7 @@
 ﻿using TWN.DiscordBot.Interfaces.Types;
 
 namespace TWN.DiscordBot.Interfaces;
-public interface IDataStore
+public interface IDataStore : IHealthCheckProvider<bool>
 {
   Task DeleteAnnouncementAsync(string twitchUser, ulong guildID, ulong[] channels);
   Task<Announcement> AddAnnouncementAsync(string twitchUser, ulong guildID, ulong channelID);

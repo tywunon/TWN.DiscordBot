@@ -2,9 +2,8 @@
 
 namespace TWN.DiscordBot.Interfaces;
 
-public interface IDiscordClient
+public interface IDiscordClient : IHealthCheckProvider<DiscordConnectionState>
 {
-  Task SendTwitchMessage(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData);
-  Task<DiscordConnectionState> HealthCheck(CancellationToken cancellationToken);
+  Task SendTwitchMessageAsync(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData);
 }
 

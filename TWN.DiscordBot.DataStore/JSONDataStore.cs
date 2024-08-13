@@ -60,4 +60,7 @@ public class JSONDataStore(DataStoreSettings dataStoreSettings)
       data.Announcements.Remove(deleteDate);
     await StoreDataAsync(data);
   }
+
+  public Task<bool> HealthCheckAsync(CancellationToken cancellationToken) 
+    => Task.FromResult(File.Exists(dataStoreSettings.FilePath));
 }

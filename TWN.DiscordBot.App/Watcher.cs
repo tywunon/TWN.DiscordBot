@@ -27,7 +27,7 @@ internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, I
           {
             var twitchUsers = lookUpData.Announcements.Select(lud => lud.TwitchUser).Distinct();
             logger.Log(LogLevel.Debug, new EventId(), twitchUsers, null, (s, ex) => "twitchUsers:" + string.Join(", ", s));
-            var twitchStreamData = await twitchClient.GetStreams(twitchUsers, stoppingToken);
+            var twitchStreamData = await twitchClient.GetStreamsAsync(twitchUsers, stoppingToken);
 
             await twitchStreamData.Match
             (
@@ -45,7 +45,7 @@ internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, I
 
                 if (onlineUser.Any())
                 {
-                  var twitchUserData = await twitchClient.GetUsers(onlineUser, stoppingToken);
+                  var twitchUserData = await twitchClient.GetUsersAsync(onlineUser, stoppingToken);
 
                   await twitchUserData.Match
                   (
@@ -75,7 +75,7 @@ internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, I
                         foreach (var data in dataGroup)
                         {
                           logger.Log(LogLevel.Debug, new EventId(), data, null, (s, ex) => "data:" + dataGroup.Key + ":" + (s.lookUpData.GuildID, s.lookUpData.ChannelID, s.twitchStreamData.Game_Name));
-                          await discordClient.SendTwitchMessage(data.lookUpData.GuildID, data.lookUpData.ChannelID, new DiscordTwitchEmbedData()
+                          await discordClient.SendTwitchMessageAsync(data.lookUpData.GuildID, data.lookUpData.ChannelID, new DiscordTwitchEmbedData()
                           {
                             Title = data.twitchStreamData.Title,
                             UserLogin = data.twitchStreamData.User_Login,

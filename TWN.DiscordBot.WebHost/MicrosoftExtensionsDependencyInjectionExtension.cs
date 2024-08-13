@@ -12,6 +12,7 @@ public static class MicrosoftExtensionsDependencyInjectionExtension
       .AddHealthChecks()
         .AddCheck<TwitchHealthCheck>("Twitch API", Diagnostics.HealthChecks.HealthStatus.Unhealthy)
         .AddCheck<DiscordHealthCheck>("Discord.Net", Diagnostics.HealthChecks.HealthStatus.Unhealthy)
+        .AddCheck<DataStoreHealthCheck>("Datastore", Diagnostics.HealthChecks.HealthStatus.Unhealthy)
         .Services
       .AddHealthChecksUI(opt =>
       {

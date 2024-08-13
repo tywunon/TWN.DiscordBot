@@ -6,7 +6,7 @@ namespace TWN.DiscordBot.WebHost.HealthChecks;
 internal class DiscordHealthCheck(IDiscordClient discordClient) : IHealthCheck
 {
   async Task<HealthCheckResult> IHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken) 
-    => await discordClient.HealthCheck(cancellationToken) switch
+    => await discordClient.HealthCheckAsync(cancellationToken) switch
     {
       Interfaces.Types.DiscordConnectionState.Disconnected
         => HealthCheckResult.Unhealthy("Discord is disconnected"),

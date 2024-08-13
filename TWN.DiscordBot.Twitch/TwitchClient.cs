@@ -17,7 +17,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
                           ILogger<TwitchClient> logger)
 : ITwitchClient
 {
-  public async Task<TwitchOAuthResult> GetOAuthToken(CancellationToken cancellationToken)
+  public async Task<TwitchOAuthResult> GetOAuthTokenAsync(CancellationToken cancellationToken)
   {
     try
     {
@@ -39,11 +39,11 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     }
   }
 
-  public async Task<TwitchStreamsResult> GetStreams(IEnumerable<string> userLogins, CancellationToken cancellationToken)
+  public async Task<TwitchStreamsResult> GetStreamsAsync(IEnumerable<string> userLogins, CancellationToken cancellationToken)
   {
     try
     {
-      var oAuthTokenResult = await GetOAuthToken(cancellationToken);
+      var oAuthTokenResult = await GetOAuthTokenAsync(cancellationToken);
       return await oAuthTokenResult.Match(
         async oAuthToken =>
         {
@@ -72,11 +72,11 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     }
   }
 
-  public async Task<TwitchUsersResult> GetUsers(IEnumerable<string> userLogins, CancellationToken cancellationToken)
+  public async Task<TwitchUsersResult> GetUsersAsync(IEnumerable<string> userLogins, CancellationToken cancellationToken)
   {
     try
     {
-      var oAuthTokenResult = await GetOAuthToken(cancellationToken);
+      var oAuthTokenResult = await GetOAuthTokenAsync(cancellationToken);
       return await oAuthTokenResult.Match(
         async oAuthToken =>
         {
@@ -109,7 +109,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     => await httpClientFactory.CreateTwitchOAuthClient()
     .PostAsync(string.Empty, new OAuthContent(twitchAPISettings.ClientID, twitchAPISettings.ClientSecret), cancellationToken);
 
-  public async Task<bool> HealthCheck(CancellationToken cancellationToken)
+  public async Task<bool> HealthCheckAsync(CancellationToken cancellationToken)
   {
     var response = await PostOAuthAsync(cancellationToken);
     return response.IsSuccessStatusCode;

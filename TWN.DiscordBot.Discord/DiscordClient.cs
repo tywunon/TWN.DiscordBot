@@ -187,7 +187,7 @@ public class DiscordClient : Interfaces.IDiscordClient
       }
 
       var cancellationTokenSource = new CancellationTokenSource();
-      var twitchUserInfo = await twitchClient.GetUsers([twitchUser], cancellationTokenSource.Token);
+      var twitchUserInfo = await twitchClient.GetUsersAsync([twitchUser], cancellationTokenSource.Token);
       await twitchUserInfo.Match(
         async success =>
         {
@@ -230,7 +230,7 @@ public class DiscordClient : Interfaces.IDiscordClient
         var colorString = guildConfig?.Color.Replace("#", "");
         var color = uint.TryParse(colorString, System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
         var twitchUser = guildData.Select(gd => gd.TwitchUser).Distinct().Freeze();
-        var twitchUserData = await twitchClient.GetUsers(twitchUser, cancellationTokenSource.Token);
+        var twitchUserData = await twitchClient.GetUsersAsync(twitchUser, cancellationTokenSource.Token);
 
         await twitchUserData.Match
           (
@@ -318,7 +318,7 @@ public class DiscordClient : Interfaces.IDiscordClient
     }
   }
 
-  public async Task SendTwitchMessage(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData)
+  public async Task SendTwitchMessageAsync(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData)
   {
     try
     {
@@ -378,7 +378,7 @@ public class DiscordClient : Interfaces.IDiscordClient
     }
     catch (Exception ex)
     {
-      WriteLog(new LogMessage(LogSeverity.Error, "SendTwitchMessage", ex.Message, ex));
+      WriteLog(new LogMessage(LogSeverity.Error, "AttachCacheBuster", ex.Message, ex));
     }
     return string.Empty;
   }
@@ -389,7 +389,7 @@ public class DiscordClient : Interfaces.IDiscordClient
     return channel.Name;
   }
 
-  public Task<DiscordConnectionState> HealthCheck(CancellationToken cancellationToken)
+  public Task<DiscordConnectionState> HealthCheckAsync(CancellationToken cancellationToken)
   {
     DiscordConnectionState result =
       discordSocketClient.ConnectionState switch
