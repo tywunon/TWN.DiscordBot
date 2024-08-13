@@ -6,28 +6,28 @@ using TWN.DiscordBot.Interfaces.Types;
 using TWN.DiscordBot.Settings;
 
 namespace TWN.DiscordBot.App;
-internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, ITwitchClient twitchClient, IDataStore dataStore, ILogger<Watcher> logger) : BackgroundService
+internal class Watcher(WatcherSettings settings, IDiscordClientAsync discordClient, ITwitchClientAsync twitchClient, IDataStoreAsync dataStore, ILogger<Watcher> logger) : BackgroundService
 {
   private readonly Dictionary<string, DateTime> onlineCache = [];
 
-  protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+  protected override async Task ExecuteAsync(CancellationToken cancellationToken)
   {
     PeriodicTimer timer = new(TimeSpan.FromMilliseconds(settings.Delay));
     logger.LogDebug("PeriodicTimer created ({Delay}ms)", settings.Delay);
 
     try
     {
-      while (await timer.WaitForNextTickAsync(stoppingToken))
+      while (await timer.WaitForNextTickAsync(cancellationToken))
       {
         try
         {
-          var lookUpData = await dataStore.GetDataAsync();
+          var lookUpData = await dataStore.GetDataAsync(cancellationToken);
           logger.Log(LogLevel.Debug, new EventId(), lookUpData, null, (s, ex) => "lookUpData:" + string.Join(", ", s.Announcements.Select(_s => $"{(_s.TwitchUser, _s.GuildID, _s.ChannelID)}")));
           if (lookUpData.Announcements.Count != 0)
           {
             var twitchUsers = lookUpData.Announcements.Select(lud => lud.TwitchUser).Distinct();
             logger.Log(LogLevel.Debug, new EventId(), twitchUsers, null, (s, ex) => "twitchUsers:" + string.Join(", ", s));
-            var twitchStreamData = await twitchClient.GetStreamsAsync(twitchUsers, stoppingToken);
+            var twitchStreamData = await twitchClient.GetStreamsAsync(twitchUsers, cancellationToken);
 
             await twitchStreamData.Match
             (
@@ -45,7 +45,7 @@ internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, I
 
                 if (onlineUser.Any())
                 {
-                  var twitchUserData = await twitchClient.GetUsersAsync(onlineUser, stoppingToken);
+                  var twitchUserData = await twitchClient.GetUsersAsync(onlineUser, cancellationToken);
 
                   await twitchUserData.Match
                   (
@@ -84,7 +84,7 @@ internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, I
                             UserImage = data.twitchUserData.Profile_Image_Url,
                             ThumbnailURL = data.twitchStreamData.Thumbnail_Url,
                             StartedAt = data.twitchStreamData.Started_At,
-                          });
+                          }, cancellationToken);
                         }
                       }
                     },

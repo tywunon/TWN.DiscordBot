@@ -9,7 +9,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using TWN.DiscordBot.Interfaces;
 
 namespace TWN.DiscordBot.WebHost.HealthChecks;
-internal class DataStoreHealthCheck(IDataStore dataStore) : IHealthCheck
+internal class DataStoreHealthCheck(IDataStoreAsync dataStore) : IHealthCheck
 {
   async Task<HealthCheckResult> IHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken)
   {

@@ -15,7 +15,7 @@ namespace TWN.DiscordBot.Twitch;
 public class TwitchClient(IHttpClientFactory httpClientFactory,
                           TwitchSettings twitchAPISettings,
                           ILogger<TwitchClient> logger)
-: ITwitchClient
+: ITwitchClientAsync
 {
   public async Task<TwitchOAuthResult> GetOAuthTokenAsync(CancellationToken cancellationToken)
   {

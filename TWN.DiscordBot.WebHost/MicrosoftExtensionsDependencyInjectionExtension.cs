@@ -7,7 +7,7 @@ public static class MicrosoftExtensionsDependencyInjectionExtension
   public static IServiceCollection AddBotAPIServices(this IServiceCollection serviceCollection)
   {
     return serviceCollection
-      .AddSingleton<IDataStoreService, DataStoreService>()
+      .AddSingleton<IDataStoreServiceAsync, DataStoreService>()
       .AddEndpointsApiExplorer()
       .AddHealthChecks()
         .AddCheck<TwitchHealthCheck>("Twitch API", Diagnostics.HealthChecks.HealthStatus.Unhealthy)

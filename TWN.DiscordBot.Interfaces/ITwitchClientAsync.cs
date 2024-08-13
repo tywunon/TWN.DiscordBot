@@ -1,7 +1,7 @@
 ﻿using TWN.DiscordBot.Interfaces.Types;
 
 namespace TWN.DiscordBot.Interfaces;
-public interface ITwitchClient : IHealthCheckProvider<bool>
+public interface ITwitchClientAsync : IHealthCheckProviderAsync<bool>
 {
   Task<TwitchOAuthResult> GetOAuthTokenAsync(CancellationToken cancellationToken);
   Task<TwitchStreamsResult> GetStreamsAsync(IEnumerable<string> userLogins, CancellationToken cancellationToken);

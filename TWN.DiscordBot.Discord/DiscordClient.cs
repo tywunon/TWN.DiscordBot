@@ -12,7 +12,7 @@ using TWN.DiscordBot.Interfaces.Types;
 using TWN.DiscordBot.Settings;
 
 namespace TWN.DiscordBot.Discord;
-public class DiscordClient : Interfaces.IDiscordClient
+public class DiscordClient : Interfaces.IDiscordClientAsync
 {
   private readonly DiscordSocketClient discordSocketClient = new(new()
   {
@@ -22,16 +22,16 @@ public class DiscordClient : Interfaces.IDiscordClient
   });
 
   private readonly DiscordSettings discordSettings;
-  private readonly ITwitchClient twitchClient;
-  private readonly IDataStore dataStore;
+  private readonly ITwitchClientAsync twitchClient;
+  private readonly IDataStoreAsync dataStore;
   private readonly IEnumerable<GuildConfig> guildConfigs;
   private readonly ILogger<DiscordClient> logger;
 
   private bool ready = false;
 
   public DiscordClient(DiscordSettings discordSettings,
-                       ITwitchClient twitchClient,
-                       IDataStore dataStore,
+                       ITwitchClientAsync twitchClient,
+                       IDataStoreAsync dataStore,
                        IEnumerable<GuildConfig> guildConfigs,
                        ILogger<DiscordClient> logger)
   {
@@ -203,7 +203,7 @@ public class DiscordClient : Interfaces.IDiscordClient
             return;
           }
 
-          await dataStore.AddAnnouncementAsync(twitchUser, channel.GuildId, channel.Id);
+          await dataStore.AddAnnouncementAsync(twitchUser, channel.GuildId, channel.Id, cancellationTokenSource.Token);
 
           await command.RespondAsync($"**{twitchUser}**'s streams will be announced in {channel.Mention}", ephemeral: true);
         },
@@ -220,12 +220,11 @@ public class DiscordClient : Interfaces.IDiscordClient
   {
     try
     {
-      var data = await dataStore.GetDataAsync();
+      var cancellationTokenSource = new CancellationTokenSource();
+      var data = await dataStore.GetDataAsync(cancellationTokenSource.Token);
       var guildData = data.Announcements.Where(d => d.GuildID == command.GuildId);
       if (guildData.Any())
       {
-        var cancellationTokenSource = new CancellationTokenSource();
-
         var guildConfig = guildConfigs.FirstOrDefault(gc => gc.GuildID == command.GuildId);
         var colorString = guildConfig?.Color.Replace("#", "");
         var color = uint.TryParse(colorString, System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
@@ -302,13 +301,13 @@ public class DiscordClient : Interfaces.IDiscordClient
         else
           channel = _channel;
       }
-
-      var data = await dataStore.GetDataAsync();
+      var cancellationTokenSource = new CancellationTokenSource();
+      var data = await dataStore.GetDataAsync(cancellationTokenSource.Token);
       var userData = data.Announcements.Where(d => d.GuildID == guildID && d.TwitchUser == twitchUser);
 
       var channels = channel is null ? userData.Select(ud => ud.ChannelID).ToArray() : [channel.Id];
 
-      await dataStore.DeleteAnnouncementAsync(twitchUser, guildID ?? 0, channels);
+      await dataStore.DeleteAnnouncementAsync(twitchUser, guildID ?? 0, channels, cancellationTokenSource.Token);
       await command.RespondAsync($"Announcements for user {twitchUser}: {string.Join(",", channels.Select(c => $"<#{c}>"))} removed", ephemeral: true);
     }
     catch (Exception ex)
@@ -318,8 +317,10 @@ public class DiscordClient : Interfaces.IDiscordClient
     }
   }
 
-  public async Task SendTwitchMessageAsync(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData)
+  public async Task SendTwitchMessageAsync(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData, CancellationToken cancellationToken)
   {
+    if (cancellationToken.IsCancellationRequested)
+      return;
     try
     {
       if (twitchData is null) return;
@@ -383,14 +384,20 @@ public class DiscordClient : Interfaces.IDiscordClient
     return string.Empty;
   }
 
-  public async Task<string> GetChannelName(ulong channelID)
+  public async Task<string> GetChannelName(ulong channelID, CancellationToken cancellationToken)
   {
+    if (cancellationToken.IsCancellationRequested)
+      return string.Empty;
+
     var channel = await discordSocketClient.GetChannelAsync(channelID);
-    return channel.Name;
+    return channel?.Name ?? string.Empty;
   }
 
   public Task<DiscordConnectionState> HealthCheckAsync(CancellationToken cancellationToken)
   {
+    if (cancellationToken.IsCancellationRequested)
+      return Task.FromCanceled<DiscordConnectionState>(cancellationToken);
+
     DiscordConnectionState result =
       discordSocketClient.ConnectionState switch
       {

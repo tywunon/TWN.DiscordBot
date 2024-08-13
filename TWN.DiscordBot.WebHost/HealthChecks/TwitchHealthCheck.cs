@@ -3,7 +3,7 @@
 using TWN.DiscordBot.Interfaces;
 
 namespace TWN.DiscordBot.WebHost.HealthChecks;
-internal class TwitchHealthCheck(ITwitchClient twitchClient) : IHealthCheck
+internal class TwitchHealthCheck(ITwitchClientAsync twitchClient) : IHealthCheck
 {
   async Task<HealthCheckResult> IHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken)
   {

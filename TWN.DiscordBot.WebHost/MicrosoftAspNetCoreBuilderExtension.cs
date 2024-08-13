@@ -37,18 +37,24 @@ public static class MicrosoftAspNetCoreBuilderExtension
 
   public static void MapDataAPI(this WebApplication webApplication)
   {
-    webApplication.MapGet("/api/data/announcements", async (IDataStoreService dataStoreService) => await dataStoreService.GetAnnouncementsAsync())
+    webApplication
+      .MapGet("/api/data/announcements", async (IDataStoreServiceAsync dataStoreService) 
+        => await dataStoreService.GetAnnouncementsAsync(new CancellationTokenSource().Token))
       .WithName("GetAnnouncements")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
       });
-    webApplication.MapPost("/api/data/announcements", async (IDataStoreService dataStoreService, string twitchUser, ulong guildID, ulong channelID) => await dataStoreService.AddAnnouncementAsync(twitchUser, guildID, channelID))
+    webApplication
+      .MapPost("/api/data/announcements", async (IDataStoreServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong channelID) 
+        => await dataStoreService.AddAnnouncementAsync(twitchUser, guildID, channelID, new CancellationTokenSource().Token))
       .WithName("AddAnnouncement")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
 
       });
-    webApplication.MapDelete("/api/data/announcements", async (IDataStoreService dataStoreService, string twitchUser, ulong guildID, ulong? channelID) => await dataStoreService.DeleteAnnouncementAsync(twitchUser, guildID, channelID))
+    webApplication
+      .MapDelete("/api/data/announcements", async (IDataStoreServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong? channelID) 
+        => await dataStoreService.DeleteAnnouncementAsync(twitchUser, guildID, channelID, new CancellationTokenSource().Token))
       .WithName("DeleteAnnouncement")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
