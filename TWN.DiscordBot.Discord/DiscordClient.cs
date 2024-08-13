@@ -54,12 +54,14 @@ public class DiscordClient : Interfaces.IDiscordClient
 
   private async Task StartAsync()
   {
-    if (ready) return;
+    if (ready) 
+      return;
 
     await discordSocketClient.LoginAsync(TokenType.Bot, discordSettings.AppToken);
     await discordSocketClient.StartAsync();
 
-    while (!ready) { await Task.Delay(100); }
+    while (!ready) 
+      await Task.Delay(100);
   }
 
   private Task HandleLog_Client(LogMessage message)
@@ -190,7 +192,7 @@ public class DiscordClient : Interfaces.IDiscordClient
       await twitchUserInfo.Match(
         async tui =>
         {
-          if (tui.Data.Length == 0)
+          if (tui.Value.Data.Length == 0)
           {
             await command.RespondAsync($"twitch-user ({twitchUser}) not found", ephemeral: true);
             return;
@@ -236,7 +238,7 @@ public class DiscordClient : Interfaces.IDiscordClient
             async tud =>
             {
               var embed = guildData
-                .Join(tud.Data, o => o.TwitchUser, i => i.Login, (o, i) => (guildData: o, twitchUserData: i))
+                .Join(tud.Value.Data, o => o.TwitchUser, i => i.Login, (o, i) => (guildData: o, twitchUserData: i))
                 .GroupBy(gd => (gd.guildData.TwitchUser, gd.twitchUserData.Profile_Image_Url, gd.twitchUserData.Login, gd.twitchUserData.Offline_Image_Url))
                 .Select(gdg => new EmbedBuilder()
               .WithAuthor(gdg.Key.TwitchUser)

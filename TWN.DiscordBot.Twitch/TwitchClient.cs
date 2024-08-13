@@ -19,7 +19,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
                           ILogger<TwitchClient> logger)
 : ITwitchClient
 {
-  public async Task<OneOf<string, Error<Exception>>> GetOAuthToken()
+  public async Task<TwitchOAuthResult> GetOAuthToken()
   {
     try
     {
@@ -32,7 +32,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
         logger.LogError(parseException, "{Message}", parseException.Message);
         return new Error<Exception>();
       }
-      return result.Access_Token ?? string.Empty;
+      return new Success<string>(result.Access_Token ?? string.Empty);
     }
     catch (Exception ex)
     {
@@ -41,7 +41,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     }
   }
 
-  public async Task<OneOf<StreamsResponse, Error<Exception>>> GetStreams(IEnumerable<string> userLogins, CancellationToken cancellationToken)
+  public async Task<TwitchStreamsResult> GetStreams(IEnumerable<string> userLogins, CancellationToken cancellationToken)
   {
     try
     {
@@ -52,7 +52,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
           var client = httpClientFactory.CreateTwitchAPIClient();
           var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"user_login={ul}"))}" : string.Empty;
           var request = new HttpRequestMessage(HttpMethod.Get, $"streams{queryParameter}");
-          request.Headers.Authorization = new("Bearer", oAuthToken);
+          request.Headers.Authorization = new("Bearer", oAuthToken.Value);
           request.Headers.Add("client-id", twitchAPISettings.ClientID);
           var response = await client.SendAsync(request, cancellationToken);
           var result = await response.Content.ReadFromJsonAsync<StreamsResponse>(cancellationToken);
@@ -62,9 +62,9 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
             logger.LogError(parseException, "{Message}", parseException.Message);
             return new Error<Exception>();
           }
-          return result;
+          return new Success<StreamsResponse>(result);
         },
-        error => Task.FromResult<OneOf<StreamsResponse, Error<Exception>>>(error)
+        error => Task.FromResult<TwitchStreamsResult>(error)
       ); ;
     }
     catch (Exception ex)
@@ -74,7 +74,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     }
   }
 
-  public async Task<OneOf<UsersResponse, Error<Exception>>> GetUsers(IEnumerable<string> userLogins, CancellationToken cancellationToken)
+  public async Task<TwitchUsersResult> GetUsers(IEnumerable<string> userLogins, CancellationToken cancellationToken)
   {
     try
     {
@@ -85,7 +85,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
           var client = httpClientFactory.CreateTwitchAPIClient();
           var queryParameter = userLogins.Any() ? $"?{string.Join("&", userLogins.Select(ul => $"login={ul}"))}" : string.Empty;
           var request = new HttpRequestMessage(HttpMethod.Get, $"users{queryParameter}");
-          request.Headers.Authorization = new("Bearer", oAuthToken);
+          request.Headers.Authorization = new("Bearer", oAuthToken.Value);
           request.Headers.Add("client-id", twitchAPISettings.ClientID);
           var response = await client.SendAsync(request, cancellationToken);
           var result = await response.Content.ReadFromJsonAsync<UsersResponse>(cancellationToken) ?? new([]);
@@ -95,9 +95,9 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
             logger.LogError(parseException, "{Message}", parseException.Message);
             return new Error<Exception>();
           }
-          return result;
+          return new Success<UsersResponse>(result);
         },
-        error => Task.FromResult<OneOf<UsersResponse, Error<Exception>>>(error)
+        error => Task.FromResult<TwitchUsersResult>(error)
       );
     }
     catch (Exception ex)
@@ -107,7 +107,9 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     }
   }
 
-  private async Task<HttpResponseMessage> PostOAuthAsync() => await httpClientFactory.CreateTwitchOAuthClient().PostAsync(string.Empty, new OAuthContent(twitchAPISettings.ClientID, twitchAPISettings.ClientSecret));
+  private async Task<HttpResponseMessage> PostOAuthAsync() 
+    => await httpClientFactory.CreateTwitchOAuthClient()
+    .PostAsync(string.Empty, new OAuthContent(twitchAPISettings.ClientID, twitchAPISettings.ClientSecret));
 
   public async Task<bool> HealthCheck()
   {

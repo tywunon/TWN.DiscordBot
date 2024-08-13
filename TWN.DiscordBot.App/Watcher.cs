@@ -13,7 +13,7 @@ internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, I
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
     PeriodicTimer timer = new(TimeSpan.FromMilliseconds(settings.Delay));
-    logger.LogDebug("{obj} created ({Delay})", nameof(timer), settings.Delay);
+    logger.LogDebug("PeriodicTimer created ({Delay}ms)", settings.Delay);
 
     try
     {
@@ -33,9 +33,9 @@ internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, I
             (
               async streamData =>
               {
-                logger.Log(LogLevel.Debug, new EventId(), streamData, null, (s, ex) => "twitchStreamData:" + string.Join(", ", s.Data.Select(_s => $"{_s.User_Login}")));
+                logger.Log(LogLevel.Debug, new EventId(), streamData, null, (s, ex) => "twitchStreamData:" + string.Join(", ", s.Value.Data.Select(_s => $"{_s.User_Login}")));
 
-                var onlineUser = streamData.Data.Select(td => td.User_Login);
+                var onlineUser = streamData.Value.Data.Select(td => td.User_Login);
                 logger.Log(LogLevel.Debug, new EventId(), onlineUser, null, (s, ex) => "onlineUser:" + string.Join(", ", s));
                 var offlineUser = onlineCache.Keys.Select(oc => oc).Except(onlineUser).ToList();
                 logger.Log(LogLevel.Debug, new EventId(), offlineUser, null, (s, ex) => "offlineUser:" + string.Join(", ", s));
@@ -51,11 +51,11 @@ internal class Watcher(WatcherSettings settings, IDiscordClient discordClient, I
                   (
                     async userResponse =>
                     {
-                      logger.Log(LogLevel.Debug, new EventId(), userResponse, null, (s, ex) => "twitchUserData:" + string.Join(", ", s.Data.Select(_s => $"{_s.Login}")));
+                      logger.Log(LogLevel.Debug, new EventId(), userResponse, null, (s, ex) => "twitchUserData:" + string.Join(", ", s.Value.Data.Select(_s => $"{_s.Login}")));
 
                       var dataGroups = lookUpData.Announcements
-                        .Join(streamData.Data, o => o.TwitchUser, i => i.User_Login, (o, i) => (lookUpData: o, twitchStreamData: i))
-                        .Join(userResponse.Data, o => o.twitchStreamData.User_Login, i => i.Login, (o, i) => (lookUpData: o.lookUpData, twitchStreamData: o.twitchStreamData, twitchUserData: i))
+                        .Join(streamData.Value.Data, o => o.TwitchUser, i => i.User_Login, (o, i) => (lookUpData: o, twitchStreamData: i))
+                        .Join(userResponse.Value.Data, o => o.twitchStreamData.User_Login, i => i.Login, (o, i) => (lookUpData: o.lookUpData, twitchStreamData: o.twitchStreamData, twitchUserData: i))
                         .GroupBy(d => (twitchUser: d.lookUpData.TwitchUser, d.twitchStreamData.Game_Name));
                       logger.Log(LogLevel.Debug, new EventId(), dataGroups, null, (s, ex) => "dataGroups:" + string.Join(", ", s.Select(_s => $"{(_s.Key, string.Join(", ", _s.Select(_s1 => (_s1.lookUpData.GuildID, _s1.lookUpData.ChannelID, _s1.twitchStreamData.Game_Name))))}")));
 
