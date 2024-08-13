@@ -19,12 +19,12 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
                           ILogger<TwitchClient> logger)
 : ITwitchClient
 {
-  public async Task<TwitchOAuthResult> GetOAuthToken()
+  public async Task<TwitchOAuthResult> GetOAuthToken(CancellationToken cancellationToken)
   {
     try
     {
       var client = httpClientFactory.CreateTwitchOAuthClient();
-      var response = await PostOAuthAsync();
+      var response = await PostOAuthAsync(cancellationToken);
       var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
       if (result is null)
       {
@@ -45,7 +45,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
   {
     try
     {
-      var oAuthTokenResult = await GetOAuthToken();
+      var oAuthTokenResult = await GetOAuthToken(cancellationToken);
       return await oAuthTokenResult.Match(
         async oAuthToken =>
         {
@@ -78,7 +78,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
   {
     try
     {
-      var oAuthTokenResult = await GetOAuthToken();
+      var oAuthTokenResult = await GetOAuthToken(cancellationToken);
       return await oAuthTokenResult.Match(
         async oAuthToken =>
         {
@@ -107,13 +107,13 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     }
   }
 
-  private async Task<HttpResponseMessage> PostOAuthAsync() 
+  private async Task<HttpResponseMessage> PostOAuthAsync(CancellationToken cancellationToken) 
     => await httpClientFactory.CreateTwitchOAuthClient()
-    .PostAsync(string.Empty, new OAuthContent(twitchAPISettings.ClientID, twitchAPISettings.ClientSecret));
+    .PostAsync(string.Empty, new OAuthContent(twitchAPISettings.ClientID, twitchAPISettings.ClientSecret), cancellationToken);
 
-  public async Task<bool> HealthCheck()
+  public async Task<bool> HealthCheck(CancellationToken cancellationToken)
   {
-    var response = await PostOAuthAsync();
+    var response = await PostOAuthAsync(cancellationToken);
     return response.IsSuccessStatusCode;
   }
 }

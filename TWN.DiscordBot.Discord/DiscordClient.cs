@@ -392,7 +392,7 @@ public class DiscordClient : Interfaces.IDiscordClient
     return channel.Name;
   }
 
-  public Task<DiscordConnectionState> HealthCheck()
+  public Task<DiscordConnectionState> HealthCheck(CancellationToken cancellationToken)
   {
     DiscordConnectionState result =
       discordSocketClient.ConnectionState switch
