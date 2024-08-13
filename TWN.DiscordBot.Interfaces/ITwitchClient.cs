@@ -1,7 +1,4 @@
-﻿
-using OneOf;
-using OneOf.Types;
-using TWN.DiscordBot.Interfaces.Types;
+﻿using TWN.DiscordBot.Interfaces.Types;
 
 namespace TWN.DiscordBot.Interfaces;
 public interface ITwitchClient

@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 using TWN.DiscordBot.Interfaces;
 

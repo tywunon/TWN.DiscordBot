@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TWN.DiscordBot.Interfaces.Types;
+﻿namespace TWN.DiscordBot.Interfaces.Types;
 public sealed class DiscordTwitchEmbedData
 {
     public required string Title { get; init; }
