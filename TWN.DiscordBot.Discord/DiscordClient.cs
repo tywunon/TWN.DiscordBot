@@ -102,7 +102,7 @@ public class DiscordClient : Interfaces.IDiscordClient
       var guildCommand = new SlashCommandBuilder()
         .WithName("add-stream")
         .WithDescription("Adds another Stream to the Announcement Queue")
-        .WithDefaultMemberPermissions(GuildPermission.ModerateMembers)
+        .WithDefaultMemberPermissions(GuildPermission.ManageChannels)
         .AddOption(name: "twitch-user", type: ApplicationCommandOptionType.String, description: "Twitch User Name", isRequired: true)
         .AddOption(name: "channel", type: ApplicationCommandOptionType.Channel, description: "Channel", isRequired: true)
         .Build();
@@ -112,7 +112,7 @@ public class DiscordClient : Interfaces.IDiscordClient
       guildCommand = new SlashCommandBuilder()
         .WithName("list-streams")
         .WithDescription("Lists all stream in the Announcement Queue")
-        .WithDefaultMemberPermissions(GuildPermission.ModerateMembers)
+        .WithDefaultMemberPermissions(GuildPermission.ManageChannels)
         .Build();
 
       await discordSocketClient.CreateGlobalApplicationCommandAsync(guildCommand);
@@ -120,7 +120,7 @@ public class DiscordClient : Interfaces.IDiscordClient
       guildCommand = new SlashCommandBuilder()
         .WithName("remove-stream")
         .WithDescription("removes Stream from the Announcement Queue")
-        .WithDefaultMemberPermissions(GuildPermission.ModerateMembers)
+        .WithDefaultMemberPermissions(GuildPermission.ManageChannels)
         .AddOption(name: "twitch-user", type: ApplicationCommandOptionType.String, description: "Twitch User Name", isRequired: true)
         .AddOption(name: "channel", type: ApplicationCommandOptionType.Channel, description: "Channel", isRequired: false)
         .Build();
@@ -161,7 +161,6 @@ public class DiscordClient : Interfaces.IDiscordClient
     return;
   }
 
-
   private async Task AddStream(SocketSlashCommand command)
   {
     try
@@ -169,38 +168,38 @@ public class DiscordClient : Interfaces.IDiscordClient
       var twitchUserOption = command.Data.Options.FirstOrDefault(o => o.Name == "twitch-user");
       if (twitchUserOption is null)
       {
-        await command.RespondAsync("twitch-user not specified", ephemeral: true);
+        await command.RespondAsync("[twitch-user] not specified", ephemeral: true);
         return;
       }
 
       var channelOption = command.Data.Options.FirstOrDefault(o => o.Name == "channel");
       if (channelOption is null)
       {
-        await command.RespondAsync("channel not specified", ephemeral: true);
+        await command.RespondAsync("Channel not specified", ephemeral: true);
         return;
       }
 
       var twitchUser = twitchUserOption.Value is string _twitchUser ? _twitchUser : string.Empty;
       if (string.IsNullOrWhiteSpace(twitchUser))
       {
-        await command.RespondAsync($"twitch-user ({twitchUser}) is empty", ephemeral: true);
+        await command.RespondAsync($"[twitch-user] ({twitchUser}) is empty", ephemeral: true);
         return;
       }
 
-      var cancellationToken = new CancellationTokenSource().Token;
-      var twitchUserInfo = await twitchClient.GetUsers([twitchUser], cancellationToken);
+      var cancellationTokenSource = new CancellationTokenSource();
+      var twitchUserInfo = await twitchClient.GetUsers([twitchUser], cancellationTokenSource.Token);
       await twitchUserInfo.Match(
-        async tui =>
+        async success =>
         {
-          if (tui.Value.Data.Length == 0)
+          if (success.Value.Data.Length == 0)
           {
-            await command.RespondAsync($"twitch-user ({twitchUser}) not found", ephemeral: true);
+            await command.RespondAsync($"[twitch-user] ({twitchUser}) not found", ephemeral: true);
             return;
           }
 
           if (channelOption.Value is not ITextChannel channel)
           {
-            await command.RespondAsync($"channel ({channelOption.Value}) is not a text-channel", ephemeral: true);
+            await command.RespondAsync($"Channel ({channelOption.Value}) is not a text-channel", ephemeral: true);
             return;
           }
 
@@ -225,20 +224,20 @@ public class DiscordClient : Interfaces.IDiscordClient
       var guildData = data.Announcements.Where(d => d.GuildID == command.GuildId);
       if (guildData.Any())
       {
-        var cancellationToken = new CancellationTokenSource().Token;
+        var cancellationTokenSource = new CancellationTokenSource();
 
         var guildConfig = guildConfigs.FirstOrDefault(gc => gc.GuildID == command.GuildId);
         var colorString = guildConfig?.Color.Replace("#", "");
         var color = uint.TryParse(colorString, System.Globalization.NumberStyles.HexNumber, null, out uint _value) ? _value : 0;
         var twitchUser = guildData.Select(gd => gd.TwitchUser).Distinct().Freeze();
-        var twitchUserData = await twitchClient.GetUsers(twitchUser, cancellationToken);
+        var twitchUserData = await twitchClient.GetUsers(twitchUser, cancellationTokenSource.Token);
 
         await twitchUserData.Match
           (
-            async tud =>
+            async success =>
             {
               var embed = guildData
-                .Join(tud.Value.Data, o => o.TwitchUser, i => i.Login, (o, i) => (guildData: o, twitchUserData: i))
+                .Join(success.Value.Data, o => o.TwitchUser, i => i.Login, (o, i) => (guildData: o, twitchUserData: i))
                 .GroupBy(gd => (gd.guildData.TwitchUser, gd.twitchUserData.Profile_Image_Url, gd.twitchUserData.Login, gd.twitchUserData.Offline_Image_Url))
                 .Select(gdg => new EmbedBuilder()
               .WithAuthor(gdg.Key.TwitchUser)
@@ -255,8 +254,6 @@ public class DiscordClient : Interfaces.IDiscordClient
             },
             error => Task.FromResult(error)
           );
-
-
       }
       else
         await command.RespondAsync("No streams in Announcement Queue", ephemeral: true);
@@ -275,21 +272,21 @@ public class DiscordClient : Interfaces.IDiscordClient
       var guildID = command.GuildId;
       if (guildID is null)
       {
-        await command.RespondAsync("guild not found", ephemeral: true);
+        await command.RespondAsync("Guild not found", ephemeral: true);
         return;
       }
 
       var twitchUserOption = command.Data.Options.FirstOrDefault(o => o.Name == "twitch-user");
       if (twitchUserOption is null)
       {
-        await command.RespondAsync("twitch-user not specified", ephemeral: true);
+        await command.RespondAsync("[twitch-user] not specified", ephemeral: true);
         return;
       }
 
       var twitchUser = twitchUserOption.Value is string _twitchUser ? _twitchUser : string.Empty;
       if (string.IsNullOrWhiteSpace(twitchUser))
       {
-        await command.RespondAsync($"twitch-user ({twitchUser}) is empty", ephemeral: true);
+        await command.RespondAsync($"[twitch-user] ({twitchUser}) is empty", ephemeral: true);
         return;
       }
 
@@ -299,7 +296,7 @@ public class DiscordClient : Interfaces.IDiscordClient
       {
         if (channelOption.Value is not ITextChannel _channel)
         {
-          await command.RespondAsync($"channel ({channelOption.Value}) is not a text-channel", ephemeral: true);
+          await command.RespondAsync($"Channel ({channelOption.Value}) is not a text-channel", ephemeral: true);
           return;
         }
         else
@@ -312,7 +309,7 @@ public class DiscordClient : Interfaces.IDiscordClient
       var channels = channel is null ? userData.Select(ud => ud.ChannelID).ToArray() : [channel.Id];
 
       await dataStore.DeleteAnnouncementAsync(twitchUser, guildID ?? 0, channels);
-      await command.RespondAsync($"announcements for user {twitchUser}: {string.Join(",", channels.Select(c => $"<#{c}>"))} removed", ephemeral: true);
+      await command.RespondAsync($"Announcements for user {twitchUser}: {string.Join(",", channels.Select(c => $"<#{c}>"))} removed", ephemeral: true);
     }
     catch (Exception ex)
     {
