@@ -1,14 +1,13 @@
 ﻿using HealthChecks.UI.Client;
 
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
 using TWN.DiscordBot.WebHost.Services;
 
 namespace Microsoft.AspNetCore.Builder;
 
-public static class MicrosoftAspNetCoreBuilderExtension
+public static class WebApplicationExtension
 {
   public static void InitBotAPI(this WebApplication webApplication)
   {
@@ -38,7 +37,7 @@ public static class MicrosoftAspNetCoreBuilderExtension
     webApplication.UseHealthChecksUI(opt =>
     {
       opt.UseRelativeApiPath = true;
-      opt.UIPath = "/healthcheck-ui";
+      opt.UIPath = "/health-check-ui";
       opt.ApiPath = "/api/health";
     });
   }
@@ -51,20 +50,35 @@ public static class MicrosoftAspNetCoreBuilderExtension
       .WithName("GetAnnouncements")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
+        Tags = [
+          new OpenApiTag() {
+            Name = "DataStore"
+          },
+        ]
       });
     webApplication
-      .MapPost("/api/data/announcements", async (IDataStoreServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong channelID)
+      .MapPost("/api/data/announcement", async (IDataStoreServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong channelID)
         => await dataStoreService.AddAnnouncementAsync(twitchUser, guildID, channelID, new CancellationTokenSource().Token))
       .WithName("AddAnnouncement")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
+        Tags = [
+          new OpenApiTag() {
+            Name = "DataStore"
+          },
+        ]
       });
     webApplication
-      .MapDelete("/api/data/announcements", async (IDataStoreServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong? channelID)
+      .MapDelete("/api/data/announcement", async (IDataStoreServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong? channelID)
         => await dataStoreService.DeleteAnnouncementAsync(twitchUser, guildID, channelID, new CancellationTokenSource().Token))
       .WithName("DeleteAnnouncement")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
+        Tags = [
+          new OpenApiTag() {
+            Name = "DataStore"
+          },
+        ]
       });
   }
 
@@ -76,6 +90,11 @@ public static class MicrosoftAspNetCoreBuilderExtension
       .WithName("GetChannelName")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
+        Tags = [
+          new OpenApiTag() {
+            Name = "Discord"
+          },
+        ]
       });
     webApplication
       .MapGet("/api/discord/guildName", (IDiscordClientServiceAsync discordClientService, ulong guildID)
@@ -83,6 +102,11 @@ public static class MicrosoftAspNetCoreBuilderExtension
       .WithName("GetGuildName")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
+        Tags = [
+          new OpenApiTag() {
+            Name = "Discord"
+          },
+        ]
       });
   }
 
@@ -94,6 +118,11 @@ public static class MicrosoftAspNetCoreBuilderExtension
       .WithName("GetStreamData")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
+        Tags = [
+          new OpenApiTag() {
+            Name = "Twitch"
+          },
+        ]
       });
     webApplication
       .MapGet("/api/twitch/getUser", async (ITwitchClientServiceAsync twitchClientService, string username)
@@ -101,6 +130,11 @@ public static class MicrosoftAspNetCoreBuilderExtension
       .WithName("GetUserData")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
+        Tags = [
+          new OpenApiTag() {
+            Name = "Twitch"
+          },
+        ]
       });
   }
 }

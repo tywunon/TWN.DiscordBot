@@ -1,7 +1,6 @@
-﻿using System.Threading.Channels;
-using System.Web;
-
+﻿
 using Discord;
+
 using Discord.WebSocket;
 
 using LanguageExt.Pipes;
@@ -9,7 +8,10 @@ using LanguageExt.Pipes;
 using Microsoft.Extensions.Logging;
 
 using OneOf;
+
 using OneOf.Types;
+
+using System.Web;
 
 using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
@@ -58,13 +60,13 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
 
   private async Task StartAsync()
   {
-    if (ready) 
+    if (ready)
       return;
 
     await discordSocketClient.LoginAsync(TokenType.Bot, discordSettings.AppToken);
     await discordSocketClient.StartAsync();
 
-    while (!ready) 
+    while (!ready)
       await Task.Delay(100);
   }
 

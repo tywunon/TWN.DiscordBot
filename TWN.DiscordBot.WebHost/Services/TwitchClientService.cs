@@ -1,6 +1,4 @@
-﻿using IdentityModel.OidcClient;
-
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
 using TWN.DiscordBot.Interfaces;
 

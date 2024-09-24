@@ -2,7 +2,7 @@
 using TWN.DiscordBot.WebHost.Services;
 
 namespace Microsoft.Extensions.DependencyInjection;
-public static class MicrosoftExtensionsDependencyInjectionExtension
+public static class ServiceCollectionExtension
 {
   public static IServiceCollection AddBotAPIServices(this IServiceCollection serviceCollection)
   {

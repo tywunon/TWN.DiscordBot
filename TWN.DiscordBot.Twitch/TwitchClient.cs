@@ -23,7 +23,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     {
       var client = httpClientFactory.CreateTwitchOAuthClient();
       var response = await PostOAuthAsync(cancellationToken);
-      var result = await response.Content.ReadFromJsonAsync<OAuthResponse>();
+      var result = await response.Content.ReadFromJsonAsync<OAuthResponse>(cancellationToken);
       if (result is null)
       {
         var parseException = new Exception($"Response:\n{response?.Content}\ncouldn't be parsed");
