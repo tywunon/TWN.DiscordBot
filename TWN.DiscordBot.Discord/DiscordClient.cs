@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using System.Threading.Channels;
+using System.Web;
 
 using Discord;
 using Discord.WebSocket;
@@ -6,6 +7,9 @@ using Discord.WebSocket;
 using LanguageExt.Pipes;
 
 using Microsoft.Extensions.Logging;
+
+using OneOf;
+using OneOf.Types;
 
 using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
@@ -384,13 +388,27 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
     return string.Empty;
   }
 
-  public async Task<string> GetChannelName(ulong channelID, CancellationToken cancellationToken)
+  public async Task<OneOf<Result<string>, NotFound>> GetChannelNameAsync(ulong channelID, CancellationToken cancellationToken)
   {
     if (cancellationToken.IsCancellationRequested)
-      return string.Empty;
+      return new NotFound();
 
     var channel = await discordSocketClient.GetChannelAsync(channelID);
-    return channel?.Name ?? string.Empty;
+    var channelName = channel?.Name;
+    if (channelName is null)
+      return new NotFound();
+    else
+      return new Result<string>(channelName);
+  }
+
+  public OneOf<Result<string>, NotFound> GetGuildName(ulong guildID)
+  {
+    var guild = discordSocketClient.GetGuild(guildID);
+    var guildName = guild?.Name;
+    if (guildName is null)
+      return new NotFound();
+    else
+      return new Result<string>(guildName);
   }
 
   public Task<DiscordConnectionState> HealthCheckAsync(CancellationToken cancellationToken)

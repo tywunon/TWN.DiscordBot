@@ -8,6 +8,8 @@ public static class MicrosoftExtensionsDependencyInjectionExtension
   {
     return serviceCollection
       .AddSingleton<IDataStoreServiceAsync, DataStoreService>()
+      .AddSingleton<IDiscordClientServiceAsync, DiscordClientService>()
+      .AddSingleton<ITwitchClientServiceAsync, TwitchClientService>()
       .AddEndpointsApiExplorer()
       .AddHealthChecks()
         .AddCheck<TwitchHealthCheck>("Twitch API", Diagnostics.HealthChecks.HealthStatus.Unhealthy)

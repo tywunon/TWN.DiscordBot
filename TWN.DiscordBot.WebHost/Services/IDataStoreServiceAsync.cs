@@ -1,9 +1,11 @@
-﻿using TWN.DiscordBot.Interfaces.Types;
+﻿using Microsoft.AspNetCore.Http;
+
+using TWN.DiscordBot.Interfaces.Types;
 
 namespace TWN.DiscordBot.WebHost.Services;
 internal interface IDataStoreServiceAsync
 {
-  Task DeleteAnnouncementAsync(string twitchUser, ulong guildID, ulong? channelID, CancellationToken cancellationToken);
-  Task<Announcement> AddAnnouncementAsync(string twitchUser, ulong guildID, ulong channelID, CancellationToken cancellationToken);
-  Task<IEnumerable<Announcement>> GetAnnouncementsAsync(CancellationToken cancellationToken);
+  Task<IResult> DeleteAnnouncementAsync(string twitchUser, ulong guildID, ulong? channelID, CancellationToken cancellationToken);
+  Task<IResult> AddAnnouncementAsync(string twitchUser, ulong guildID, ulong channelID, CancellationToken cancellationToken);
+  Task<IResult> GetAnnouncementsAsync(CancellationToken cancellationToken);
 }

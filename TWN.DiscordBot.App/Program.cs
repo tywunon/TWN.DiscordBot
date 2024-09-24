@@ -76,16 +76,13 @@ internal class Program
       .AddSingleton<ITwitchClientAsync, Twitch.TwitchClient>()
       .AddSingleton<IDataStoreAsync, DataStore.JSONDataStore>()
       .AddBotAPIServices()
-      .AddHostedService<Watcher>()
+      //.AddHostedService<Watcher>()
       .AddHostedService<TCPProbeProvider>()
       .AddHostedService<LogCleaner>()
       ;
 
     var host = builder.Build();
-
-    host.UseHealthChecks();
-    host.UseBotAPI();
-    host.MapDataAPI();
+    host.InitBotAPI();
     host.UseStatusCodePages();
     host.UseHttpsRedirection();
 
