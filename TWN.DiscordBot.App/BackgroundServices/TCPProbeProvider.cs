@@ -1,41 +1,44 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using TWN.DiscordBot.Settings;
 
-namespace TWN.DiscordBot.App.BackgroundServices;
-internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger) : BackgroundService
+namespace TWN.DiscordBot.Bot.BackgroundServices;
+internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger) : PeriodicBackgroundService(logger)
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+  Socket? listener;
+  protected override Task InitAsync(CancellationToken cancellationToken)
+  {
+    listener = new(SocketType.Stream, ProtocolType.Tcp);
+    listener.Bind(new IPEndPoint(IPAddress.Any, tcpProbeSettings.Port));
+    logger.LogInformation("Probe listening on {LocalEndPoint}", listener.LocalEndPoint);
+    listener.Listen(100);
+
+    return base.InitAsync(cancellationToken);
+  }
+
+  protected override Task<TimeSpan> GetInterval(CancellationToken cancellationToken) => Task.FromResult(TimeSpan.FromMilliseconds(20));
+  protected async override Task ExecutePeriodicAsync(CancellationToken cancellationToken)
+  {
+    if (listener is null)
+      return;
+
+    try
     {
-        try
-        {
-            using Socket listener = new(SocketType.Stream, ProtocolType.Tcp);
-            listener.Bind(new IPEndPoint(IPAddress.Any, tcpProbeSettings.Port));
-            logger.LogInformation("Probe listening on {LocalEndPoint}", listener.LocalEndPoint);
-            listener.Listen(100);
-
-            PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(20));
-
-            while (await timer.WaitForNextTickAsync(stoppingToken))
-            {
-                try
-                {
-                    var socket = await listener.AcceptAsync(stoppingToken);
-                    if (socket == null) continue;
-                    socket.Close();
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "{Message}", ex.Message);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogCritical(ex, "{Message}", ex.Message);
-        }
+      var socket = await listener.AcceptAsync(cancellationToken);
+      if (socket == null) 
+        return;
+      socket.Close();
     }
+    catch (Exception ex)
+    {
+      logger.LogError(ex, "{Message}", ex.Message);
+    }
+  }
+  public override void Dispose()
+  {
+    base.Dispose();
+    listener?.Dispose();
+  }
 }

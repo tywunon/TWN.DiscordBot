@@ -5,11 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using NReco.Logging.File;
-using TWN.DiscordBot.App.BackgroundServices;
+using TWN.DiscordBot.Bot.BackgroundServices;
 using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.WebHost;
 
-namespace TWN.DiscordBot.App;
+namespace TWN.DiscordBot.Bot;
 
 internal class Program
 {
