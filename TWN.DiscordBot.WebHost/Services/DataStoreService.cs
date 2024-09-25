@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 
 using TWN.DiscordBot.Interfaces;
+using TWN.DiscordBot.Interfaces.Types;
 
 namespace TWN.DiscordBot.WebHost.Services;
 internal class DataStoreService(IDataStoreAsync dataStore) : IDataStoreServiceAsync
@@ -9,33 +10,33 @@ internal class DataStoreService(IDataStoreAsync dataStore) : IDataStoreServiceAs
   {
 
     var result = await dataStore.GetAnnouncementsAsync(cancellationToken);
-    return Results.Ok(new ResultMessage()
+    return Results.Ok(new ResultMessage<Payloads.AnnouncementsPayload>()
     {
       Success = true,
       Message = string.Empty,
-      Payload = new { announcements = result },
+      Payload = new Payloads.AnnouncementsPayload(result),
     });
   }
 
   public async Task<IResult> AddAnnouncementAsync(string twitchUser, ulong guildID, ulong channelID, CancellationToken cancellationToken)
   {
     var result = await dataStore.AddAnnouncementAsync(twitchUser, guildID, channelID, cancellationToken);
-    return Results.Ok(new ResultMessage()
+    return Results.Ok(new ResultMessage<Payloads.AnnouncementPayload>()
     {
       Success = true,
       Message = string.Empty,
-      Payload = new { announcement = result },
+      Payload = new Payloads.AnnouncementPayload(result),
     });
   }
 
   public async Task<IResult> DeleteAnnouncementAsync(string twitchUser, ulong guildID, ulong? channelID, CancellationToken cancellationToken)
   {
     await dataStore.DeleteAnnouncementAsync(twitchUser, guildID, channelID.HasValue ? [channelID.Value] : [], cancellationToken);
-    return Results.Ok(new ResultMessage()
+    return Results.Ok(new ResultMessage<Payloads.EmptyPayload>()
     {
       Success = true,
       Message = string.Empty,
-      Payload = new { },
+      Payload = new Payloads.EmptyPayload(),
     });
   }
 }

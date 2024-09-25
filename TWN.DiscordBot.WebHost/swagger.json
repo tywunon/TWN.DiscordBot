@@ -1,0 +1,572 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "TWN.DiscordBot.Bot",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/data/announcements": {
+      "get": {
+        "tags": [
+          "DataStore"
+        ],
+        "operationId": "GetAnnouncements",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnouncementsPayloadResultMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/announcement": {
+      "post": {
+        "tags": [
+          "DataStore"
+        ],
+        "operationId": "AddAnnouncement",
+        "parameters": [
+          {
+            "name": "twitchUser",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "guildID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "channelID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnouncementPayloadResultMessage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "DataStore"
+        ],
+        "operationId": "DeleteAnnouncement",
+        "parameters": [
+          {
+            "name": "twitchUser",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "guildID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "channelID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyPayloadResultMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/discord/channelName": {
+      "get": {
+        "tags": [
+          "Discord"
+        ],
+        "operationId": "GetChannelName",
+        "parameters": [
+          {
+            "name": "channelID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelNamePayloadResultMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/discord/guildName": {
+      "get": {
+        "tags": [
+          "Discord"
+        ],
+        "operationId": "GetGuildName",
+        "parameters": [
+          {
+            "name": "guildID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuildNamePayloadResultMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/twitch/getStream": {
+      "get": {
+        "tags": [
+          "Twitch"
+        ],
+        "operationId": "GetStreamData",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamDataPayload"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamDataPayload"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/twitch/getUser": {
+      "get": {
+        "tags": [
+          "Twitch"
+        ],
+        "operationId": "GetUserData",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDataPayloadResultMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDataPayloadResultMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Announcement": {
+        "type": "object",
+        "properties": {
+          "twitchUser": {
+            "type": "string",
+            "nullable": true
+          },
+          "guildID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "channelID": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AnnouncementPayload": {
+        "type": "object",
+        "properties": {
+          "announcement": {
+            "$ref": "#/components/schemas/Announcement"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AnnouncementPayloadResultMessage": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "payload": {
+            "$ref": "#/components/schemas/AnnouncementPayload"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AnnouncementsPayload": {
+        "type": "object",
+        "properties": {
+          "announcements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Announcement"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AnnouncementsPayloadResultMessage": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "payload": {
+            "$ref": "#/components/schemas/AnnouncementsPayload"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChannelNamePayload": {
+        "type": "object",
+        "properties": {
+          "channelID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "channelName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChannelNamePayloadResultMessage": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "payload": {
+            "$ref": "#/components/schemas/ChannelNamePayload"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmptyPayload": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "EmptyPayloadResultMessage": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "payload": {
+            "$ref": "#/components/schemas/EmptyPayload"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GuildNamePayload": {
+        "type": "object",
+        "properties": {
+          "guildID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "guildName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GuildNamePayloadResultMessage": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "payload": {
+            "$ref": "#/components/schemas/GuildNamePayload"
+          }
+        },
+        "additionalProperties": false
+      },
+      "StreamDataPayload": {
+        "type": "object",
+        "properties": {
+          "streamsResponse": {
+            "$ref": "#/components/schemas/StreamsResponseData"
+          },
+          "isOnline": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "StreamsResponseData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "user_Id": {
+            "type": "string",
+            "nullable": true
+          },
+          "user_Login": {
+            "type": "string",
+            "nullable": true
+          },
+          "user_Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "game_ID": {
+            "type": "string",
+            "nullable": true
+          },
+          "game_Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "viewer_Count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "started_At": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "language": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnail_Url": {
+            "type": "string",
+            "nullable": true
+          },
+          "tag_IDs": {
+            "type": "array",
+            "items": {},
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "is_Mature": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserDataPayload": {
+        "type": "object",
+        "properties": {
+          "usersResponse": {
+            "$ref": "#/components/schemas/UsersResponseData"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserDataPayloadResultMessage": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "payload": {
+            "$ref": "#/components/schemas/UserDataPayload"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UsersResponseData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "login": {
+            "type": "string",
+            "nullable": true
+          },
+          "display_Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "broadcaster_Type": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "profile_Image_Url": {
+            "type": "string",
+            "nullable": true
+          },
+          "offline_Image_Url": {
+            "type": "string",
+            "nullable": true
+          },
+          "view_Count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_At": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

@@ -9,17 +9,17 @@ internal class DiscordClientService(IDiscordClientAsync discordClient) : IDiscor
   {
     var result = await discordClient.GetChannelNameAsync(channelID, cancellationToken);
     return result.Match(
-      s => Results.Ok(new ResultMessage()
+      s => Results.Ok(new ResultMessage<Payloads.ChannelNamePayload>()
       {
         Success = true,
         Message = string.Empty,
-        Payload = new { channelID = channelID, channelName = s.Value },
+        Payload = new Payloads.ChannelNamePayload(channelID, s.Value),
       }),
-      nf => Results.Ok(new ResultMessage()
+      nf => Results.Ok(new ResultMessage<Payloads.ChannelNamePayload>()
       {
         Success = false,
         Message = "Channel Not Found",
-        Payload = new { }
+        Payload = new Payloads.ChannelNamePayload(channelID, string.Empty),
       }));
   }
 
@@ -27,17 +27,17 @@ internal class DiscordClientService(IDiscordClientAsync discordClient) : IDiscor
   {
     var result = discordClient.GetGuildName(guildID);
     return result.Match(
-      s => Results.Ok(new ResultMessage()
+      s => Results.Ok(new ResultMessage<Payloads.GuildNamePayload>()
       {
         Success = true,
         Message = string.Empty,
-        Payload = new { guildID = guildID, guildName = s.Value },
+        Payload = new Payloads.GuildNamePayload(guildID, s.Value),
       }),
-      nf => Results.Ok(new ResultMessage()
+      nf => Results.Ok(new ResultMessage<Payloads.GuildNamePayload>()
       {
         Success = false,
         Message = "Guild Not Found",
-        Payload = new { }
+        Payload = new Payloads.GuildNamePayload(guildID, string.Empty),
       }));
   }
 }

@@ -1,7 +1,7 @@
 ﻿namespace TWN.DiscordBot.WebHost;
-internal readonly struct ResultMessage
+internal readonly struct ResultMessage<T>
 {
   public bool Success { get; init; }
   public string Message { get; init; }
-  public object Payload { get; init; }
+  public T Payload { get; init; }
 }

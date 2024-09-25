@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
@@ -92,7 +93,9 @@ public static class InitExtensions
             Name = "DataStore"
           },
         ]
-      });
+      })
+      .Produces<ResultMessage<Payloads.AnnouncementsPayload>>(StatusCodes.Status200OK);
+
     webApplication
       .MapPost("/api/data/announcement", async (IDataStoreServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong channelID)
         => await dataStoreService.AddAnnouncementAsync(twitchUser, guildID, channelID, new CancellationTokenSource().Token))
@@ -104,7 +107,9 @@ public static class InitExtensions
             Name = "DataStore"
           },
         ]
-      });
+      })
+      .Produces<ResultMessage<Payloads.AnnouncementPayload>>(StatusCodes.Status200OK);
+
     webApplication
       .MapDelete("/api/data/announcement", async (IDataStoreServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong? channelID)
         => await dataStoreService.DeleteAnnouncementAsync(twitchUser, guildID, channelID, new CancellationTokenSource().Token))
@@ -116,7 +121,8 @@ public static class InitExtensions
             Name = "DataStore"
           },
         ]
-      });
+      })
+      .Produces<ResultMessage<Payloads.EmptyPayload>>(StatusCodes.Status200OK);
   }
 
   private static void MapDiscordAPI(this WebApplication webApplication)
@@ -132,7 +138,9 @@ public static class InitExtensions
             Name = "Discord"
           },
         ]
-      });
+      })
+      .Produces<ResultMessage<Payloads.ChannelNamePayload>>(StatusCodes.Status200OK);
+
     webApplication
       .MapGet("/api/discord/guildName", (IDiscordClientServiceAsync discordClientService, ulong guildID)
         => discordClientService.GetGuildName(guildID))
@@ -144,7 +152,8 @@ public static class InitExtensions
             Name = "Discord"
           },
         ]
-      });
+      })
+      .Produces<ResultMessage<Payloads.GuildNamePayload>>(StatusCodes.Status200OK);
   }
 
   private static void MapTwitchAPI(this WebApplication webApplication)
@@ -160,7 +169,10 @@ public static class InitExtensions
             Name = "Twitch"
           },
         ]
-      });
+      })
+      .Produces<Payloads.StreamDataPayload>(StatusCodes.Status200OK)
+      .Produces<Payloads.StreamDataPayload>(StatusCodes.Status500InternalServerError);
+
     webApplication
       .MapGet("/api/twitch/getUser", async (ITwitchClientServiceAsync twitchClientService, string username)
         => await twitchClientService.GetUserDataAsync(username, new CancellationTokenSource().Token))
@@ -172,6 +184,8 @@ public static class InitExtensions
             Name = "Twitch"
           },
         ]
-      });
+      })
+      .Produces<ResultMessage<Payloads.UserDataPayload>>(StatusCodes.Status200OK)
+      .Produces<ResultMessage<Payloads.UserDataPayload>>(StatusCodes.Status500InternalServerError);
   }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 using TWN.DiscordBot.Interfaces;
+using TWN.DiscordBot.Interfaces.Types;
 
 namespace TWN.DiscordBot.WebHost.Services;
 internal class TwitchClientService(ITwitchClientAsync twitchClient)
@@ -16,37 +18,25 @@ internal class TwitchClientService(ITwitchClientAsync twitchClient)
         var streamsResponseData = streamsResponse.Data?.FirstOrDefault(srd => srd.User_Login == username);
         return streamsResponseData switch
         {
-          not null => Results.Ok(new ResultMessage()
+          not null => Results.Ok(new ResultMessage<Payloads.StreamDataPayload>()
           {
             Success = true,
             Message = string.Empty,
-            Payload = new
-            {
-              streamsResponseData = streamsResponseData,
-              isOnline = true,
-            },
+            Payload = new Payloads.StreamDataPayload(streamsResponseData, true),
           }),
-          _ => Results.Ok(new ResultMessage()
+          _ => Results.Ok(new ResultMessage<Payloads.StreamDataPayload>()
           {
             Success = true,
             Message = $"User {username} not found",
-            Payload = new
-            {
-              streamsResponseData = new { },
-              isOnline = false,
-            },
+            Payload = new Payloads.StreamDataPayload(streamsResponseData, false),
           }),
         };
       },
-      err => Results.Json(data: new ResultMessage()
+      err => Results.Json(data: new ResultMessage<Payloads.StreamDataPayload>()
       {
         Success = false,
         Message = err.Value.Message,
-        Payload = new
-        {
-          streamsResponseData = new { },
-          isOnline = false,
-        },
+        Payload = new Payloads.StreamDataPayload(null, false),
       },
       statusCode: StatusCodes.Status500InternalServerError)
     );
@@ -62,29 +52,25 @@ internal class TwitchClientService(ITwitchClientAsync twitchClient)
         var usersResponseData = usersResponse.Data.FirstOrDefault(urd => urd.Login == username);
         return usersResponseData switch
         {
-          not null => Results.Ok(new ResultMessage()
+          not null => Results.Ok(new ResultMessage<Payloads.UserDataPayload>()
           {
             Success = true,
             Message = string.Empty,
-            Payload = new { usersResponse = usersResponseData },
+            Payload = new Payloads.UserDataPayload(usersResponseData),
           }),
-          _ => Results.NotFound(new ResultMessage()
+          _ => Results.NotFound(new ResultMessage<Payloads.UserDataPayload>()
           {
             Success = false,
             Message = $"User {username} not found",
-            Payload = new { usersResponse = new { } },
+            Payload = new Payloads.UserDataPayload(usersResponseData),
           }),
         };
       },
-      err => Results.Json(data: new ResultMessage()
+      err => Results.Json(data: new ResultMessage<Payloads.UserDataPayload>()
       {
         Success = false,
         Message = err.Value.Message,
-        Payload = new
-        {
-          usersResponse = new { },
-          isOnline = false,
-        },
+        Payload = new Payloads.UserDataPayload(null),
       },
       statusCode: StatusCodes.Status500InternalServerError)
     );
