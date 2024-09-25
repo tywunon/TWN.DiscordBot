@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace TWN.DiscordBot.Bot.BackgroundServices;
@@ -29,8 +23,8 @@ internal abstract class PeriodicBackgroundService(ILogger<PeriodicBackgroundServ
     }
   }
 
-
-  protected async virtual Task InitAsync(CancellationToken cancellationToken) => await Task.CompletedTask;
+  protected async virtual Task InitAsync(CancellationToken cancellationToken) 
+    => await Task.CompletedTask;
   protected abstract Task<TimeSpan> GetInterval(CancellationToken cancellationToken);
   protected abstract Task ExecutePeriodicAsync(CancellationToken cancellationToken);
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace TWN.DiscordBot.Bot.BackgroundServices;
 internal class LogCleaner(ILogger<LogCleaner> logger) : PeriodicBackgroundService(logger)

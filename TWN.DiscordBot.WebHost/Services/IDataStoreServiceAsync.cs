@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-using TWN.DiscordBot.Interfaces.Types;
-
 namespace TWN.DiscordBot.WebHost.Services;
 internal interface IDataStoreServiceAsync
 {

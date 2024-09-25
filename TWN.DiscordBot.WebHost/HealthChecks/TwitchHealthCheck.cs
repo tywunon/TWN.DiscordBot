@@ -5,10 +5,7 @@ using TWN.DiscordBot.Interfaces;
 namespace TWN.DiscordBot.WebHost.HealthChecks;
 internal class TwitchHealthCheck(ITwitchClientAsync twitchClient) : IHealthCheck
 {
-  async Task<HealthCheckResult> IHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken)
-  {
-    return await twitchClient.HealthCheckAsync(cancellationToken)
+  async Task<HealthCheckResult> IHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken) => await twitchClient.HealthCheckAsync(cancellationToken)
       ? HealthCheckResult.Healthy("Twitch is healthy")
       : HealthCheckResult.Unhealthy("Twitch is unhealthy");
-  }
 }
