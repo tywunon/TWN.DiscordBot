@@ -16,14 +16,14 @@ internal abstract class PeriodicBackgroundService(ILogger<PeriodicBackgroundServ
       {
         await ExecutePeriodicAsync(stoppingToken);
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         logger.LogError(ex, "An exception was thrown in periodic execution");
       }
     }
   }
 
-  protected async virtual Task InitAsync(CancellationToken cancellationToken) 
+  protected async virtual Task InitAsync(CancellationToken cancellationToken)
     => await Task.CompletedTask;
   protected abstract Task<TimeSpan> GetInterval(CancellationToken cancellationToken);
   protected abstract Task ExecutePeriodicAsync(CancellationToken cancellationToken);
