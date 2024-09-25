@@ -9,13 +9,13 @@ internal class DiscordClientService(IDiscordClientAsync discordClient) : IDiscor
   {
     var result = await discordClient.GetChannelNameAsync(channelID, cancellationToken);
     return result.Match(
-      s => Results.Ok(Results.Ok(new ResultMessage()
+      s => Results.Ok(new ResultMessage()
       {
         Success = true,
         Message = string.Empty,
         Payload = new { channelID = channelID, channelName = s.Value },
-      })),
-      nf => Results.NotFound(new ResultMessage()
+      }),
+      nf => Results.Ok(new ResultMessage()
       {
         Success = false,
         Message = "Channel Not Found",
@@ -33,7 +33,7 @@ internal class DiscordClientService(IDiscordClientAsync discordClient) : IDiscor
         Message = string.Empty,
         Payload = new { guildID = guildID, guildName = s.Value },
       }),
-      nf => Results.NotFound(new ResultMessage()
+      nf => Results.Ok(new ResultMessage()
       {
         Success = false,
         Message = "Guild Not Found",

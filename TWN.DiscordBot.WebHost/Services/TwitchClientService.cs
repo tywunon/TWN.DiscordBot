@@ -26,7 +26,7 @@ internal class TwitchClientService(ITwitchClientAsync twitchClient)
               isOnline = true,
             },
           }),
-          _ => Results.NotFound(new ResultMessage()
+          _ => Results.Ok(new ResultMessage()
           {
             Success = true,
             Message = $"User {username} not found",

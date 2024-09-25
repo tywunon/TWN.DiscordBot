@@ -5,8 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using NReco.Logging.File;
-
+using TWN.DiscordBot.App.BackgroundServices;
 using TWN.DiscordBot.Interfaces;
+using TWN.DiscordBot.WebHost;
 
 namespace TWN.DiscordBot.App;
 
@@ -82,9 +83,10 @@ internal class Program
       ;
 
     var host = builder.Build();
-    host.InitBotAPI();
+    host.USeBotAPI();
     host.UseStatusCodePages();
     host.UseHttpsRedirection();
+    host.MapBotAPI();
 
     await host.RunAsync();
   }

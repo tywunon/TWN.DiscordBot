@@ -1,15 +1,49 @@
 ﻿using HealthChecks.UI.Client;
 
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 
+using TWN.DiscordBot.WebHost;
+using TWN.DiscordBot.WebHost.HealthChecks;
 using TWN.DiscordBot.WebHost.Services;
 
-namespace Microsoft.AspNetCore.Builder;
+namespace TWN.DiscordBot.WebHost;
 
-public static class WebApplicationExtension
+public static class InitExtensions
 {
-  public static void InitBotAPI(this WebApplication webApplication)
+  public static IServiceCollection AddBotAPIServices(this IServiceCollection serviceCollection)
+  {
+    return serviceCollection
+      .AddSingleton<IDataStoreServiceAsync, DataStoreService>()
+      .AddSingleton<IDiscordClientServiceAsync, DiscordClientService>()
+      .AddSingleton<ITwitchClientServiceAsync, TwitchClientService>()
+      .AddEndpointsApiExplorer()
+      .AddHealthChecks()
+        .AddCheck<TwitchHealthCheck>("Twitch API", HealthStatus.Unhealthy)
+        .AddCheck<DiscordHealthCheck>("Discord.Net", HealthStatus.Unhealthy)
+        .AddCheck<DataStoreHealthCheck>("Datastore", HealthStatus.Unhealthy)
+        .Services
+      .AddHealthChecksUI(opt =>
+      {
+        opt
+          .SetEvaluationTimeInSeconds(10)
+          .MaximumHistoryEntriesPerEndpoint(60)
+          .SetApiMaxActiveRequests(1)
+          .AddHealthCheckEndpoint("feedback api", "/api/health")
+        ;
+      })
+        .AddInMemoryStorage()
+        .Services
+      .AddSwaggerGen(sgo =>
+      {
+      })
+    ;
+  }
+
+  public static void USeBotAPI(this WebApplication webApplication)
   {
     webApplication.UseHealthChecks();
 
@@ -20,7 +54,10 @@ public static class WebApplicationExtension
 #endif
     ;
     webApplication.UseDeveloperExceptionPage();
+  }
 
+  public static void MapBotAPI(this WebApplication webApplication)
+  {
     webApplication.MapDataAPI();
     webApplication.MapDiscordAPI();
     webApplication.MapTwitchAPI();

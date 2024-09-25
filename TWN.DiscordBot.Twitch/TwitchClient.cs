@@ -10,6 +10,7 @@ using System.Net.Http.Json;
 using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
 using TWN.DiscordBot.Settings;
+using TWN.DiscordBot.Utils;
 
 namespace TWN.DiscordBot.Twitch;
 public class TwitchClient(IHttpClientFactory httpClientFactory,
