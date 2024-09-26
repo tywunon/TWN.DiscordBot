@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazor.Bootstrap" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TWN.DiscordBot.Interfaces\TWN.DiscordBot.Interfaces.csproj" />
+    <ProjectReference Include="..\TWN.DiscordBot.Settings\TWN.DiscordBot.Settings.csproj" />
+    <ProjectReference Include="..\TWN.DiscordBot.Twitch\TWN.DiscordBot.Twitch.csproj" />
+    <ProjectReference Include="..\TWN.DiscordBot.WebClient\TWN.DiscordBot.WebClient.csproj" />
+  </ItemGroup>
+
+</Project>

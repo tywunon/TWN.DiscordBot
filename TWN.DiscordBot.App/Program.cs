@@ -23,9 +23,9 @@ internal class Program
     builder.Configuration
       .AddJsonFile($"appsettings.json", false, true);
 
-    var settings = builder.Configuration.GetRequiredSection(nameof(Settings))
-      .Get<Settings.Settings>() 
-      ?? new Settings.Settings(
+    var settings = builder.Configuration.GetRequiredSection("Settings")
+      .Get<Settings.BotSettings>() 
+      ?? new Settings.BotSettings(
         WebHost: new(Test: "Test", 
                      Urls: []),
         Watcher: new(Delay: 1000,

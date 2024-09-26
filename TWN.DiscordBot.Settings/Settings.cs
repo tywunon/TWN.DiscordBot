@@ -1,13 +1,16 @@
 ﻿namespace TWN.DiscordBot.Settings;
-public sealed record Settings(WebHostSettings WebHost,
-                              WatcherSettings Watcher,
-                              DiscordSettings Discord,
-                              TwitchSettings Twitch,
-                              IEnumerable<GuildConfig> GuildConfig,
-                              DataStoreSettings DataStore,
-                              TCPProbeSettings TCPProbe);
+public sealed record BotSettings(WebHostSettings WebHost,
+                                 WatcherSettings Watcher,
+                                 DiscordSettings Discord,
+                                 TwitchSettings Twitch,
+                                 IEnumerable<GuildConfig> GuildConfig,
+                                 DataStoreSettings DataStore,
+                                 TCPProbeSettings TCPProbe);
 
-public sealed record WebHostSettings(string Test, 
+public sealed record ControlPanelSettings(IEnumerable<WebClientConfig> WebClient,
+                                          TwitchSettings Twitch);
+
+public sealed record WebHostSettings(string Test,
                                      IEnumerable<string> Urls);
 
 public sealed record WatcherSettings(int Delay,
@@ -31,4 +34,5 @@ public sealed record GuildConfig(ulong GuildID,
 public sealed record DataStoreSettings(string FilePath);
 
 public sealed record TCPProbeSettings(short Port);
+public sealed record WebClientConfig(string Name, string BaseURL);
 
