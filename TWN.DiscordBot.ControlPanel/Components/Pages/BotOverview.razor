@@ -1,0 +1,164 @@
+﻿@using TWN.DiscordBot.ControlPanel.Provider
+@inject IBotDataController botDataController;
+@inject NavigationManager navigationManager
+<Button Color="ButtonColor.Primary" @onclick="()=> HandleAdd()"><Icon Name="IconName.DatabaseFillAdd"></Icon></Button>
+|
+<Button Color="ButtonColor.Primary" @onclick="()=> HandleReload()"><Icon Name="IconName.ArrowClockwise"></Icon></Button>
+<hr />
+<Grid @ref="dataGrid"
+      TItem="Provider.AnnouncementData"
+      Class="table table-hover border-top"
+      DataProvider="AnnouncementsDataProvider"
+      AllowDetailView="true">
+  <GridColumns>
+    <GridColumn HeaderText="" TItem="Provider.AnnouncementData" class="align-middle">
+      <Button Color="ButtonColor.Primary" @onclick="() => HandleRun(context)"><Icon Name="IconName.PlayFill"></Icon></Button>
+    </GridColumn>
+    <GridColumn HeaderText="Twitch User" TItem="Provider.AnnouncementData" PropertyName="TwitchUser" class="align-middle">
+      <Image Src="@context.ProfilePicture" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
+      <Badge Color="@GetBadgeColor(context.IsOnline)" Class="p-2">
+        <Icon Name="IconName.Twitch" />
+        <span class="p-2">@context.TwitchUser</span>
+      </Badge>
+    </GridColumn>
+    <GridColumn HeaderText="Guild Name" TItem="Provider.AnnouncementData" PropertyName="GuildName" class="align-middle">
+      <Image Src="@context.AnnouncementDiscordData.GuildIconUrl" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
+      <span class="p-2">@context.AnnouncementDiscordData.GuildName</span>
+    </GridColumn>
+    <GridColumn HeaderText="Channel Name" TItem="Provider.AnnouncementData" PropertyName="ChannelName" class="align-middle">
+      <span>@context.AnnouncementDiscordData.ChannelName</span>
+    </GridColumn>
+    <GridColumn HeaderText="" TItem="Provider.AnnouncementData" class="align-middle">
+      <Button Color="ButtonColor.Danger" @onclick="() => HandleDelete(context)"><Icon Name="IconName.TrashFill"></Icon></Button>
+    </GridColumn>
+  </GridColumns>
+
+  <GridDetailView @ref="dataGridDetail" TItem="Provider.AnnouncementData">
+    <Card Style="width:18rem;">
+      <CardHeader>
+        <Icon Name="IconName.Twitch" />
+        <span class="p-2">@context.TwitchUser</span>
+        <NavLink>@context.AnnouncementTwitchUserData.TwitchDisplayName</NavLink>
+      </CardHeader>
+      <CardBody>
+        <Image Class="" Src="@context.AnnouncementTwitchUserData.ProfilePicture" Style="width: 150px; height: 150px"></Image>
+      </CardBody>
+      <CardFooter>
+
+      </CardFooter>
+    </Card>
+  </GridDetailView>
+</Grid>
+
+<Modal @ref="addDialog" Title="Add new Announcement">
+  <BodyTemplate>
+    <Accordion @ref="addDialogAccordion" OnShown="HandleAddDialogOnShown">
+      @foreach (var guildData in GetAddDialogData().GuildData)
+      {
+        <AccordionItem>
+          <TitleTemplate>
+            <Image Src="@guildData.GuildIconUrl" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
+            <span class="p-2">@guildData.GuildName</span>
+          </TitleTemplate>
+          <Content>
+            @foreach (var category in guildData.DiscordChannelData.GroupBy(dcd => (dcd.CategoryID, dcd.CategoryName, dcd.CategoryPosition)).OrderBy(g => g.Key.CategoryPosition))
+            {
+              <Grid TItem="DiscordClientChannelData"
+                    Data="category"
+                    Class="table table-hover border-top"
+                    AllowSelection="true">
+                <GridColumns>
+                  <GridColumn TItem="DiscordClientChannelData"
+                              HeaderText="@category.Key.CategoryName"
+                              PropertyName="ChannelName"
+                              SortKeySelector="@(item => item.ChannelPosition)"
+                              IsDefaultSortColumn="true">
+                    @context.ChannelName
+                  </GridColumn>
+                </GridColumns>
+              </Grid>
+            }
+          </Content>
+        </AccordionItem>
+      }
+    </Accordion>
+  </BodyTemplate>
+  <FooterTemplate>
+    <Button Color="ButtonColor.Secondary" @onclick="async () => await addDialog.HideAsync()">Close</Button>
+    <Button Color="ButtonColor.Primary" @onclick="HandleDialogAdd">Add Announcement</Button>
+  </FooterTemplate>
+</Modal>
+
+@code {
+  [Parameter]
+  public string? BotID { get; set; }
+
+  private string? botName;
+
+  private Grid<Provider.AnnouncementData>? dataGrid;
+  private GridDetailView<Provider.AnnouncementData>? dataGridDetail;
+  private Modal? addDialog;
+  private Accordion? addDialogAccordion;
+
+  private async Task<GridDataProviderResult<Provider.AnnouncementData>> AnnouncementsDataProvider(GridDataProviderRequest<Provider.AnnouncementData> request)
+    => await Task.FromResult(request.ApplyTo(await GetBotAnnouncements(BotID, request.CancellationToken)));
+
+  private async Task<AutoCompleteDataProviderResult<Provider.AnnouncementData>> AnnouncementsDataProvider(AutoCompleteDataProviderRequest<Provider.AnnouncementData> request)
+    => await Task.FromResult(request.ApplyTo(await GetBotAnnouncements(BotID, request.CancellationToken)));
+
+  private async Task<IEnumerable<AnnouncementData>> GetBotAnnouncements(string? botID, CancellationToken cancellationToken)
+    => await botDataController.GetBotAnnouncementsAsync(BotID, cancellationToken);
+
+  private DiscordClientData GetAddDialogData()
+  {
+    return Task.Run(async () => await botDataController.GetDiscordClientDataAsync(BotID, CancellationToken.None)).Result;
+  }
+
+  protected override async Task OnInitializedAsync()
+  {
+    await base.OnInitializedAsync();
+
+    botName = await botDataController.GetBotNameAsync(BotID, CancellationToken.None) ?? "Unknown Bot";
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    await base.OnAfterRenderAsync(firstRender);
+  }
+
+  public async Task HandleReload()
+  {
+    await dataGrid.RefreshDataAsync();
+  }
+
+  public async Task HandleAdd()
+  {
+    await addDialog.ShowAsync();
+  }
+
+  public async Task HandleDialogAdd()
+  {
+    await addDialog.HideAsync();
+    await Task.CompletedTask;
+  }
+
+  public async Task HandleDelete(Provider.AnnouncementData announcementData)
+  {
+    await Task.CompletedTask;
+  }
+
+  public async Task HandleRun(Provider.AnnouncementData announcementData)
+  {
+    await Task.CompletedTask;
+  }
+
+  public void HandleAddDialogOnShown()
+  {
+    if (addDialogAccordion is not null)
+      addDialogAccordion.ShowFirstAccordionItemAsync();
+  }
+
+
+  private IconColor GetIconColor(bool isOnline) => isOnline ? IconColor.Success : IconColor.Danger;
+  private BadgeColor GetBadgeColor(bool isOnline) => isOnline ? BadgeColor.Success : BadgeColor.Danger;
+}

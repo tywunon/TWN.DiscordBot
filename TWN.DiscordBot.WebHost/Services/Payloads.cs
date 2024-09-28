@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 using TWN.DiscordBot.Interfaces.Types;
 
@@ -14,6 +11,10 @@ internal static class Payloads
   internal record AnnouncementPayload(Announcement Announcement) { }
   internal record ChannelNamePayload(ulong ChannelID, string ChannelName);
   internal record GuildNamePayload(ulong GuildID, string GuildName);
-  internal record StreamDataPayload(StreamsResponseData? StreamsResponse, bool IsOnline);
-  internal record UserDataPayload(UsersResponseData? UsersResponse);
+  internal record GuildIconUrlPayload(ulong GuildID, string GuildIconUrl);
+  internal record DiscordClientDataPayload([AllowNull] DiscordClientData? DiscordClientData);
+  internal record StreamDataPayload([AllowNull] StreamsResponseData? StreamsResponse, bool IsOnline);
+  internal record UserDataPayload([AllowNull]UsersResponseData? UsersResponse);
+  internal record HealthCheckPayload(string Status, TimeSpan TotalDuration, IDictionary<string, HealthCheckPayloadEntry> Entries);
+  internal record HealthCheckPayloadEntry(IReadOnlyDictionary<string, object> Data, string? Description, TimeSpan Duration, string Status, IEnumerable<string> Tags);
 }

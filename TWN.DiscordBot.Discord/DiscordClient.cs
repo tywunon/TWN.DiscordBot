@@ -16,6 +16,7 @@ using System.Web;
 using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
 using TWN.DiscordBot.Settings;
+using TWN.DiscordBot.Utils;
 
 namespace TWN.DiscordBot.Discord;
 public class DiscordClient : Interfaces.IDiscordClientAsync
@@ -413,6 +414,16 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
       return new Result<string>(guildName);
   }
 
+  public OneOf<Result<string>, NotFound> GetGuildIconUrl(ulong guildID)
+  {
+    var guild = discordSocketClient.GetGuild(guildID);
+    var guildIconUrl = guild?.IconUrl;
+    if (guildIconUrl is null)
+      return new NotFound();
+    else
+      return new Result<string>(guildIconUrl);
+  }
+
   public Task<DiscordConnectionState> HealthCheckAsync(CancellationToken cancellationToken)
   {
     if (cancellationToken.IsCancellationRequested)
@@ -428,5 +439,36 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
         _ => default,
       };
     return Task.FromResult(result);
+  }
+
+  public OneOf<Result<DiscordClientData>, Error<Exception>> GetDiscordClientData()
+  {
+    try
+    {
+      return new Result<DiscordClientData>(new()
+      {
+        GuildData = discordSocketClient.Guilds.Select(g => new DiscordClientGuildData()
+        {
+          GuildID = g.Id,
+          GuildName = g.Name,
+          GuildIconUrl = g.IconUrl,
+          DiscordChannelData = g.TextChannels.Select(tch => new DiscordClientChannelData()
+          {
+            ChannelID = tch.Id,
+            ChannelName = tch.Name,
+            ChannelPosition = tch.Position,
+            CategoryID = tch.Category.Id,
+            CategoryName = tch.Category.Name,
+            CategoryPosition = tch.Category.Position,
+          })
+        })
+      });
+
+    }
+    catch (Exception ex)
+    {
+      WriteLog(new LogMessage(LogSeverity.Error, "GetDiscordClientData", ex.Message, ex));
+      return new Error<Exception>(ex);
+    }
   }
 }

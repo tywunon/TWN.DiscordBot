@@ -34,5 +34,5 @@ public sealed record GuildConfig(ulong GuildID,
 public sealed record DataStoreSettings(string FilePath);
 
 public sealed record TCPProbeSettings(short Port);
-public sealed record WebClientConfig(string Name, string BaseURL);
+public sealed record WebClientConfig(string Name, string ID, string BaseURL);
 

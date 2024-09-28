@@ -5,8 +5,8 @@ using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
 
 namespace TWN.DiscordBot.WebHost.Services;
-internal class TwitchClientService(ITwitchClientAsync twitchClient)
-: ITwitchClientServiceAsync
+internal class TwitchClientApiService(ITwitchClientAsync twitchClient)
+: ITwitchClientApiServiceAsync
 {
   public async Task<IResult> GetStreamDataAsync(string username, CancellationToken cancellationToken)
   {
@@ -22,13 +22,13 @@ internal class TwitchClientService(ITwitchClientAsync twitchClient)
           {
             Success = true,
             Message = string.Empty,
-            Payload = new Payloads.StreamDataPayload(streamsResponseData, true),
+            Payload = new (streamsResponseData, true),
           }),
           _ => Results.Ok(new ResultMessage<Payloads.StreamDataPayload>()
           {
             Success = true,
             Message = $"User {username} not found",
-            Payload = new Payloads.StreamDataPayload(streamsResponseData, false),
+            Payload = new (streamsResponseData, false),
           }),
         };
       },
@@ -36,7 +36,7 @@ internal class TwitchClientService(ITwitchClientAsync twitchClient)
       {
         Success = false,
         Message = err.Value.Message,
-        Payload = new Payloads.StreamDataPayload(null, false),
+        Payload = new (null, false),
       },
       statusCode: StatusCodes.Status500InternalServerError)
     );

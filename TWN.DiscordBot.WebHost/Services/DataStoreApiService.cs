@@ -4,7 +4,7 @@ using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
 
 namespace TWN.DiscordBot.WebHost.Services;
-internal class DataStoreService(IDataStoreAsync dataStore) : IDataStoreServiceAsync
+internal class DataStoreApiService(IDataStoreAsync dataStore) : IDataStoreApiServiceAsync
 {
   public async Task<IResult> GetAnnouncementsAsync(CancellationToken cancellationToken)
   {
@@ -14,7 +14,7 @@ internal class DataStoreService(IDataStoreAsync dataStore) : IDataStoreServiceAs
     {
       Success = true,
       Message = string.Empty,
-      Payload = new Payloads.AnnouncementsPayload(result),
+      Payload = new (result),
     });
   }
 
@@ -25,7 +25,7 @@ internal class DataStoreService(IDataStoreAsync dataStore) : IDataStoreServiceAs
     {
       Success = true,
       Message = string.Empty,
-      Payload = new Payloads.AnnouncementPayload(result),
+      Payload = new (result),
     });
   }
 
@@ -36,7 +36,7 @@ internal class DataStoreService(IDataStoreAsync dataStore) : IDataStoreServiceAs
     {
       Success = true,
       Message = string.Empty,
-      Payload = new Payloads.EmptyPayload(),
+      Payload = new (),
     });
   }
 }

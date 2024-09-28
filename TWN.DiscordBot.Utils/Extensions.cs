@@ -1,4 +1,6 @@
-﻿namespace TWN.DiscordBot.Utils
+﻿using Microsoft.Extensions.Logging;
+
+namespace TWN.DiscordBot.Utils
 {
   public static class SystemCollectionsGenericExtension
   {
@@ -11,13 +13,8 @@
 
     public static bool RemoveAll<K, V>(this IDictionary<K, V> self, Func<KeyValuePair<K, V>, bool> predicate)
       => self.Filter(predicate).ToList().All(self.Remove);
-  }
 
-  public static class SystemNetHttpExtension
-  {
-    public static HttpClient CreateTwitchOAuthClient(this IHttpClientFactory httpClientFactory)
-      => httpClientFactory.CreateClient("TwitchOAuth");
-    public static HttpClient CreateTwitchAPIClient(this IHttpClientFactory httpClientFactory)
-      => httpClientFactory.CreateClient("TwitchAPI");
+    public static void LogException(this ILogger self, Exception exception, string source) 
+      => self.LogError(exception, "[{source}] {Message}", source, exception.Message);
   }
 }

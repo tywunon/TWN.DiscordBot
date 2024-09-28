@@ -1,16 +1,22 @@
-﻿@inherits LayoutComponentBase
+﻿@using TWN.DiscordBot.ControlPanel.Provider
+@inherits LayoutComponentBase
+@inject IBotDataController dataProvider;
 
 <div class="bb-page">
 
-  <Sidebar 
-           IconName="IconName.BootstrapFill"
-           Title="Blazor Bootstrap"
-           DataProvider="SidebarDataProvider" />
+@*   <Sidebar @ref="sidebar"
+            Href="/"
+            Title="ControlPanel"
+            BadgeText="TWN.DiscordBot"
+            DataProvider="SidebarDataProvider"
+            ImageSrc="lx_trans.png"
+            Width="300"
+  data-bs-theme="dark" /> *@
 
   <main>
-    <div class="bb-top-row px-4 d-flex justify-content-end">
-      <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-    </div>
+@*     <div class="bb-top-row px-4 d-flex justify-content-between">
+      <Icon Name="IconName.List" Color="IconColor.Body" role="button" @onclick="ToggleSidebar" />
+    </div> *@
 
     <article class="content px-4">
       <div class="py-2">@Body</div>
@@ -20,21 +26,17 @@
 </div>
 
 @code {
-
-  private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
+  Sidebar sidebar = default!;
+  private Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
   {
-    return await Task.FromResult(request.ApplyTo(GetNavItems()));
+    return Task.FromResult(request.ApplyTo([new(){
+      IconName = IconName.Robot,
+      Href="/",
+      Text = "Discord Bots",
+      Class = ""
+  }]));
   }
-
-  private IEnumerable<NavItem> GetNavItems()
-  {
-    return new List<NavItem>
-                   {
-                       new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match=NavLinkMatch.All},
-                       new NavItem { Id = "2", Href = "/counter", IconName = IconName.PlusSquareFill, Text = "Counter"},
-                       new NavItem { Id = "3", Href = "/weather", IconName = IconName.Table, Text = "Fetch Data"},
-                   };
-  }
+  private void ToggleSidebar() => sidebar?.ToggleSidebar();
 }
 
 

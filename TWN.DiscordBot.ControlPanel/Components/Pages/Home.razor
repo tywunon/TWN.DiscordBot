@@ -1,7 +1,70 @@
 ﻿@page "/"
+@using TWN.DiscordBot.ControlPanel.Provider
+@inject IBotDataController botDataController;
 
-<PageTitle>Home</PageTitle>
+<PageTitle>ControlPanel</PageTitle>
 
-<h1>Hello, world!</h1>
+<Accordion AlwaysOpen="false" @ref="accordion">
+  @foreach (var metaData in GetBotMetaData())
+  {
+    <AccordionItem>
+      <TitleTemplate>
+        <Icon Name="IconName.Discord" Size="IconSize.x2" Color="@GetIconColor(metaData.Status)"></Icon>
+        <span class="p-2 align-middle">|</span>
+        <span class="fs-5 align-middle">@metaData.Name</span>
+      </TitleTemplate>
+      <Content>
+        <BotOverview BotID="@metaData.ID"></BotOverview>
+      </Content>
+    </AccordionItem>
+  }
+</Accordion>
 
-Welcome to your new app.
+@code {
+  private IEnumerable<BotMetaData>? botMetaData;
+  private Accordion? accordion;
+
+  protected async override Task OnInitializedAsync()
+  {
+    await base.OnInitializedAsync();
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      if (accordion is not null)
+        await accordion.ShowFirstAccordionItemAsync();
+    }
+    await base.OnAfterRenderAsync(firstRender);
+  }
+
+  private IEnumerable<BotMetaData> GetBotMetaData()
+  {
+    if (!botMetaData?.Any() ?? false)
+      botMetaData = default;
+    return botMetaData = botMetaData ?? Task.Run(async () => await botDataController.GetBotMetaDataAsync(CancellationToken.None)).Result;
+  }
+
+  private IconColor GetIconColor(BotMetaDataStatus status)
+  {
+    return status switch
+    {
+      BotMetaDataStatus.Healthy => IconColor.Success,
+      BotMetaDataStatus.Degraded => IconColor.Warning,
+      BotMetaDataStatus.Unhealthy => IconColor.Danger,
+      _ => IconColor.Danger
+    };
+  }
+
+  private BadgeColor GetBadgeColor(BotMetaDataStatus status)
+  {
+    return status switch
+    {
+      BotMetaDataStatus.Healthy => BadgeColor.Success,
+      BotMetaDataStatus.Degraded => BadgeColor.Warning,
+      BotMetaDataStatus.Unhealthy => BadgeColor.Danger,
+      _ => BadgeColor.Danger
+    };
+  }
+}

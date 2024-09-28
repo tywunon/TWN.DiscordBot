@@ -1,4 +1,5 @@
 using TWN.DiscordBot.ControlPanel.Components;
+using TWN.DiscordBot.ControlPanel.Provider;
 
 namespace TWN.DiscordBot.ControlPanel;
 internal class Program
@@ -24,13 +25,19 @@ internal class Program
                     ClientID: string.Empty,
                     ClientSecret: string.Empty));
 
-    foreach (var x in settings.WebClient)
-    {
-      builder.Services.AddHttpClient(x.Name, client =>
-      {
-        client.BaseAddress = new(x.BaseURL);
-      });
-    }
+    //foreach (var webClient in settings.WebClient)
+    //{
+    //  builder.Services.AddHttpClient(webClient.ID, client =>
+    //  {
+    //    client.BaseAddress = new(webClient.BaseURL);
+    //    client.Timeout = TimeSpan.FromMilliseconds(500);
+    //  });
+    //}
+    builder.Services.AddHttpClient();
+
+    builder.Services
+      .AddSingleton<IBotDataController, BotDataController>()
+      .AddSingleton(settings.WebClient);
 
     var app = builder.Build();
 

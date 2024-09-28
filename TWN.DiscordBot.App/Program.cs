@@ -83,7 +83,7 @@ internal class Program
       ;
 
     var host = builder.Build();
-    host.USeBotAPI();
+    host.UseBotAPI();
     host.UseStatusCodePages();
     host.UseHttpsRedirection();
     host.MapBotAPI();
