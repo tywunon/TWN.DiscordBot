@@ -10,8 +10,7 @@ public sealed record BotSettings(WebHostSettings WebHost,
 public sealed record ControlPanelSettings(IEnumerable<WebClientConfig> WebClient,
                                           TwitchSettings Twitch);
 
-public sealed record WebHostSettings(string Test,
-                                     IEnumerable<string> Urls);
+public sealed record WebHostSettings(IEnumerable<string> Urls);
 
 public sealed record WatcherSettings(int Delay,
                                      double Horizon);

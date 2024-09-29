@@ -26,8 +26,7 @@ internal class Program
     var settings = builder.Configuration.GetRequiredSection("Settings")
       .Get<Settings.BotSettings>() 
       ?? new Settings.BotSettings(
-        WebHost: new(Test: "Test", 
-                     Urls: []),
+        WebHost: new(Urls: []),
         Watcher: new(Delay: 1000,
                      Horizon: 5 * 60 * 1000), // 5min
         Discord: new(Status: string.Empty,
