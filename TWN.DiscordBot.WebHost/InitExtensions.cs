@@ -52,12 +52,11 @@ public static class InitExtensions
 
   public static void UseBotAPI(this WebApplication webApplication)
   {
-    webApplication
 #if DEBUG
+    webApplication
     .UseSwagger()
-    .UseSwaggerUI()
+    .UseSwaggerUI();
 #endif
-    ;
     webApplication.UseDeveloperExceptionPage();
   }
 
