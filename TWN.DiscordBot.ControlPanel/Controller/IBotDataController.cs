@@ -1,6 +1,6 @@
 ﻿using TWN.DiscordBot.WebClient;
 
-namespace TWN.DiscordBot.ControlPanel.Provider;
+namespace TWN.DiscordBot.ControlPanel.Controller;
 
 public interface IBotDataController
 {

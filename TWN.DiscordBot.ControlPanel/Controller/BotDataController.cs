@@ -3,7 +3,7 @@ using TWN.DiscordBot.WebClient;
 using TWN.DiscordBot.Utils;
 using System.Numerics;
 
-namespace TWN.DiscordBot.ControlPanel.Provider;
+namespace TWN.DiscordBot.ControlPanel.Controller;
 
 public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHttpClientFactory httpClientFactory, ILogger<BotDataController> logger) : IBotDataController
 {
@@ -60,18 +60,77 @@ public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHt
         var guildIconUrlResult = await botClient.GetGuildIconUrlAsync(a.GuildID);
         var channelNameResult = await botClient.GetChannelNameAsync(a.ChannelID);
 
-        var twitchLogin = userDataResult.Success ? userDataResult.Payload.UsersResponse.Login : a.TwitchUser;
-        var twitchDisplayName = userDataResult.Success ? userDataResult.Payload.UsersResponse.Display_Name : a.TwitchUser;
-        var twitchProfilePicture = userDataResult.Success ? userDataResult.Payload.UsersResponse.Profile_Image_Url : string.Empty;
         var isOnline = streamDataResult.Success && streamDataResult.Payload.IsOnline;
+
         var guildName = guildNameResult.Success ? guildNameResult.Payload.GuildName : a.GuildID.ToString();
         var guildIconUrl = guildIconUrlResult.Success ? guildIconUrlResult.Payload.GuildIconUrl : string.Empty;
         var channelName = channelNameResult.Success ? channelNameResult.Payload.ChannelName : a.GuildID.ToString();
 
+        var announcementDiscordData = new AnnouncementDiscordData(channelName, guildIconUrl, channelName);
+
+        var announcementTwitchUserData = userDataResult.Success
+          ? new AnnouncementTwitchUserData(
+              userDataResult.Payload.UsersResponse.Id,
+              userDataResult.Payload.UsersResponse.Login,
+              userDataResult.Payload.UsersResponse.Display_Name,
+              userDataResult.Payload.UsersResponse.Type,
+              userDataResult.Payload.UsersResponse.Broadcaster_Type,
+              userDataResult.Payload.UsersResponse.Description,
+              userDataResult.Payload.UsersResponse.Profile_Image_Url,
+              userDataResult.Payload.UsersResponse.Offline_Image_Url,
+              userDataResult.Payload.UsersResponse.View_Count,
+              userDataResult.Payload.UsersResponse.Created_At)
+          : new AnnouncementTwitchUserData(
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              default,
+              default);
+
+        var announcementTwitchStreamData = streamDataResult.Success
+          ? new AnnouncementTwitchStreamData(
+              streamDataResult.Payload.StreamsResponse?.Id ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.User_Id ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.User_Login ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.User_Name ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.Game_ID ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.Game_Name ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.Type ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.Title ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.Viewer_Count ?? default,
+              streamDataResult.Payload.StreamsResponse?.Started_At ?? default,
+              streamDataResult.Payload.StreamsResponse?.Language ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.Thumbnail_Url ?? string.Empty,
+              streamDataResult.Payload.StreamsResponse?.Tag_IDs ?? [],
+              streamDataResult.Payload.StreamsResponse?.Tags ?? [],
+              streamDataResult.Payload.StreamsResponse?.Is_Mature ?? default
+            )
+          : new AnnouncementTwitchStreamData(
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              string.Empty,
+              default,
+              default,
+              string.Empty,
+              string.Empty,
+              [],
+              [],
+              default);
+
         var newAnnouncementData = new AnnouncementData(a.TwitchUser, isOnline,
-          AnnouncementDiscordData: new(channelName, guildIconUrl, channelName),
-          AnnouncementTwitchUserData: new(twitchLogin, twitchDisplayName, twitchProfilePicture),
-          AnnouncementTwitchStreamData: new());
+          AnnouncementDiscordData: announcementDiscordData,
+          AnnouncementTwitchUserData: announcementTwitchUserData,
+          AnnouncementTwitchStreamData: announcementTwitchStreamData);
         return newAnnouncementData;
       }));
       return [.. result];
@@ -123,20 +182,3 @@ public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHt
   private WebClientConfig? GetWebClientConfig(string? botID)
     => webClientConfig.FirstOrDefault(wcc => wcc.ID == botID);
 }
-
-public record BotMetaData(string Name, string ID, BotMetaDataStatus Status);
-public enum BotMetaDataStatus
-{
-  Unhealthy = 0,
-  Degraded = 1,
-  Healthy = 2,
-}
-
-public record AnnouncementData(string TwitchUser, bool IsOnline, AnnouncementDiscordData AnnouncementDiscordData, AnnouncementTwitchUserData AnnouncementTwitchUserData, AnnouncementTwitchStreamData AnnouncementTwitchStreamData);
-public record AnnouncementDiscordData(string GuildName, string GuildIconUrl, string ChannelName);
-public record AnnouncementTwitchUserData();
-
-public record AnnouncementTwitchStreamData();
-public record DiscordClientData(IEnumerable<DiscordClientGuildData> GuildData);
-public record DiscordClientGuildData(long GuildID, string GuildName, string GuildIconUrl, IEnumerable<DiscordClientChannelData> DiscordChannelData);
-public record DiscordClientChannelData(long ChannelID, string ChannelName, int ChannelPosition, long CategoryID, string CategoryName, int CategoryPosition);

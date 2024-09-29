@@ -1,5 +1,5 @@
 using TWN.DiscordBot.ControlPanel.Components;
-using TWN.DiscordBot.ControlPanel.Provider;
+using TWN.DiscordBot.ControlPanel.Controller;
 
 namespace TWN.DiscordBot.ControlPanel;
 internal class Program

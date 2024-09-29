@@ -1,47 +1,49 @@
-﻿@using TWN.DiscordBot.ControlPanel.Provider
+﻿@using TWN.DiscordBot.ControlPanel.Controller
 @inject IBotDataController botDataController;
-@inject NavigationManager navigationManager
-<Button Color="ButtonColor.Primary" @onclick="()=> HandleAdd()"><Icon Name="IconName.DatabaseFillAdd"></Icon></Button>
-|
-<Button Color="ButtonColor.Primary" @onclick="()=> HandleReload()"><Icon Name="IconName.ArrowClockwise"></Icon></Button>
+@inject NavigationManager navigationManager;
+
+<div>
+  <Button Color="ButtonColor.Primary" @onclick="()=> HandleAdd()"><Icon Name="IconName.DatabaseFillAdd"></Icon></Button>
+  |
+  <Button Color="ButtonColor.Primary" @onclick="()=> HandleReload()"><Icon Name="IconName.ArrowClockwise"></Icon></Button>
+</div>
 <hr />
 <Grid @ref="dataGrid"
-      TItem="Provider.AnnouncementData"
+      TItem="AnnouncementData"
       Class="table table-hover border-top"
       DataProvider="AnnouncementsDataProvider"
       AllowDetailView="true">
   <GridColumns>
-    <GridColumn HeaderText="" TItem="Provider.AnnouncementData" class="align-middle">
+    <GridColumn HeaderText="" TItem="AnnouncementData" class="align-middle">
       <Button Color="ButtonColor.Primary" @onclick="() => HandleRun(context)"><Icon Name="IconName.PlayFill"></Icon></Button>
     </GridColumn>
-    <GridColumn HeaderText="Twitch User" TItem="Provider.AnnouncementData" PropertyName="TwitchUser" class="align-middle">
-      <Image Src="@context.ProfilePicture" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
+    <GridColumn HeaderText="Twitch User" TItem="AnnouncementData" PropertyName="TwitchUser" class="align-middle">
+      <Image Src="@context.AnnouncementTwitchUserData.ProfileImageUrl" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
       <Badge Color="@GetBadgeColor(context.IsOnline)" Class="p-2">
         <Icon Name="IconName.Twitch" />
         <span class="p-2">@context.TwitchUser</span>
       </Badge>
     </GridColumn>
-    <GridColumn HeaderText="Guild Name" TItem="Provider.AnnouncementData" PropertyName="GuildName" class="align-middle">
+    <GridColumn HeaderText="Guild Name" TItem="AnnouncementData" PropertyName="GuildName" class="align-middle">
       <Image Src="@context.AnnouncementDiscordData.GuildIconUrl" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
       <span class="p-2">@context.AnnouncementDiscordData.GuildName</span>
     </GridColumn>
-    <GridColumn HeaderText="Channel Name" TItem="Provider.AnnouncementData" PropertyName="ChannelName" class="align-middle">
+    <GridColumn HeaderText="Channel Name" TItem="AnnouncementData" PropertyName="ChannelName" class="align-middle">
       <span>@context.AnnouncementDiscordData.ChannelName</span>
     </GridColumn>
-    <GridColumn HeaderText="" TItem="Provider.AnnouncementData" class="align-middle">
+    <GridColumn HeaderText="" TItem="AnnouncementData" class="align-middle">
       <Button Color="ButtonColor.Danger" @onclick="() => HandleDelete(context)"><Icon Name="IconName.TrashFill"></Icon></Button>
     </GridColumn>
   </GridColumns>
 
-  <GridDetailView @ref="dataGridDetail" TItem="Provider.AnnouncementData">
+  <GridDetailView @ref="dataGridDetail" TItem="AnnouncementData">
     <Card Style="width:18rem;">
       <CardHeader>
         <Icon Name="IconName.Twitch" />
         <span class="p-2">@context.TwitchUser</span>
-        <NavLink>@context.AnnouncementTwitchUserData.TwitchDisplayName</NavLink>
       </CardHeader>
       <CardBody>
-        <Image Class="" Src="@context.AnnouncementTwitchUserData.ProfilePicture" Style="width: 150px; height: 150px"></Image>
+        <Image Class="" Src="@context.AnnouncementTwitchUserData.ProfileImageUrl" Style="width: 150px; height: 150px"></Image>
       </CardBody>
       <CardFooter>
 
@@ -95,15 +97,12 @@
 
   private string? botName;
 
-  private Grid<Provider.AnnouncementData>? dataGrid;
-  private GridDetailView<Provider.AnnouncementData>? dataGridDetail;
+  private Grid<Controller.AnnouncementData>? dataGrid;
+  private GridDetailView<Controller.AnnouncementData>? dataGridDetail;
   private Modal? addDialog;
   private Accordion? addDialogAccordion;
 
-  private async Task<GridDataProviderResult<Provider.AnnouncementData>> AnnouncementsDataProvider(GridDataProviderRequest<Provider.AnnouncementData> request)
-    => await Task.FromResult(request.ApplyTo(await GetBotAnnouncements(BotID, request.CancellationToken)));
-
-  private async Task<AutoCompleteDataProviderResult<Provider.AnnouncementData>> AnnouncementsDataProvider(AutoCompleteDataProviderRequest<Provider.AnnouncementData> request)
+  private async Task<GridDataProviderResult<Controller.AnnouncementData>> AnnouncementsDataProvider(GridDataProviderRequest<Controller.AnnouncementData> request)
     => await Task.FromResult(request.ApplyTo(await GetBotAnnouncements(BotID, request.CancellationToken)));
 
   private async Task<IEnumerable<AnnouncementData>> GetBotAnnouncements(string? botID, CancellationToken cancellationToken)
@@ -142,12 +141,12 @@
     await Task.CompletedTask;
   }
 
-  public async Task HandleDelete(Provider.AnnouncementData announcementData)
+  public async Task HandleDelete(Controller.AnnouncementData announcementData)
   {
     await Task.CompletedTask;
   }
 
-  public async Task HandleRun(Provider.AnnouncementData announcementData)
+  public async Task HandleRun(Controller.AnnouncementData announcementData)
   {
     await Task.CompletedTask;
   }

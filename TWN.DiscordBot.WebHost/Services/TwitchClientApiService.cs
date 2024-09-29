@@ -26,8 +26,8 @@ internal class TwitchClientApiService(ITwitchClientAsync twitchClient)
           }),
           _ => Results.Ok(new ResultMessage<Payloads.StreamDataPayload>()
           {
-            Success = true,
-            Message = $"User {username} not found",
+            Success = false,
+            Message = $"Stream Data {username} not found",
             Payload = new (streamsResponseData, false),
           }),
         };
