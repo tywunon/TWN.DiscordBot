@@ -25,14 +25,14 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
       if (result is null)
       {
         var parseException = new Exception($"Response:\n{response?.Content}\ncouldn't be parsed");
-        logger.LogError(parseException, "{Message}", parseException.Message);
+        logger.LogException(parseException, "GetOAuthTokenAsync");
         return new Error<Exception>();
       }
       return new Success<string>(result.Access_Token ?? string.Empty);
     }
     catch (Exception ex)
     {
-      logger.LogError(ex, "{Message}", ex.Message);
+      logger.LogException(ex, "GetOAuthTokenAsync");
       return new Error<Exception>(ex);
     }
   }
@@ -55,7 +55,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
           if (result is null)
           {
             var parseException = new Exception($"Response:\n{response?.Content}\ncouldn't be parsed");
-            logger.LogError(parseException, "{Message}", parseException.Message);
+            logger.LogException(parseException, "GetStreamsAsync");
             return new Error<Exception>();
           }
           return new Success<StreamsResponse>(result);
@@ -65,7 +65,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     }
     catch (Exception ex)
     {
-      logger.LogError(ex, "{Message}", ex.Message);
+      logger.LogException(ex, "GetStreamsAsync");
       return new Error<Exception>(ex);
     }
   }
@@ -88,7 +88,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
           if (result is null)
           {
             var parseException = new Exception($"Response:\n{response?.Content}\ncouldn't be parsed");
-            logger.LogError(parseException, "{Message}", parseException.Message);
+            logger.LogException(parseException, "GetUsersAsync");
             return new Error<Exception>();
           }
           return new Success<UsersResponse>(result);
@@ -98,7 +98,7 @@ public class TwitchClient(IHttpClientFactory httpClientFactory,
     }
     catch (Exception ex)
     {
-      logger.LogError(ex, "{Message}", ex.Message);
+      logger.LogException(ex, "GetUsersAsync");
       return new Error<Exception>(ex);
     }
   }

@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using TWN.DiscordBot.Utils;
+
 namespace TWN.DiscordBot.Bot.BackgroundServices;
 internal class LogCleaner(ILogger<LogCleaner> logger) : PeriodicBackgroundService(logger)
 {
@@ -18,9 +20,8 @@ internal class LogCleaner(ILogger<LogCleaner> logger) : PeriodicBackgroundServic
     }
     catch (Exception ex)
     {
-      logger.LogError(ex, "An Exception was thrown");
+      logger.LogException(ex, "ExecutePeriodicAsync");
     }
     return Task.CompletedTask;
   }
-
 }

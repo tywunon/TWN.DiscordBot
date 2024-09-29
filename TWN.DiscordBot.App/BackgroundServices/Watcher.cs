@@ -93,7 +93,7 @@ internal class Watcher(WatcherSettings settings, IDiscordClientAsync discordClie
     }
     catch (Exception ex)
     {
-      logger.LogError(ex, "An Exception was thrown while watching");
+      logger.LogException(ex, "ExecutePeriodicAsync");
     }
   }
 }

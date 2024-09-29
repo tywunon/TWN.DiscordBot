@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
+using TWN.DiscordBot.Utils;
 
 using TWN.DiscordBot.Settings;
 
@@ -34,7 +35,7 @@ internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPPr
     }
     catch (Exception ex)
     {
-      logger.LogError(ex, "{Message}", ex.Message);
+      logger.LogException(ex, "AcceptAsync");
     }
   }
 

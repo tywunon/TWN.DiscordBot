@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using TWN.DiscordBot.Utils;
+
 namespace TWN.DiscordBot.Bot.BackgroundServices;
 internal abstract class PeriodicBackgroundService(ILogger<PeriodicBackgroundService> logger) : BackgroundService
 {
@@ -18,7 +20,7 @@ internal abstract class PeriodicBackgroundService(ILogger<PeriodicBackgroundServ
       }
       catch (Exception ex)
       {
-        logger.LogError(ex, "An exception was thrown in periodic execution");
+        logger.LogException(ex, "ExecutePeriodicAsync");
       }
     }
   }
