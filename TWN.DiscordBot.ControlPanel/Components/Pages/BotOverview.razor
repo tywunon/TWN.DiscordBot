@@ -37,18 +37,48 @@
   </GridColumns>
 
   <GridDetailView @ref="dataGridDetail" TItem="AnnouncementData">
-    <Card Style="width:18rem;">
-      <CardHeader>
-        <Icon Name="IconName.Twitch" />
-        <span class="p-2">@context.TwitchUser</span>
-      </CardHeader>
-      <CardBody>
-        <Image Class="" Src="@context.AnnouncementTwitchUserData.ProfileImageUrl" Style="width: 150px; height: 150px"></Image>
-      </CardBody>
-      <CardFooter>
-
-      </CardFooter>
-    </Card>
+    <table>
+      <tr><td>ID: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.ID</span></td></tr>
+      <tr><td>Login: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.Login</span></td></tr>
+      <tr><td>DisplayName: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.DisplayName</span></td></tr>
+      <tr><td>Type: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.Type</span></td></tr>
+      <tr><td>BroadcasterType: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.BroadcasterType</span></td></tr>
+      <tr><td>Description: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.Description</span></td></tr>
+      <tr><td>ProfileImageUrl: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.ProfileImageUrl</span></td></tr>
+      <tr><td>OfflineImageUrl: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.OfflineImageUrl</span></td></tr>
+      <tr><td>ViewCount: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.ViewCount</span></td></tr>
+      <tr><td>CreatedAt: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.CreatedAt</span></td></tr>
+    </table>
+    @if (context.IsOnline)
+    {
+      <table>
+        <tr><td>ID </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.ID  </span></td></tr>
+        <tr><td>UserID </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.UserID  </span></td></tr>
+        <tr><td>UserLogin </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.UserLogin  </span></td></tr>
+        <tr><td>UserName </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.UserName  </span></td></tr>
+        <tr><td>GameID </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.GameID  </span></td></tr>
+        <tr><td>GameName </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.GameName  </span></td></tr>
+        <tr><td>Type </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.Type  </span></td></tr>
+        <tr><td>Title </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.Title  </span></td></tr>
+        <tr><td>ViewerCount </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.ViewerCount  </span></td></tr>
+        <tr><td>StartedAt </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.StartedAt  </span></td></tr>
+        <tr><td>Language </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.Language  </span></td></tr>
+        <tr><td>ThumbnailUrl </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.ThumbnailUrl  </span></td></tr>
+        <tr>
+          <td>TagIDs </td>
+          <td><span class="p-2"> @(string.Join(',', context.AnnouncementTwitchStreamData.TagIDs))  </span></td>
+        </tr>
+        <tr>
+          <td>Tags </td>
+          <td><span class="p-2"> @(string.Join(',', context.AnnouncementTwitchStreamData.Tags))  </span></td>
+        </tr>
+        <tr><td>IsMature </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.IsMature  </span></td></tr>
+      </table>
+    }
+    else
+    {
+      <tr><td>OfflineImageUrl: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.OfflineImageUrl</span></td></tr>
+    }
   </GridDetailView>
 </Grid>
 

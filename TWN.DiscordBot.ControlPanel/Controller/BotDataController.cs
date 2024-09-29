@@ -66,7 +66,7 @@ public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHt
         var guildIconUrl = guildIconUrlResult.Success ? guildIconUrlResult.Payload.GuildIconUrl : string.Empty;
         var channelName = channelNameResult.Success ? channelNameResult.Payload.ChannelName : a.GuildID.ToString();
 
-        var announcementDiscordData = new AnnouncementDiscordData(channelName, guildIconUrl, channelName);
+        var announcementDiscordData = new AnnouncementDiscordData(guildName, guildIconUrl, channelName);
 
         var announcementTwitchUserData = userDataResult.Success
           ? new AnnouncementTwitchUserData(
