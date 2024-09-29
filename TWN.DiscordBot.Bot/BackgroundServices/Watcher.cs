@@ -4,6 +4,7 @@ using TWN.DiscordBot.Interfaces;
 using TWN.DiscordBot.Interfaces.Types;
 using TWN.DiscordBot.Settings;
 using TWN.DiscordBot.Utils;
+using TWN.DiscordBot.Utils.BackgroundServices;
 
 namespace TWN.DiscordBot.Bot.BackgroundServices;
 internal class Watcher(WatcherSettings settings, IDiscordClientAsync discordClient, ITwitchClientAsync twitchClient, IDataStoreAsync dataStore, ILogger<Watcher> logger) : PeriodicBackgroundService(logger)

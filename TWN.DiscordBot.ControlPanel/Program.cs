@@ -1,3 +1,5 @@
+using NReco.Logging.File;
+
 using TWN.DiscordBot.ControlPanel.Components;
 using TWN.DiscordBot.ControlPanel.Controller;
 
@@ -33,11 +35,25 @@ internal class Program
     //    client.Timeout = TimeSpan.FromMilliseconds(500);
     //  });
     //}
+
+    builder.Services.AddLogging(b =>
+    {
+      b.AddConsole()
+      .AddFile(@"logs/control-panel_{0:yyyy}-{0:MM}-{0:dd}.log", flo =>
+      {
+        flo.Append = true;
+        flo.FormatLogFileName = fName => string.Format(fName, DateTime.UtcNow);
+        flo.FileSizeLimitBytes = 20 * 1024 * 1024; // 20MiB
+        flo.MaxRollingFiles = 6;
+      });
+    });
+
     builder.Services.AddHttpClient();
 
     builder.Services
       .AddSingleton<IBotDataController, BotDataController>()
-      .AddSingleton(settings.WebClient);
+      .AddSingleton(settings.WebClient)
+      .AddHostedService<Utils.BackgroundServices.LogCleaner>();
 
     var app = builder.Build();
 

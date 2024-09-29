@@ -1,11 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using TWN.DiscordBot.Utils;
-
-namespace TWN.DiscordBot.Bot.BackgroundServices;
-internal class LogCleaner(ILogger<LogCleaner> logger) : PeriodicBackgroundService(logger)
+namespace TWN.DiscordBot.Utils.BackgroundServices;
+public class LogCleaner(ILogger<LogCleaner> logger) : PeriodicBackgroundService(logger)
 {
-  protected override Task<TimeSpan> GetInterval(CancellationToken cancellationToken) 
+  protected override Task<TimeSpan> GetInterval(CancellationToken cancellationToken)
     => Task.FromResult(TimeSpan.FromHours(4));
   protected override Task ExecutePeriodicAsync(CancellationToken cancellationToken)
   {

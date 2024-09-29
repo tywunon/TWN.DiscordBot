@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using TWN.DiscordBot.Utils;
 
 using TWN.DiscordBot.Settings;
+using TWN.DiscordBot.Utils.BackgroundServices;
 
 namespace TWN.DiscordBot.Bot.BackgroundServices;
 internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger) : PeriodicBackgroundService(logger)

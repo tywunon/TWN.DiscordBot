@@ -46,7 +46,7 @@ internal class Program
     builder.Services.AddLogging(b =>
     {
       b.AddConsole()
-      .AddFile(@"logs/app_{0:yyyy}-{0:MM}-{0:dd}.log", flo =>
+      .AddFile(@"logs/bot_{0:yyyy}-{0:MM}-{0:dd}.log", flo =>
       {
         flo.Append = true;
         flo.FormatLogFileName = fName => string.Format(fName, DateTime.UtcNow);
@@ -78,7 +78,7 @@ internal class Program
       .AddBotAPIServices()
       //.AddHostedService<Watcher>()
       .AddHostedService<TCPProbeProvider>()
-      .AddHostedService<LogCleaner>()
+      .AddHostedService<Utils.BackgroundServices.LogCleaner>()
       ;
 
     var host = builder.Build();
