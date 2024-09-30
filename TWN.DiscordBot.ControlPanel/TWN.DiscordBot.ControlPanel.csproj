@@ -7,12 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="logs\**" />
+    <Content Remove="logs\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <None Remove="logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="appsettings.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="appsettings.json">
+    <None Include="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 
