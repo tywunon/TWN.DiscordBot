@@ -13,7 +13,8 @@ public sealed record ControlPanelSettings(IEnumerable<WebClientConfig> WebClient
 public sealed record WebHostSettings(IEnumerable<string> Urls);
 
 public sealed record WatcherSettings(int Delay,
-                                     double Horizon);
+                                     double Horizon,
+                                     bool Enabled);
 
 public sealed record DiscordSettings(string Status,
                                      string AppToken);

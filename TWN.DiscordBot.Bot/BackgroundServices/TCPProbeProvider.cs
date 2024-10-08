@@ -22,6 +22,7 @@ internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPPr
 
   protected override Task<TimeSpan> GetInterval(CancellationToken cancellationToken) 
     => Task.FromResult(TimeSpan.FromMilliseconds(20));
+
   protected async override Task ExecutePeriodicAsync(CancellationToken cancellationToken)
   {
     if (listener is null)

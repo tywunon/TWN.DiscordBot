@@ -6,6 +6,7 @@ using TWN.DiscordBot.Utils;
 namespace TWN.DiscordBot.Utils.BackgroundServices;
 public abstract class PeriodicBackgroundService(ILogger<PeriodicBackgroundService> logger) : BackgroundService
 {
+  public bool ShouldStop { get; protected set; } = false;
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
     await InitAsync(stoppingToken);
@@ -15,12 +16,18 @@ public abstract class PeriodicBackgroundService(ILogger<PeriodicBackgroundServic
     while (await timer.WaitForNextTickAsync(stoppingToken))
       try
       {
-        await ExecutePeriodicAsync(stoppingToken);
+        if (stoppingToken.IsCancellationRequested)
+          break;
+        else if (ShouldStop)
+          break;
+        else
+          await ExecutePeriodicAsync(stoppingToken);
       }
       catch (Exception ex)
       {
         logger.LogException(ex, "ExecutePeriodicAsync");
       }
+    logger.LogInformation("Execution of {}:{} was stopped.", typeof(PeriodicBackgroundService).Name, this.GetType().Name);
   }
 
   protected async virtual Task InitAsync(CancellationToken cancellationToken)

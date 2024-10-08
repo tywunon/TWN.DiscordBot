@@ -15,6 +15,12 @@ internal class Watcher(WatcherSettings settings, IDiscordClientAsync discordClie
     => Task.FromResult(TimeSpan.FromMilliseconds(settings.Delay));
   protected async override Task ExecutePeriodicAsync(CancellationToken cancellationToken)
   {
+    if (!settings.Enabled)
+    {
+      ShouldStop = true;
+      return;
+    }
+
     try
     {
       var lookUpData = await dataStore.GetDataAsync(cancellationToken);

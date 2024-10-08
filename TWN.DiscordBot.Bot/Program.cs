@@ -28,7 +28,8 @@ internal class Program
       ?? new Settings.BotSettings(
         WebHost: new(Urls: []),
         Watcher: new(Delay: 1000,
-                     Horizon: 5 * 60 * 1000), // 5min
+                     Horizon: 5 * 60 * 1000, // 5min
+                     Enabled: false), 
         Discord: new(Status: string.Empty,
                      AppToken: string.Empty),
         Twitch: new(OAuthURL: string.Empty,
@@ -76,7 +77,7 @@ internal class Program
       .AddSingleton<ITwitchClientAsync, Twitch.TwitchClient>()
       .AddSingleton<IDataStoreAsync, DataStore.JSONDataStore>()
       .AddBotAPIServices()
-      //.AddHostedService<Watcher>()
+      .AddHostedService<Watcher>()
       .AddHostedService<TCPProbeProvider>()
       .AddHostedService<Utils.BackgroundServices.LogCleaner>()
       ;
