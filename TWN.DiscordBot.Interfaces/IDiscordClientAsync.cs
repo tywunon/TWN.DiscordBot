@@ -11,6 +11,6 @@ public interface IDiscordClientAsync : IHealthCheckProviderAsync<DiscordConnecti
   OneOf<Result<DiscordClientData>, Error<Exception>> GetDiscordClientData();
   OneOf<Result<string>, NotFound> GetGuildName(ulong guildID);
   Task<OneOf<Result<string>, NotFound>> GetChannelNameAsync(ulong channelID, CancellationToken cancellationToken);
-  Task SendTwitchMessageAsync(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData, CancellationToken cancellationToken);
+  Task PostTwitchAnnouncementAsync(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData, CancellationToken cancellationToken);
 }
 

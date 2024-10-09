@@ -173,7 +173,7 @@ public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHt
     }
   }
 
-  public async Task<OneOf<Success, Error<string>>> AddAnnouncement(string? botID, string twitchUser, long guildID, long channelID)
+  public async Task<OneOf<Success, Error<string>>> AddAnnouncementAsync(string? botID, string twitchUser, long guildID, long channelID, CancellationToken cancellationToken)
   {
     try
     {
@@ -181,7 +181,7 @@ public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHt
       if (botClient is null)
         return new Error<string>($"no BotClient found for {botID}");
 
-      var addAnnouncementResult = await botClient.AddAnnouncementAsync(twitchUser, guildID, channelID);
+      var addAnnouncementResult = await botClient.AddAnnouncementAsync(twitchUser, guildID, channelID, cancellationToken);
       if (addAnnouncementResult.Success)
         return new Success();
       return new Error<string>(addAnnouncementResult.Message);
@@ -193,18 +193,45 @@ public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHt
     }
   }
 
-  public async Task<OneOf<Success, Error<string>>> DeleteAnnouncement(string? botID, string twitchUser, long guildID, long? channelID)
+  public async Task<OneOf<Success, Error<string>>> DeleteAnnouncementAsync(string? botID, string twitchUser, long guildID, long? channelID, CancellationToken cancellationToken)
   {
-    var botClient = GetBotClient(botID, TimeSpan.FromMilliseconds(2000));
-    if (botClient is null)
-      return new Error<string>($"no BotClient found for {botID}");
+    try
+    {
+      var botClient = GetBotClient(botID, TimeSpan.FromMilliseconds(2000));
+      if (botClient is null)
+        return new Error<string>($"no BotClient found for {botID}");
 
-    var deleteAnnouncementResult = await botClient.DeleteAnnouncementAsync(twitchUser, guildID, channelID);
-    if (deleteAnnouncementResult.Success)
-      return new Success();
-    return new Error<string>(deleteAnnouncementResult.Message);
+      var deleteAnnouncementResult = await botClient.DeleteAnnouncementAsync(twitchUser, guildID, channelID, cancellationToken);
+      if (deleteAnnouncementResult.Success)
+        return new Success();
+      return new Error<string>(deleteAnnouncementResult.Message);
+    }
+    catch (Exception ex)
+    {
+      logger.LogException(ex, "DeleteAnnouncementAsync");
+      return new Error<string>($"{ex.Message}");
+    }
   }
 
+  public async Task<OneOf<Success, Error<string>>> PostTwitchAnnouncementAsync(string? botID, string twitchUser, long guildID, long channelID, CancellationToken cancellationToken)
+  {
+    try
+    {
+      var botClient = GetBotClient(botID, TimeSpan.FromMilliseconds(2000));
+      if (botClient is null)
+        return new Error<string>($"no BotClient found for {botID}");
+
+      var postTwitchAnnouncementResult = await botClient.PostTwitchAnnouncementAsync(twitchUser, guildID, channelID, cancellationToken);
+      if (postTwitchAnnouncementResult.Success)
+        return new Success();
+      return new Error<string>(postTwitchAnnouncementResult.Message);
+    }
+    catch (Exception ex)
+    {
+      logger.LogException(ex, "PostTwitchAnnouncementAsync");
+      return new Error<string>($"{ex.Message}");
+    }
+  }
   private BotClient? GetBotClient(string? botID, TimeSpan timeout)
   {
     var config = GetWebClientConfig(botID);

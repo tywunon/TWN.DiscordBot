@@ -207,7 +207,7 @@
 
     foreach (var selection in selectedAddDialogItems)
     {
-      var addAnnouncementResult = await BotDataController.AddAnnouncement(BotID, twitchUser.Trim(), selection.GuildID, selection.ChannelID);
+      var addAnnouncementResult = await BotDataController.AddAnnouncementAsync(BotID, twitchUser.Trim(), selection.GuildID, selection.ChannelID, CancellationToken.None);
       await addAnnouncementResult.Match(
         s =>
         {
@@ -230,7 +230,7 @@
             Title = botName,
             HelpText = $"{DateTime.Now}",
             AutoHide = true,
-            Message = $"Failed to add Announcement for {twitchUser} in Channel {selection.ChannelName} on {selection.GuildName}: {err}",
+            Message = $"Failed to add Announcement for {twitchUser} in Channel {selection.ChannelName} on {selection.GuildName}: {err.Value}",
             IconName = IconName.Database,
           });
         return Task.CompletedTask;
@@ -262,7 +262,7 @@
     if (!confirmation)
       return;
 
-    var deleteAnnouncementResult = await BotDataController.DeleteAnnouncement(BotID, twitchUser, guildID, channelID);
+    var deleteAnnouncementResult = await BotDataController.DeleteAnnouncementAsync(BotID, twitchUser, guildID, channelID, CancellationToken.None);
     await deleteAnnouncementResult.Match(
       s =>
       {
@@ -285,7 +285,7 @@
             Title = botName,
             HelpText = $"{DateTime.Now}",
             AutoHide = true,
-            Message = $"Failed to delete Announcement for {twitchUser} in Channel {channelName} on {guildName}: {err}",
+            Message = $"Failed to delete Announcement for {twitchUser} in Channel {channelName} on {guildName}: {err.Value}",
             IconName = IconName.Database,
           });
         return Task.CompletedTask;
@@ -297,6 +297,44 @@
 
   private async Task HandleRun(Controller.AnnouncementData announcementData)
   {
+    if (announcementData is null)
+      return;
+
+    var twitchUser = announcementData.TwitchUser;
+    var guildID = announcementData.AnnouncementDiscordData.GuildID;
+    var guildName = announcementData.AnnouncementDiscordData.GuildName;
+    var channelID = announcementData.AnnouncementDiscordData.ChannelID;
+    var channelName = announcementData.AnnouncementDiscordData.ChannelName;
+
+    var postTwitchAnnouncementResult = await BotDataController.PostTwitchAnnouncementAsync(BotID, twitchUser, guildID, channelID, CancellationToken.None);
+    await postTwitchAnnouncementResult.Match(
+      s =>
+      {
+        ToastService.Notify(new ToastMessage()
+          {
+            Type = ToastType.Success,
+            Title = botName,
+            HelpText = $"{DateTime.Now}",
+            AutoHide = true,
+            Message = $"Announcement for {twitchUser} in Channel {channelName} on {guildName} was posted",
+            IconName = IconName.Database,
+          });
+        return Task.CompletedTask;
+      },
+      err =>
+      {
+        ToastService.Notify(new ToastMessage()
+          {
+            Type = ToastType.Danger,
+            Title = botName,
+            HelpText = $"{DateTime.Now}",
+            AutoHide = true,
+            Message = $"Failed to post Announcement for {twitchUser} in Channel {channelName} on {guildName}: {err.Value}",
+            IconName = IconName.Database,
+          });
+        return Task.CompletedTask;
+      }
+    );
     await Task.CompletedTask;
   }
 

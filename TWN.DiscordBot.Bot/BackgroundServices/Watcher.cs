@@ -77,7 +77,7 @@ internal class Watcher(WatcherSettings settings, IDiscordClientAsync discordClie
                       foreach (var data in dataGroup)
                       {
                         logger.Log(LogLevel.Debug, new EventId(), data, null, (s, ex) => "data:" + dataGroup.Key + ":" + (s.lookUpData.GuildID, s.lookUpData.ChannelID, s.twitchStreamData.Game_Name));
-                        await discordClient.SendTwitchMessageAsync(data.lookUpData.GuildID, data.lookUpData.ChannelID, new DiscordTwitchEmbedData()
+                        await discordClient.PostTwitchAnnouncementAsync(data.lookUpData.GuildID, data.lookUpData.ChannelID, new DiscordTwitchEmbedData()
                         {
                           Title = data.twitchStreamData.Title,
                           UserLogin = data.twitchStreamData.User_Login,

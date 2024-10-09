@@ -324,7 +324,7 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
     }
   }
 
-  public async Task SendTwitchMessageAsync(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData, CancellationToken cancellationToken)
+  public async Task PostTwitchAnnouncementAsync(ulong guildID, ulong channelID, DiscordTwitchEmbedData twitchData, CancellationToken cancellationToken)
   {
     if (cancellationToken.IsCancellationRequested)
       return;

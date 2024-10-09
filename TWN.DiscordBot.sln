@@ -23,9 +23,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bot", "Bot", "{C4950C3C-0D6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ControlPanel", "ControlPanel", "{FD94CD60-1238-475B-80F3-F5C9F6DC358F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.WebClient", "TWN.DiscordBot.WebClient\TWN.DiscordBot.WebClient.csproj", "{85CA2B96-D569-44CC-8E12-24A23622ACBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.DiscordBot.WebClient", "TWN.DiscordBot.WebClient\TWN.DiscordBot.WebClient.csproj", "{85CA2B96-D569-44CC-8E12-24A23622ACBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TWN.DiscordBot.ControlPanel", "TWN.DiscordBot.ControlPanel\TWN.DiscordBot.ControlPanel.csproj", "{3C77B67F-A27D-4DEB-9A08-73564BFFB861}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TWN.DiscordBot.ControlPanel", "TWN.DiscordBot.ControlPanel\TWN.DiscordBot.ControlPanel.csproj", "{3C77B67F-A27D-4DEB-9A08-73564BFFB861}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

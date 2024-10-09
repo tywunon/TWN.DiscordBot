@@ -261,6 +261,64 @@
         }
       }
     },
+    "/api/discord/postTwitchAnnouncement": {
+      "post": {
+        "tags": [
+          "Discord"
+        ],
+        "operationId": "PostTwitchAnnouncement",
+        "parameters": [
+          {
+            "name": "twitchUser",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "guildID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "channelID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyPayloadResultMessage"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyPayloadResultMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/twitch/getStream": {
       "get": {
         "tags": [

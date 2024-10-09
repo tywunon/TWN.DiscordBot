@@ -73,7 +73,7 @@ public static class InitExtensions
   {
     webApplication
       .MapGet("/api/health", async (IHealthCheckApiServiceAsync healthCheckService, HttpContext context)
-        => await healthCheckService.CheckHealthAsync(context, new CancellationTokenSource().Token))
+        => await healthCheckService.CheckHealthAsync(context, CancellationToken.None))
       .WithName("HealthCheck")
       .WithOpenApi(x => new(x)
       {
@@ -92,7 +92,7 @@ public static class InitExtensions
   {
     webApplication
       .MapGet("/api/data/announcements", async (IDataStoreApiServiceAsync dataStoreService)
-        => await dataStoreService.GetAnnouncementsAsync(new CancellationTokenSource().Token))
+        => await dataStoreService.GetAnnouncementsAsync(CancellationToken.None))
       .WithName("GetAnnouncements")
       .WithOpenApi(x => new(x)
       {
@@ -108,7 +108,7 @@ public static class InitExtensions
 
     webApplication
       .MapPost("/api/data/announcement", async (IDataStoreApiServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong channelID)
-        => await dataStoreService.AddAnnouncementAsync(twitchUser, guildID, channelID, new CancellationTokenSource().Token))
+        => await dataStoreService.AddAnnouncementAsync(twitchUser, guildID, channelID, CancellationToken.None))
       .WithName("AddAnnouncement")
       .WithOpenApi(x => new OpenApiOperation(x)
       {
@@ -124,7 +124,7 @@ public static class InitExtensions
 
     webApplication
       .MapDelete("/api/data/announcement", async (IDataStoreApiServiceAsync dataStoreService, string twitchUser, ulong guildID, ulong? channelID)
-        => await dataStoreService.DeleteAnnouncementAsync(twitchUser, guildID, channelID, new CancellationTokenSource().Token))
+        => await dataStoreService.DeleteAnnouncementAsync(twitchUser, guildID, channelID, CancellationToken.None))
       .WithName("DeleteAnnouncement")
       .WithOpenApi(x => new(x)
       {
@@ -143,7 +143,7 @@ public static class InitExtensions
   {
     webApplication
       .MapGet("/api/discord/channelName", async (IDiscordClientApiServiceAsync discordClientService, ulong channelID)
-        => await discordClientService.GetChannelNameAsync(channelID, new CancellationTokenSource().Token))
+        => await discordClientService.GetChannelNameAsync(channelID, CancellationToken.None))
       .WithName("GetChannelName")
       .WithOpenApi(x => new(x)
       {
@@ -205,13 +205,30 @@ public static class InitExtensions
       })
       .Produces<ResultMessage<Payloads.DiscordClientDataPayload>>(StatusCodes.Status200OK)
       .Produces<ResultMessage<Payloads.DiscordClientDataPayload>>(StatusCodes.Status500InternalServerError);
+
+    webApplication
+      .MapPost("/api/discord/postTwitchAnnouncement", async (IDiscordClientApiServiceAsync discordClientService, string twitchUser, ulong guildID, ulong channelID)
+        => await discordClientService.PostTwitchAnnouncementAsync(twitchUser, guildID, channelID, CancellationToken.None))
+      .WithName("PostTwitchAnnouncement")
+      .WithOpenApi(x => new(x)
+      {
+        Tags =
+        [
+          new ()
+              {
+                Name = "Discord"
+              },
+        ]
+      })
+      .Produces<ResultMessage<Payloads.EmptyPayload>>(StatusCodes.Status200OK)
+      .Produces<ResultMessage<Payloads.EmptyPayload>>(StatusCodes.Status500InternalServerError);
   }
 
   private static void MapTwitchAPI(this WebApplication webApplication)
   {
     webApplication
       .MapGet("/api/twitch/getStream", async (ITwitchClientApiServiceAsync twitchClientService, string username)
-        => await twitchClientService.GetStreamDataAsync(username, new CancellationTokenSource().Token))
+        => await twitchClientService.GetStreamDataAsync(username, CancellationToken.None))
       .WithName("GetStreamData")
       .WithOpenApi(x => new(x)
       {
@@ -228,7 +245,7 @@ public static class InitExtensions
 
     webApplication
       .MapGet("/api/twitch/getUser", async (ITwitchClientApiServiceAsync twitchClientService, string username)
-        => await twitchClientService.GetUserDataAsync(username, new CancellationTokenSource().Token))
+        => await twitchClientService.GetUserDataAsync(username, CancellationToken.None))
       .WithName("GetUserData")
       .WithOpenApi(x => new(x)
       {
