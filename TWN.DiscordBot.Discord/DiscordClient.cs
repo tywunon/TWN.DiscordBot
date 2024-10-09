@@ -447,12 +447,12 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
     {
       return new Result<DiscordClientData>(new()
       {
-        GuildData = discordSocketClient.Guilds.Select(g => new DiscordClientGuildData()
+        GuildData = discordSocketClient.Guilds?.Select(g => new DiscordClientGuildData()
         {
           GuildID = g.Id,
           GuildName = g.Name,
           GuildIconUrl = g.IconUrl,
-          DiscordChannelData = g.TextChannels.Select(tch => new DiscordClientChannelData()
+          DiscordChannelData = g.TextChannels?.Select(tch => new DiscordClientChannelData()
           {
             ChannelID = tch.Id,
             ChannelName = tch.Name,
@@ -460,8 +460,8 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
             CategoryID = tch.Category.Id,
             CategoryName = tch.Category.Name,
             CategoryPosition = tch.Category.Position,
-          })
-        })
+          }) ?? []
+        }) ?? []
       });
 
     }
