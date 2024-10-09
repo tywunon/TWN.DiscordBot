@@ -1,6 +1,4 @@
 ﻿@using TWN.DiscordBot.ControlPanel.Controller
-@inject IBotDataController botDataController;
-@inject NavigationManager navigationManager;
 
 <div>
   <Button Color="ButtonColor.Primary" @onclick="()=> HandleAdd()"><Icon Name="IconName.DatabaseFillAdd"></Icon></Button>
@@ -21,7 +19,13 @@
       <Image Src="@context.AnnouncementTwitchUserData.ProfileImageUrl" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
       <Badge Color="@GetBadgeColor(context.IsOnline)" Class="p-2">
         <Icon Name="IconName.Twitch" />
-        <span class="p-2">@context.TwitchUser</span>
+        <span class="p-2">
+          @context.AnnouncementTwitchUserData.DisplayName
+          @if (context.TwitchUser != context.AnnouncementTwitchUserData.DisplayName)
+          {
+            @string.Concat("\t", "(", context.TwitchUser, ")")
+          }
+        </span>
       </Badge>
     </GridColumn>
     <GridColumn HeaderText="Guild Name" TItem="AnnouncementData" PropertyName="GuildName" class="align-middle">
@@ -37,6 +41,14 @@
   </GridColumns>
 
   <GridDetailView @ref="dataGridDetail" TItem="AnnouncementData">
+    <Card Style="width:18rem;">
+      <CardBody>
+        <img class="rounded-top" src="@context.AnnouncementTwitchUserData.ProfileImageUrl" alt="placeholder" style="width:100%" />
+        <CardTitle>@context.AnnouncementTwitchUserData.DisplayName</CardTitle>
+        <CardSubTitle>@context.AnnouncementTwitchUserData.Login</CardSubTitle>
+        <Button Color="ButtonColor.Primary" @onclick="() => GoToWebsite(context.AnnouncementTwitchUserData.Login)"><Icon Name="IconName.Twitch"></Icon><span>Twitch</span></Button>
+      </CardBody>
+    </Card>
     <table>
       <tr><td>ID: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.ID</span></td></tr>
       <tr><td>Login: </td><td><span class="p-2">@context.AnnouncementTwitchUserData.Login</span></td></tr>
@@ -51,6 +63,7 @@
     </table>
     @if (context.IsOnline)
     {
+      <hr />
       <table>
         <tr><td>ID </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.ID  </span></td></tr>
         <tr><td>UserID </td><td><span class="p-2"> @context.AnnouncementTwitchStreamData.UserID  </span></td></tr>
@@ -82,38 +95,41 @@
   </GridDetailView>
 </Grid>
 
-<Modal @ref="addDialog" Title="Add new Announcement">
+<Modal @ref="addDialog"
+       Title="Add new Announcement"
+       IsScrollable="true"
+       Size="ModalSize.Large">
   <BodyTemplate>
-    <Accordion @ref="addDialogAccordion" OnShown="HandleAddDialogOnShown">
-      @foreach (var guildData in GetAddDialogData().GuildData)
-      {
-        <AccordionItem>
-          <TitleTemplate>
-            <Image Src="@guildData.GuildIconUrl" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
-            <span class="p-2">@guildData.GuildName</span>
-          </TitleTemplate>
-          <Content>
-            @foreach (var category in guildData.DiscordChannelData.GroupBy(dcd => (dcd.CategoryID, dcd.CategoryName, dcd.CategoryPosition)).OrderBy(g => g.Key.CategoryPosition))
-            {
-              <Grid TItem="DiscordClientChannelData"
-                    Data="category"
-                    Class="table table-hover border-top"
-                    AllowSelection="true">
-                <GridColumns>
-                  <GridColumn TItem="DiscordClientChannelData"
-                              HeaderText="@category.Key.CategoryName"
-                              PropertyName="ChannelName"
-                              SortKeySelector="@(item => item.ChannelPosition)"
-                              IsDefaultSortColumn="true">
-                    @context.ChannelName
-                  </GridColumn>
-                </GridColumns>
-              </Grid>
-            }
-          </Content>
-        </AccordionItem>
-      }
-    </Accordion>
+    <InputText @bind-Value="twitchUser">
+
+    </InputText>
+    <Grid TItem="AddDialogData"
+          AllowSelection="true"
+          AllowFiltering="true"
+          Responsive="true"
+          SelectionMode="GridSelectionMode.Multiple"
+          SelectedItemsChanged="HandleSelectedItemsChanged"
+          DataProvider="AddDialogDataDataProvider"
+          Class="table table-hover table-bordered table-striped">
+      <GridColumns>
+        <GridColumn TItem="AddDialogData"
+                    PropertyName="ChannelName"
+                    HeaderText="ChannelName">
+          @context.ChannelName
+        </GridColumn>
+        <GridColumn TItem="AddDialogData"
+                    PropertyName="CategoryName"
+                    HeaderText="CategoryName">
+          @context.CategoryName
+        </GridColumn>
+        <GridColumn TItem="AddDialogData"
+                    PropertyName="GuildName"
+                    HeaderText="Guild">
+          <Image Src="@context.GuildIconURL" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
+          <span class="p-2">@context.GuildName</span>
+        </GridColumn>
+      </GridColumns>
+    </Grid>
   </BodyTemplate>
   <FooterTemplate>
     <Button Color="ButtonColor.Secondary" @onclick="async () => await addDialog.HideAsync()">Close</Button>
@@ -121,33 +137,50 @@
   </FooterTemplate>
 </Modal>
 
+<ConfirmDialog @ref="deleteConfirmDialog" />
+
 @code {
-  [Parameter]
-  public string? BotID { get; set; }
+  [Parameter] public string? BotID { get; set; } = default!;
 
-  private string? botName;
+  [Inject] IBotDataController BotDataController { get; set; } = default!;
+  [Inject] NavigationManager NavigationManager { get; set; } = default!;
+  [Inject] IJSRuntime JSRuntime { get; set; } = default!;
+  [Inject] ToastService ToastService { get; set; } = default!;
 
-  private Grid<Controller.AnnouncementData>? dataGrid;
-  private GridDetailView<Controller.AnnouncementData>? dataGridDetail;
-  private Modal? addDialog;
-  private Accordion? addDialogAccordion;
+  private Grid<Controller.AnnouncementData> dataGrid = default!;
+  private GridDetailView<Controller.AnnouncementData> dataGridDetail = default!;
+  private Modal addDialog = default!;
+  private ConfirmDialog deleteConfirmDialog = default!;
+
+  private string botName = default!;
+  private string twitchUser = default!;
+  HashSet<AddDialogData> selectedAddDialogItems = new();
 
   private async Task<GridDataProviderResult<Controller.AnnouncementData>> AnnouncementsDataProvider(GridDataProviderRequest<Controller.AnnouncementData> request)
     => await Task.FromResult(request.ApplyTo(await GetBotAnnouncements(BotID, request.CancellationToken)));
 
   private async Task<IEnumerable<AnnouncementData>> GetBotAnnouncements(string? botID, CancellationToken cancellationToken)
-    => await botDataController.GetBotAnnouncementsAsync(BotID, cancellationToken);
+    => await BotDataController.GetBotAnnouncementsAsync(BotID, cancellationToken);
 
-  private DiscordClientData GetAddDialogData()
+  private async Task<GridDataProviderResult<AddDialogData>> AddDialogDataDataProvider(GridDataProviderRequest<AddDialogData> request)
+    => await Task.FromResult(request.ApplyTo(await GetAddDialogData()));
+
+  private async Task<IEnumerable<AddDialogData>> GetAddDialogData()
   {
-    return Task.Run(async () => await botDataController.GetDiscordClientDataAsync(BotID, CancellationToken.None)).Result;
+    var clientData = await BotDataController.GetDiscordClientDataAsync(BotID, CancellationToken.None);
+    return clientData.GuildData
+      .SelectMany(gd => gd.DiscordChannelData, (gd, dcd) => new AddDialogData(gd, dcd))
+      .OrderBy(dcd => dcd.GuildID)
+      .ThenBy(dcd => dcd.CategoryPosition)
+      .ThenBy(dcd => dcd.ChannelPosition)
+      ;
   }
 
   protected override async Task OnInitializedAsync()
   {
     await base.OnInitializedAsync();
 
-    botName = await botDataController.GetBotNameAsync(BotID, CancellationToken.None) ?? "Unknown Bot";
+    botName = await BotDataController.GetBotNameAsync(BotID, CancellationToken.None) ?? "Unknown Bot";
   }
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -155,39 +188,160 @@
     await base.OnAfterRenderAsync(firstRender);
   }
 
-  public async Task HandleReload()
+  private async Task HandleReload()
   {
     await dataGrid.RefreshDataAsync();
   }
 
-  public async Task HandleAdd()
+  private async Task HandleAdd()
   {
     await addDialog.ShowAsync();
   }
 
-  public async Task HandleDialogAdd()
+  private async Task HandleDialogAdd()
   {
     await addDialog.HideAsync();
+
+    if (selectedAddDialogItems is null)
+      return;
+
+    foreach (var selection in selectedAddDialogItems)
+    {
+      var addAnnouncementResult = await BotDataController.AddAnnouncement(BotID, twitchUser.Trim(), selection.GuildID, selection.ChannelID);
+      await addAnnouncementResult.Match(
+        s =>
+        {
+          ToastService.Notify(new ToastMessage()
+            {
+              Type = ToastType.Success,
+              Title = botName,
+              HelpText = $"{DateTime.Now}",
+              AutoHide = true,
+              Message = $"Announcement for {twitchUser} in Channel {selection.ChannelName} on {selection.GuildName} added",
+              IconName = IconName.Database,
+            });
+          return dataGrid.RefreshDataAsync();
+        },
+      err =>
+      {
+        ToastService.Notify(new ToastMessage()
+          {
+            Type = ToastType.Danger,
+            Title = botName,
+            HelpText = $"{DateTime.Now}",
+            AutoHide = true,
+            Message = $"Failed to add Announcement for {twitchUser} in Channel {selection.ChannelName} on {selection.GuildName}: {err}",
+            IconName = IconName.Database,
+          });
+        return Task.CompletedTask;
+      });
+    }
+  }
+
+  private async Task HandleDelete(Controller.AnnouncementData announcementData)
+  {
+    if (announcementData is null)
+      return;
+
+    var twitchUser = announcementData.TwitchUser;
+    var guildID = announcementData.AnnouncementDiscordData.GuildID;
+    var guildName = announcementData.AnnouncementDiscordData.GuildName;
+    var channelID = announcementData.AnnouncementDiscordData.ChannelID;
+    var channelName = announcementData.AnnouncementDiscordData.ChannelName;
+
+    var confirmationOptions = new ConfirmDialogOptions()
+      {
+        Size = DialogSize.Large,
+        YesButtonText = "Proceed with deletion",
+        YesButtonColor = ButtonColor.Danger,
+        NoButtonText = "Don't Delete",
+        NoButtonColor = ButtonColor.Secondary,
+        AutoFocusYesButton = false,
+      };
+    var confirmation = await deleteConfirmDialog.ShowAsync("Are you sure you want to delete this announcement?", $"{twitchUser} | {guildName}({guildID}) | {channelName}({guildID})", confirmationOptions);
+    if (!confirmation)
+      return;
+
+    var deleteAnnouncementResult = await BotDataController.DeleteAnnouncement(BotID, twitchUser, guildID, channelID);
+    await deleteAnnouncementResult.Match(
+      s =>
+      {
+        ToastService.Notify(new ToastMessage()
+          {
+            Type = ToastType.Success,
+            Title = botName,
+            HelpText = $"{DateTime.Now}",
+            AutoHide = true,
+            Message = $"Announcement for {twitchUser} in Channel {channelName} on {guildName} deleted",
+            IconName = IconName.Database,
+          });
+        return dataGrid.RefreshDataAsync();
+      },
+      err =>
+      {
+        ToastService.Notify(new ToastMessage()
+          {
+            Type = ToastType.Danger,
+            Title = botName,
+            HelpText = $"{DateTime.Now}",
+            AutoHide = true,
+            Message = $"Failed to delete Announcement for {twitchUser} in Channel {channelName} on {guildName}: {err}",
+            IconName = IconName.Database,
+          });
+        return Task.CompletedTask;
+      }
+    );
+
     await Task.CompletedTask;
   }
 
-  public async Task HandleDelete(Controller.AnnouncementData announcementData)
+  private async Task HandleRun(Controller.AnnouncementData announcementData)
   {
     await Task.CompletedTask;
   }
 
-  public async Task HandleRun(Controller.AnnouncementData announcementData)
+  private Task HandleSelectedItemsChanged(HashSet<AddDialogData> selection)
   {
-    await Task.CompletedTask;
+    selectedAddDialogItems =
+      selection is not null && selection.Any()
+        ? new(selection)
+        : selectedAddDialogItems;
+    return Task.CompletedTask;
   }
 
-  public void HandleAddDialogOnShown()
+  private void GoToWebsite(string twitchUser)
   {
-    if (addDialogAccordion is not null)
-      addDialogAccordion.ShowFirstAccordionItemAsync();
+    JSRuntime?.InvokeVoidAsync("open", $"https://www.twitch.tv/{twitchUser}", "_blank");
   }
-
 
   private IconColor GetIconColor(bool isOnline) => isOnline ? IconColor.Success : IconColor.Danger;
   private BadgeColor GetBadgeColor(bool isOnline) => isOnline ? BadgeColor.Success : BadgeColor.Danger;
+
+  class AddDialogData
+  {
+    public AddDialogData(DiscordClientGuildData guildData, DiscordClientChannelData channelData)
+    {
+      GuildID = guildData.GuildID;
+      GuildName = guildData.GuildName;
+      GuildIconURL = guildData.GuildIconUrl;
+
+      CategoryID = channelData.CategoryID;
+      CategoryName = channelData.CategoryName;
+      CategoryPosition = channelData.CategoryPosition;
+
+      ChannelID = channelData.ChannelID;
+      ChannelName = channelData.ChannelName;
+      ChannelPosition = channelData.ChannelPosition;
+    }
+
+    public long GuildID { get; set; }
+    public string GuildName { get; set; }
+    public string GuildIconURL { get; set; }
+    public long CategoryID { get; set; }
+    public string CategoryName { get; set; }
+    public int CategoryPosition { get; set; }
+    public long ChannelID { get; set; }
+    public string ChannelName { get; set; }
+    public int ChannelPosition { get; set; }
+  }
 }

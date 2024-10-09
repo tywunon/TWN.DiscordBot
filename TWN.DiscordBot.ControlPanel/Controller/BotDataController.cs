@@ -2,6 +2,9 @@
 using TWN.DiscordBot.WebClient;
 using TWN.DiscordBot.Utils;
 using System.Numerics;
+using OneOf;
+using OneOf.Types;
+using System.Threading.Channels;
 
 namespace TWN.DiscordBot.ControlPanel.Controller;
 
@@ -62,11 +65,13 @@ public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHt
 
         var isOnline = streamDataResult.Success && streamDataResult.Payload.IsOnline;
 
+        var guildID = guildNameResult.Success ? guildNameResult.Payload.GuildID : a.GuildID;
         var guildName = guildNameResult.Success ? guildNameResult.Payload.GuildName : a.GuildID.ToString();
         var guildIconUrl = guildIconUrlResult.Success ? guildIconUrlResult.Payload.GuildIconUrl : string.Empty;
-        var channelName = channelNameResult.Success ? channelNameResult.Payload.ChannelName : a.GuildID.ToString();
+        var channelID = channelNameResult.Success ? channelNameResult.Payload.ChannelID : a.ChannelID;
+        var channelName = channelNameResult.Success ? channelNameResult.Payload.ChannelName : a.ChannelID.ToString();
 
-        var announcementDiscordData = new AnnouncementDiscordData(guildName, guildIconUrl, channelName);
+        var announcementDiscordData = new AnnouncementDiscordData(guildID, guildName, guildIconUrl, channelID, channelName);
 
         var announcementTwitchUserData = userDataResult.Success
           ? new AnnouncementTwitchUserData(
@@ -166,6 +171,38 @@ public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHt
       logger.LogException(ex, "GetBotNameAsync");
       return new([]);
     }
+  }
+
+  public async Task<OneOf<Success, Error<string>>> AddAnnouncement(string? botID, string twitchUser, long guildID, long channelID)
+  {
+    try
+    {
+      var botClient = GetBotClient(botID, TimeSpan.FromMilliseconds(2000));
+      if (botClient is null)
+        return new Error<string>($"no BotClient found for {botID}");
+
+      var addAnnouncementResult = await botClient.AddAnnouncementAsync(twitchUser, guildID, channelID);
+      if (addAnnouncementResult.Success)
+        return new Success();
+      return new Error<string>(addAnnouncementResult.Message);
+    }
+    catch (Exception ex)
+    {
+      logger.LogException(ex, "AddAnnouncement");
+      return new Error<string>($"{ex.Message}");
+    }
+  }
+
+  public async Task<OneOf<Success, Error<string>>> DeleteAnnouncement(string? botID, string twitchUser, long guildID, long? channelID)
+  {
+    var botClient = GetBotClient(botID, TimeSpan.FromMilliseconds(2000));
+    if (botClient is null)
+      return new Error<string>($"no BotClient found for {botID}");
+
+    var deleteAnnouncementResult = await botClient.DeleteAnnouncementAsync(twitchUser, guildID, channelID);
+    if (deleteAnnouncementResult.Success)
+      return new Success();
+    return new Error<string>(deleteAnnouncementResult.Message);
   }
 
   private BotClient? GetBotClient(string? botID, TimeSpan timeout)

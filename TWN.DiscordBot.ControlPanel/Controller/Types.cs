@@ -13,8 +13,10 @@ public record AnnouncementData(string TwitchUser,
                                AnnouncementDiscordData AnnouncementDiscordData,
                                AnnouncementTwitchUserData AnnouncementTwitchUserData,
                                AnnouncementTwitchStreamData AnnouncementTwitchStreamData);
-public record AnnouncementDiscordData(string GuildName,
+public record AnnouncementDiscordData(long GuildID,
+                                      string GuildName,
                                       string GuildIconUrl,
+                                      long ChannelID,
                                       string ChannelName);
 public record AnnouncementTwitchUserData(string ID,
                                          string Login,
