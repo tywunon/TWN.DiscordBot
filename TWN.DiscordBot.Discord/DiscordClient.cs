@@ -457,9 +457,9 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
             ChannelID = tch.Id,
             ChannelName = tch.Name,
             ChannelPosition = tch.Position,
-            CategoryID = tch.Category.Id,
-            CategoryName = tch.Category.Name,
-            CategoryPosition = tch.Category.Position,
+            CategoryID = tch.Category?.Id ?? default,
+            CategoryName = tch.Category?.Name ?? string.Empty,
+            CategoryPosition = tch.Category?.Position ?? default,
           }) ?? []
         }) ?? []
       });
