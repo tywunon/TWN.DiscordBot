@@ -78,7 +78,7 @@ internal class Program
       .AddSingleton<IDataStoreAsync, DataStore.JSONDataStore>()
       .AddBotAPIServices()
       .AddHostedService<Watcher>()
-      .AddHostedService<TCPProbeProvider>()
+      .AddHostedService<Utils.BackgroundServices.TCPProbeProvider>()
       .AddHostedService<Utils.BackgroundServices.LogCleaner>()
       ;
 

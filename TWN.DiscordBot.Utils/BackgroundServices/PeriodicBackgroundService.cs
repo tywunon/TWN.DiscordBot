@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using TWN.DiscordBot.Utils;
-
 namespace TWN.DiscordBot.Utils.BackgroundServices;
 public abstract class PeriodicBackgroundService(ILogger<PeriodicBackgroundService> logger) : BackgroundService
 {

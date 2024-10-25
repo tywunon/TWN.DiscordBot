@@ -12,4 +12,8 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TWN.DiscordBot.Settings\TWN.DiscordBot.Settings.csproj" />
+  </ItemGroup>
+
 </Project>

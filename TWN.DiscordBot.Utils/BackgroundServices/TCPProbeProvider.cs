@@ -1,13 +1,11 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
-using TWN.DiscordBot.Utils;
 
 using TWN.DiscordBot.Settings;
-using TWN.DiscordBot.Utils.BackgroundServices;
 
-namespace TWN.DiscordBot.Bot.BackgroundServices;
-internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger) : PeriodicBackgroundService(logger)
+namespace TWN.DiscordBot.Utils.BackgroundServices;
+public class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPProbeProvider> logger) : PeriodicBackgroundService(logger)
 {
   Socket? listener;
   protected async override Task InitAsync(CancellationToken cancellationToken)
@@ -45,5 +43,6 @@ internal class TCPProbeProvider(TCPProbeSettings tcpProbeSettings, ILogger<TCPPr
   {
     base.Dispose();
     listener?.Dispose();
+    GC.SuppressFinalize(this);
   }
 }
