@@ -25,8 +25,9 @@ public static class InitExtensions
       .AddSingleton<IHealthCheckApiServiceAsync, HealthCheckApiService>()
       .AddEndpointsApiExplorer()
       .AddHealthChecks()
-        .AddCheck<TwitchHealthCheck>("Twitch API")
-        .AddCheck<DiscordHealthCheck>("Discord.Net")
+        .AddCheck<TwitchAPIHealthCheck>("Twitch API")
+        .AddCheck<DiscordAPIHealthCheck>("Discord API")
+        .AddCheck<DiscordDotnetHealthCheck>("Discord.Net")
         .AddCheck<DataStoreHealthCheck>("Datastore")
         .Services
       .AddHealthChecksUI(opt =>

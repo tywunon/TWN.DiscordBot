@@ -378,7 +378,7 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
 
     try
     {
-      UriBuilder uriBuilder = new UriBuilder(uri);
+      var uriBuilder = new UriBuilder(uri);
       var queryParams = HttpUtility.ParseQueryString(uriBuilder.Query);
       queryParams.Add("v", DateTime.Now.Ticks.ToString());
       uriBuilder.Query = queryParams.ToString();

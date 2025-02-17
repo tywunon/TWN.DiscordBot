@@ -64,6 +64,10 @@ internal class Program
     {
       client.BaseAddress = new(settings.Twitch.OAuthURL);
     });
+    builder.Services.AddHttpClient("HealthCheck", client =>
+    {
+      client.BaseAddress = new(settings.Twitch.OAuthURL);
+    });
 
     builder.Services
       .AddSingleton(settings.WebHost)
