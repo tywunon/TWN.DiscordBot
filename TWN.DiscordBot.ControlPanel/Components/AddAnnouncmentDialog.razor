@@ -1,0 +1,51 @@
+﻿@using TWN.DiscordBot.ControlPanel.Components.Types;
+
+<Modal @ref="addDialog"
+       Title="Add new Announcement"
+       IsScrollable="true"
+       Size="ModalSize.Large">
+  <BodyTemplate>
+    <InputText @bind-Value="twitchUser">
+
+    </InputText>
+    <Grid TItem="AddDialogData"
+          AllowSelection="true"
+          AllowFiltering="true"
+          Responsive="true"
+          SelectionMode="GridSelectionMode.Multiple"
+          SelectedItemsChanged="HandleSelectedItemsChanged"
+          DataProvider="AddDialogDataDataProvider"
+          Class="table table-hover table-bordered table-striped">
+      <GridColumns>
+        <GridColumn TItem="AddDialogData"
+                    PropertyName="ChannelName"
+                    HeaderText="ChannelName">
+          @context.ChannelName
+        </GridColumn>
+        <GridColumn TItem="AddDialogData"
+                    PropertyName="CategoryName"
+                    HeaderText="CategoryName">
+          @context.CategoryName
+        </GridColumn>
+        <GridColumn TItem="AddDialogData"
+                    PropertyName="GuildName"
+                    HeaderText="Guild">
+          <Image Src="@context.GuildIconURL" IsResponsive="true" Class="rounded-circle img-fluid" Style="width: 25px; height: 25px" />
+          <span class="p-2">@context.GuildName</span>
+        </GridColumn>
+      </GridColumns>
+    </Grid>
+  </BodyTemplate>
+  <FooterTemplate>
+    <Button Color="ButtonColor.Secondary" @onclick="async () => await addDialog.HideAsync()">Close</Button>
+    <Button Color="ButtonColor.Primary" @onclick="HandleDialogAdd">Add Announcement</Button>
+  </FooterTemplate>
+</Modal>
+
+@code{
+  private Modal addDialog = default!;
+}
+
+
+
+

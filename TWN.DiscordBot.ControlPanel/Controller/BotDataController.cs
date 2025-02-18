@@ -57,86 +57,124 @@ public class BotDataController(IEnumerable<WebClientConfig> webClientConfig, IHt
 
       var result = await Task.WhenAll(announcementsResult.Payload.Announcements.Select(async (a, idx) =>
       {
-        var userDataResult = await botClient.GetUserDataAsync(a.TwitchUser);
-        var streamDataResult = await botClient.GetStreamDataAsync(a.TwitchUser);
-        var guildNameResult = await botClient.GetGuildNameAsync(a.GuildID);
-        var guildIconUrlResult = await botClient.GetGuildIconUrlAsync(a.GuildID);
-        var channelNameResult = await botClient.GetChannelNameAsync(a.ChannelID);
+        try
+        {
+          var userDataResult = await botClient.GetUserDataAsync(a.TwitchUser);
+          var streamDataResult = await botClient.GetStreamDataAsync(a.TwitchUser);
+          var guildNameResult = await botClient.GetGuildNameAsync(a.GuildID);
+          var guildIconUrlResult = await botClient.GetGuildIconUrlAsync(a.GuildID);
+          var channelNameResult = await botClient.GetChannelNameAsync(a.ChannelID);
 
-        var isOnline = streamDataResult.Success && streamDataResult.Payload.IsOnline;
+          var isOnline = streamDataResult.Success && streamDataResult.Payload.IsOnline;
 
-        var guildID = guildNameResult.Success ? guildNameResult.Payload.GuildID : a.GuildID;
-        var guildName = guildNameResult.Success ? guildNameResult.Payload.GuildName : a.GuildID.ToString();
-        var guildIconUrl = guildIconUrlResult.Success ? guildIconUrlResult.Payload.GuildIconUrl : string.Empty;
-        var channelID = channelNameResult.Success ? channelNameResult.Payload.ChannelID : a.ChannelID;
-        var channelName = channelNameResult.Success ? channelNameResult.Payload.ChannelName : a.ChannelID.ToString();
+          var guildID = guildNameResult.Success ? guildNameResult.Payload.GuildID : a.GuildID;
+          var guildName = guildNameResult.Success ? guildNameResult.Payload.GuildName : a.GuildID.ToString();
+          var guildIconUrl = guildIconUrlResult.Success ? guildIconUrlResult.Payload.GuildIconUrl : string.Empty;
+          var channelID = channelNameResult.Success ? channelNameResult.Payload.ChannelID : a.ChannelID;
+          var channelName = channelNameResult.Success ? channelNameResult.Payload.ChannelName : a.ChannelID.ToString();
 
-        var announcementDiscordData = new AnnouncementDiscordData(guildID, guildName, guildIconUrl, channelID, channelName);
+          var announcementDiscordData = new AnnouncementDiscordData(guildID, guildName, guildIconUrl, channelID, channelName);
 
-        var announcementTwitchUserData = userDataResult.Success
-          ? new AnnouncementTwitchUserData(
-              userDataResult.Payload.UsersResponse.Id,
-              userDataResult.Payload.UsersResponse.Login,
-              userDataResult.Payload.UsersResponse.Display_Name,
-              userDataResult.Payload.UsersResponse.Type,
-              userDataResult.Payload.UsersResponse.Broadcaster_Type,
-              userDataResult.Payload.UsersResponse.Description,
-              userDataResult.Payload.UsersResponse.Profile_Image_Url,
-              userDataResult.Payload.UsersResponse.Offline_Image_Url,
-              userDataResult.Payload.UsersResponse.View_Count,
-              userDataResult.Payload.UsersResponse.Created_At)
-          : new AnnouncementTwitchUserData(
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              default,
-              default);
+          var announcementTwitchUserData = userDataResult.Success
+            ? new AnnouncementTwitchUserData(
+                userDataResult.Payload.UsersResponse.Id,
+                userDataResult.Payload.UsersResponse.Login,
+                userDataResult.Payload.UsersResponse.Display_Name,
+                userDataResult.Payload.UsersResponse.Type,
+                userDataResult.Payload.UsersResponse.Broadcaster_Type,
+                userDataResult.Payload.UsersResponse.Description,
+                userDataResult.Payload.UsersResponse.Profile_Image_Url,
+                userDataResult.Payload.UsersResponse.Offline_Image_Url,
+                userDataResult.Payload.UsersResponse.View_Count,
+                userDataResult.Payload.UsersResponse.Created_At)
+            : new AnnouncementTwitchUserData(
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                default,
+                default);
 
-        var announcementTwitchStreamData = streamDataResult.Success
-          ? new AnnouncementTwitchStreamData(
-              streamDataResult.Payload.StreamsResponse?.Id ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.User_Id ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.User_Login ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.User_Name ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.Game_ID ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.Game_Name ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.Type ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.Title ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.Viewer_Count ?? default,
-              streamDataResult.Payload.StreamsResponse?.Started_At ?? default,
-              streamDataResult.Payload.StreamsResponse?.Language ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.Thumbnail_Url ?? string.Empty,
-              streamDataResult.Payload.StreamsResponse?.Tag_IDs ?? [],
-              streamDataResult.Payload.StreamsResponse?.Tags ?? [],
-              streamDataResult.Payload.StreamsResponse?.Is_Mature ?? default
-            )
-          : new AnnouncementTwitchStreamData(
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              string.Empty,
-              default,
-              default,
-              string.Empty,
-              string.Empty,
-              [],
-              [],
-              default);
+          var announcementTwitchStreamData = streamDataResult.Success
+            ? new AnnouncementTwitchStreamData(
+                streamDataResult.Payload.StreamsResponse?.Id ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.User_Id ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.User_Login ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.User_Name ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.Game_ID ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.Game_Name ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.Type ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.Title ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.Viewer_Count ?? default,
+                streamDataResult.Payload.StreamsResponse?.Started_At ?? default,
+                streamDataResult.Payload.StreamsResponse?.Language ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.Thumbnail_Url ?? string.Empty,
+                streamDataResult.Payload.StreamsResponse?.Tag_IDs ?? [],
+                streamDataResult.Payload.StreamsResponse?.Tags ?? [],
+                streamDataResult.Payload.StreamsResponse?.Is_Mature ?? default
+              )
+            : new AnnouncementTwitchStreamData(
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                default,
+                default,
+                string.Empty,
+                string.Empty,
+                [],
+                [],
+                default);
 
-        var newAnnouncementData = new AnnouncementData(a.TwitchUser, isOnline,
-          AnnouncementDiscordData: announcementDiscordData,
-          AnnouncementTwitchUserData: announcementTwitchUserData,
-          AnnouncementTwitchStreamData: announcementTwitchStreamData);
-        return newAnnouncementData;
+          var newAnnouncementData = new AnnouncementData(a.TwitchUser, isOnline,
+            AnnouncementDiscordData: announcementDiscordData,
+            AnnouncementTwitchUserData: announcementTwitchUserData,
+            AnnouncementTwitchStreamData: announcementTwitchStreamData);
+          return newAnnouncementData;
+        }
+        catch (Exception ex)
+        {
+          logger.LogException(ex, $"GetBotAnnouncementsAsync({a.TwitchUser})");
+          return new AnnouncementData(a.TwitchUser, false, 
+            AnnouncementDiscordData: new AnnouncementDiscordData(a.GuildID, 
+                                       ex.Message, 
+                                       string.Empty, 
+                                       a.ChannelID,
+                                       ex.Message), 
+            AnnouncementTwitchUserData: new AnnouncementTwitchUserData(string.Empty, 
+                                          string.Empty, 
+                                          string.Empty, 
+                                          string.Empty, 
+                                          string.Empty, 
+                                          string.Empty, 
+                                          string.Empty, 
+                                          string.Empty, 
+                                          default, 
+                                          default), 
+            AnnouncementTwitchStreamData: new AnnouncementTwitchStreamData(string.Empty,
+                                            string.Empty,
+                                            string.Empty,
+                                            string.Empty,
+                                            string.Empty,
+                                            string.Empty,
+                                            string.Empty,
+                                            string.Empty,
+                                            default,
+                                            default,
+                                            string.Empty,
+                                            string.Empty,
+                                            [],
+                                            [],
+                                            default));
+        }
       }));
       return [.. result];
     }
