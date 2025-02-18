@@ -4,8 +4,6 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 using System.Net.Http.Json;
 
-using TWN.DiscordBot.Interfaces.Types;
-
 namespace TWN.DiscordBot.WebHost.HealthChecks;
 internal abstract class AtlassianStatuspageHealthCheckBase(IHttpClientFactory clientFactory) : IHealthCheck
 {
@@ -22,7 +20,7 @@ internal abstract class AtlassianStatuspageHealthCheckBase(IHttpClientFactory cl
       
       var data = new Dictionary<string, object>()
       {
-        ["response"] = response,
+        ["atlassian-statuspage-response"] = response,
       };
       return response.Status.Indicator switch
       {

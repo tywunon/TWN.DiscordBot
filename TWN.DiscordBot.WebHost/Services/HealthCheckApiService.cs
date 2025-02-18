@@ -13,7 +13,7 @@ internal class HealthCheckApiService(HealthCheckService healthCheckService) : IH
   {
     var report = await healthCheckService.CheckHealthAsync(cancellationToken);
     return await Task.FromResult(Results.Ok(
-      new Payloads.HealthCheckPayload(report.Status.ToString(), 
+      new Payloads.HealthCheckPayload(httpContext.Request.Host.Value,report.Status.ToString(), 
                                       report.TotalDuration, 
                                       report.Entries
                                         .ToDictionary(

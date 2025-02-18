@@ -15,6 +15,6 @@ internal static class Payloads
   internal record DiscordClientDataPayload([AllowNull] DiscordClientData? DiscordClientData);
   internal record StreamDataPayload([AllowNull] StreamsResponseData? StreamsResponse, bool IsOnline);
   internal record UserDataPayload([AllowNull]UsersResponseData? UsersResponse);
-  internal record HealthCheckPayload(string Status, TimeSpan TotalDuration, IDictionary<string, HealthCheckPayloadEntry> Entries);
+  internal record HealthCheckPayload(string Host, string Status, TimeSpan TotalDuration, IDictionary<string, HealthCheckPayloadEntry> Entries);
   internal record HealthCheckPayloadEntry(IReadOnlyDictionary<string, object> Data, string? Description, TimeSpan Duration, string Status, IEnumerable<string> Tags);
 }
