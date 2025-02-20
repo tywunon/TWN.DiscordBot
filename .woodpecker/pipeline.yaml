@@ -21,31 +21,31 @@ steps:
     commands:
       - dotnet publish --no-build -c Release -o ./publish
 
-  - name: deploy
-    image: bash
-    environment:
-      DEPLOY_DEST:
-        from_secret: deploy_destination
-      SSH_KEY:
-        from_secret: ssh_key
-      SSH_KNOWN_HOSTS:
-        from_secret: ssh_known_hosts
-    commands:
-      - apk update
-      - apk add rsync
-      - apk add openssh
-      - mkdir ~/.ssh/
-      - echo "My dest.. ${DEPLOY_DEST}"
-      - echo "${SSH_KEY}" > ~/.ssh/id_rsa
-      - echo "${SSH_KNOWN_HOSTS}" > ~/.ssh/known_hosts
-      - chmod 600 ~/.ssh/id_rsa
-      - rsync -rv publish/* ${DEPLOY_DEST}
+  # - name: deploy
+  #   image: bash
+  #   environment:
+  #     DEPLOY_DEST:
+  #       from_secret: deploy_destination
+  #     SSH_KEY:
+  #       from_secret: ssh_key
+  #     SSH_KNOWN_HOSTS:
+  #       from_secret: ssh_known_hosts
+  #   commands:
+  #     - apk update
+  #     - apk add rsync
+  #     - apk add openssh
+  #     - mkdir ~/.ssh/
+  #     - echo "My dest.. ${DEPLOY_DEST}"
+  #     - echo "${SSH_KEY}" > ~/.ssh/id_rsa
+  #     - echo "${SSH_KNOWN_HOSTS}" > ~/.ssh/known_hosts
+  #     - chmod 600 ~/.ssh/id_rsa
+  #     - rsync -rv publish/* ${DEPLOY_DEST}
 
-  - name: discord notification
-    image: appleboy/drone-discord
-    settings:
-      webhook_id: 
-        from_secret: discord_webhook_id
-      webhook_token: 
-        from_secret: discord_webhook_token
-      message: "done"
+  # - name: discord notification
+  #   image: appleboy/drone-discord
+  #   settings:
+  #     webhook_id: 
+  #       from_secret: discord_webhook_id
+  #     webhook_token: 
+  #       from_secret: discord_webhook_token
+  #     message: "done"
