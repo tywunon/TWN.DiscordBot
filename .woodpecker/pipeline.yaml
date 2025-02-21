@@ -54,3 +54,9 @@ steps:
   #     webhook_token: 
   #       from_secret: discord_webhook_token
   #     message: "done"
+
+  - name: check-publish
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    commands:
+      - ls -la ./TWN.DiscordBot.Bot/publish
+      - ls -la ./TWN.DiscordBot.ControlPanel/publish
