@@ -8,9 +8,8 @@ steps:
     commands: 
       - touch ./TWN.DiscordBot.Bot/appsettings.json
       - touch ./TWN.DiscordBot.ControlPanel/appsettings.json
-      - dotnet restore --packages ./packages
+      - dotnet restore
       - dotnet build -c Release
-      - ls -la ./packages
 
   # - name: test
   #   image: mcr.microsoft.com/dotnet/sdk:9.0
@@ -20,9 +19,8 @@ steps:
   - name: publish
     image: mcr.microsoft.com/dotnet/sdk:9.0
     commands:
-      - ls -la ./packages
-      - dotnet publish ./TWN.DiscordBot.Bot --no-build -o ./TWN.DiscordBot.Bot/publish
-      - dotnet publish ./TWN.DiscordBot.ControlPanel --no-build -o ./TWN.DiscordBot.ControlPanel/publish
+      - dotnet publish ./TWN.DiscordBot.Bot -o ./TWN.DiscordBot.Bot/publish
+      - dotnet publish ./TWN.DiscordBot.ControlPanel -o ./TWN.DiscordBot.ControlPanel/publish
 
   # - name: deploy
   #   image: bash
@@ -56,6 +54,5 @@ steps:
   - name: check-publish
     image: alpine
     commands:
-      - ls -la ./packages
       - ls -la ./TWN.DiscordBot.Bot/publish
       - ls -la ./TWN.DiscordBot.ControlPanel/publish
