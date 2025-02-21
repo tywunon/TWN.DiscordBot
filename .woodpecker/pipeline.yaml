@@ -54,5 +54,6 @@ steps:
   - name: check-publish
     image: alpine
     commands:
+      - ls -la ./packages
       - ls -la ./TWN.DiscordBot.Bot/publish
       - ls -la ./TWN.DiscordBot.ControlPanel/publish
