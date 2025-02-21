@@ -16,10 +16,15 @@ steps:
   #   commands:
   #   - dotnet test --no-build -c Release
 
-  - name: publish
+  - name: publish-bot
     image: mcr.microsoft.com/dotnet/sdk:9.0
     commands:
-      - dotnet publish --no-build -c Release -o ./publish
+      - dotnet publish ./TWN.DiscordBot.Bot --no-build -o ./publish
+
+  - name: publish-control-panel
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    commands:
+      - dotnet publish ./TWN.DiscordBot.ControlPanel --no-build -o ./publish
 
   # - name: deploy
   #   image: bash
