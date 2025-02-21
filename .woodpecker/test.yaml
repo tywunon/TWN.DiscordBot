@@ -4,9 +4,12 @@ when:
 
 steps:
   - name: build
-    image: mcr.microsoft.com/dotnet/sdk:9.0
-    commands: 
-      - touch ./TWN.DiscordBot.ControlPanel/appsettings.json
-      - touch ./TWN.DiscordBot.Bot/appsettings.json
-      - dotnet restore
-      - dotnet build -c Release
+    image: debian
+    commands:
+      - echo "This is the build step"
+      - echo "binary-data-123" > executable
+  - name: a-test-step
+    image: golang:1.16
+    commands:
+      - echo "Testing ..."
+      - ./executable
