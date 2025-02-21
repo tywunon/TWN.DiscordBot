@@ -242,21 +242,41 @@ public class DiscordClient : Interfaces.IDiscordClientAsync
           (
             async success =>
             {
-              var embed = guildData
+              var embeds = guildData
                 .Join(success.Value.Data, o => o.TwitchUser, i => i.Login, (o, i) => (guildData: o, twitchUserData: i))
                 .GroupBy(gd => (gd.guildData.TwitchUser, gd.twitchUserData.Profile_Image_Url, gd.twitchUserData.Login, gd.twitchUserData.Offline_Image_Url))
                 .Select(gdg => new EmbedBuilder()
-              .WithAuthor(gdg.Key.TwitchUser)
-              .WithThumbnailUrl(AttachCacheBuster(gdg.Key.Profile_Image_Url))
-              .WithImageUrl(AttachCacheBuster(gdg.Key.Offline_Image_Url))
-              .WithFields(gdg.Select((gdgi, i) => new EmbedFieldBuilder().WithName($"{i + 1}.").WithValue($"<#{gdgi.guildData.ChannelID}>").WithIsInline(false)))
-              .WithUrl($"https://twitch.tv/{gdg.Key.Login}")
-              .WithCurrentTimestamp()
-              .Build()).ToArray();
-              if (embed.Length > 0)
-                await command.RespondAsync(string.Empty, embed, ephemeral: true);
+                  .WithAuthor(gdg.Key.TwitchUser)
+                  .WithThumbnailUrl(AttachCacheBuster(gdg.Key.Profile_Image_Url))
+                  .WithImageUrl(AttachCacheBuster(gdg.Key.Offline_Image_Url))
+                  .WithFields(gdg.Select((gdgi, i) => new EmbedFieldBuilder().WithName($"{i + 1}.").WithValue($"<#{gdgi.guildData.ChannelID}>").WithIsInline(false)))
+                  .WithUrl($"https://twitch.tv/{gdg.Key.Login}")
+                  .WithCurrentTimestamp()
+                  .Build());
+
+              if (embeds.Any())
+              {
+                var rest = embeds;
+                if (!command.HasResponded)
+                {
+                  var first10 = rest.Take(10);
+                  await command.RespondAsync(string.Empty, first10.ToArray(), ephemeral: true);
+                  rest = embeds.Except(first10);
+                }
+                if (rest.Any())
+                {
+                  var channel = await command.GetChannelAsync();
+                  while (rest.Any())
+                  {
+                    var next10 = rest.Take(10);
+                    rest = rest.Except(next10);
+                    await channel.SendMessageAsync(string.Empty, embeds: next10.ToArray(), flags: MessageFlags.Ephemeral);
+                  }
+                }
+              }
               else
                 await command.RespondAsync("No streams in Announcement Queue", ephemeral: true);
+
             },
             error => Task.FromResult(error)
           );
