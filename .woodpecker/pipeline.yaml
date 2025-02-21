@@ -10,6 +10,7 @@ steps:
       - touch ./TWN.DiscordBot.ControlPanel/appsettings.json
       - dotnet restore --packages ./packages
       - dotnet build -c Release
+      - ls -la ./packages
 
   # - name: test
   #   image: mcr.microsoft.com/dotnet/sdk:9.0
@@ -19,6 +20,7 @@ steps:
   - name: publish
     image: mcr.microsoft.com/dotnet/sdk:9.0
     commands:
+      - ls -la ./packages
       - dotnet publish ./TWN.DiscordBot.Bot --no-build -o ./TWN.DiscordBot.Bot/publish
       - dotnet publish ./TWN.DiscordBot.ControlPanel --no-build -o ./TWN.DiscordBot.ControlPanel/publish
 
