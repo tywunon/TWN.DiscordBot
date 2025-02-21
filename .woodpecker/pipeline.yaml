@@ -3,8 +3,8 @@ when:
     branch: main
 
 variables:
-  - botPrj './TWN.DiscordBot.Bot'
-  - ctrlPnlPrj './TWN.DiscordBot.ControlPanel'
+  - &botPrj './TWN.DiscordBot.Bot'
+  - &ctrlPnlPrj './TWN.DiscordBot.ControlPanel'
 
 steps:
   - name: build
