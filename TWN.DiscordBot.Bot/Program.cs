@@ -39,8 +39,7 @@ internal class Program
                     ClientID: string.Empty,
                     ClientSecret: string.Empty),
         GuildConfig: [],
-        DataStore: new(FilePath: string.Empty),
-        TCPProbe: new(Port: -1));
+        DataStore: new(FilePath: string.Empty));
 
     builder.WebHost
       .UseUrls(settings.WebHost.Urls.Distinct().ToArray())
@@ -78,7 +77,6 @@ internal class Program
       .AddSingleton(settings.Twitch)
       .AddSingleton(settings.GuildConfig)
       .AddSingleton(settings.DataStore)
-      .AddSingleton(settings.TCPProbe)
       .AddSingleton<IDiscordClientAsync, Discord.DiscordClient>()
       .AddSingleton<ITwitchClientAsync, Twitch.TwitchClient>()
       .AddSingleton<IDataStoreAsync, DataStore.JSONDataStore>()

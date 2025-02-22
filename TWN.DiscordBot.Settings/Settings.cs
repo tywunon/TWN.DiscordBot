@@ -4,8 +4,7 @@ public sealed record BotSettings(WebHostSettings WebHost,
                                  DiscordSettings Discord,
                                  TwitchSettings Twitch,
                                  IEnumerable<GuildConfig> GuildConfig,
-                                 DataStoreSettings DataStore,
-                                 TCPProbeSettings TCPProbe);
+                                 DataStoreSettings DataStore);
 
 public sealed record ControlPanelSettings(IEnumerable<WebClientConfig> WebClient,
                                           TwitchSettings Twitch);
@@ -32,7 +31,5 @@ public sealed record GuildConfig(ulong GuildID,
                                  int ThumbnailHeight);
 
 public sealed record DataStoreSettings(string FilePath);
-
-public sealed record TCPProbeSettings(short Port);
 public sealed record WebClientConfig(string Name, string ID, string BaseURL);
 
