@@ -13,7 +13,7 @@ namespace TWN.DiscordBot.Bot;
 
 internal class Program
 {
-  private static async Task Main(string[] args) => await MainAsync(args);
+  private static Task Main(string[] args) => MainAsync(args);
 
   private static async Task MainAsync(string[] args)
   {
@@ -21,7 +21,9 @@ internal class Program
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Configuration
-      .AddJsonFile($"appsettings.json", false, true);
+      .SetBasePath(Path.Combine(builder.Environment.ContentRootPath, "config"))
+      .AddJsonFile($"appsettings.json", false, true)
+      .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true);
 
     var settings = builder.Configuration.GetRequiredSection("Settings")
       .Get<Settings.BotSettings>() 
@@ -92,6 +94,6 @@ internal class Program
     host.UseHttpsRedirection();
     host.MapBotAPI();
 
-    await host.RunAsync();
+    await host.RunAsync().ConfigureAwait(true);
   }
 }

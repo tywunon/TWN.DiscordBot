@@ -16,7 +16,10 @@ internal class Program
         .AddInteractiveServerComponents();
 
     builder.Configuration
-      .AddJsonFile($"appsettings.json", false, true);
+      .SetBasePath(Path.Combine(builder.Environment.ContentRootPath, "config"))
+      .AddJsonFile($"appsettings.json", false, true)
+      .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true);
+
 
     var settings = builder.Configuration.GetRequiredSection("Settings")
       .Get<Settings.ControlPanelSettings>()
